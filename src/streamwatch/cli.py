@@ -67,6 +67,22 @@ def cmd_portal(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_metrics(args: argparse.Namespace) -> int:
+    from streamwatch.metrics import write
+
+    for run_dir in args.run_dirs:
+        out = write(run_dir)
+        base = json.loads(out.read_text(encoding="utf-8"))["base"]
+        print(f"{out}")
+        print(f"  G1 inferencia p50/p95: {base['G1']['overall']['p50']} / {base['G1']['overall']['p95']} ms")
+        print(f"  G2 FPS: {{{', '.join(f'{k}: {v["fps"]}' for k, v in base['G2']['by_source'].items())}}}")
+        print(f"  G3 CPU media/p95: {base['G3']['overall']['mean']} / {base['G3']['overall']['p95']} %")
+        print(f"  G4 baja confianza: {base['G4']['overall']['rate']}")
+        print(f"  G5 trazabilidad: {base['G5']['coverage']} ({base['G5']['traced']}/{base['G5']['events']})")
+        print(f"  G7 alertas: {base['G7']['opened']} abiertas, {base['G7']['open_at_end']} activas al final")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="streamwatch", description="Centro de monitoreo de computer vision")
     p.add_argument("-v", "--verbose", action="store_true")
@@ -94,6 +110,10 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--db")
     i.add_argument("--config", default="config/monitor.yaml")
     i.set_defaults(func=cmd_import)
+    me = sub.add_parser("metrics", help="Calcula metrics.json (G1–G7) de corridas desde sus JSONL")
+    me.add_argument("run_dirs", nargs="+")
+    me.set_defaults(func=cmd_metrics)
+
     po = sub.add_parser("portal", help="Levanta el portal web de eventos y alertas")
     po.add_argument("--db")
     po.add_argument("--host", default="127.0.0.1")
