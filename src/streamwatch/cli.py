@@ -1,0 +1,98 @@
+"""Interfaz de línea de comandos: ``streamwatch <comando>``."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import shutil
+import sys
+from pathlib import Path
+
+from streamwatch.config import load_config
+
+
+def cmd_monitor(args: argparse.Namespace) -> int:
+    from streamwatch.detector import YoloDetector
+    from streamwatch.monitor import Monitor
+
+    cfg = load_config(args.config, args.scenario)
+    if args.db:
+        cfg.storage.db = args.db
+    detector = YoloDetector(cfg.model)
+    mon = Monitor(cfg, detector, run_id=args.run_id, telemetry=not args.no_telemetry)
+    print(f"Corrida {mon.run_id} · {cfg.config_ref} · {detector.model_ref} · {detector.device}", flush=True)
+    meta = mon.run(duration_s=args.duration, max_frames=args.max_frames)
+    print(json.dumps({k: meta[k] for k in ("run_id", "duration_s", "frames_processed", "ended_reason")}, indent=2))
+    if args.export:
+        dst = export_run(mon.run_dir, Path(args.export))
+        print(f"Exportada a {dst}")
+    return 0
+
+
+def export_run(run_dir: Path, dest_root: Path) -> Path:
+    dst = dest_root / run_dir.name
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(run_dir, dst)
+    return dst
+
+
+def cmd_export(args: argparse.Namespace) -> int:
+    cfg = load_config(args.config)
+    dst = export_run(Path(cfg.storage.runs_dir) / args.run_id, Path(args.dest))
+    print(dst)
+    return 0
+
+
+def cmd_import(args: argparse.Namespace) -> int:
+    from streamwatch.storage import Store, import_run
+
+    cfg = load_config(args.config)
+    store = Store(args.db or cfg.storage.db)
+    for run_dir in args.run_dirs:
+        counts = import_run(store, run_dir)
+        print(f"{run_dir}: {counts}")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="streamwatch", description="Centro de monitoreo de computer vision")
+    p.add_argument("-v", "--verbose", action="store_true")
+    sub = p.add_subparsers(dest="command", required=True)
+
+    m = sub.add_parser("monitor", help="Ejecuta el monitor sobre las fuentes configuradas")
+    m.add_argument("--config", default="config/monitor.yaml")
+    m.add_argument("--scenario", help="Overlay de escenario (config/scenarios/*.yaml)")
+    m.add_argument("--duration", type=float, help="Segundos de ejecución")
+    m.add_argument("--max-frames", type=int, help="Frames procesados por fuente")
+    m.add_argument("--run-id")
+    m.add_argument("--db", help="Ruta del SQLite (por defecto storage.db)")
+    m.add_argument("--no-telemetry", action="store_true", help="No abrir el puerto de Prometheus")
+    m.add_argument("--export", help="Al terminar, copiar la corrida a esta carpeta (p. ej. evidencias/runs)")
+    m.set_defaults(func=cmd_monitor)
+
+    e = sub.add_parser("export", help="Copia una corrida de data/runs a una carpeta de evidencias")
+    e.add_argument("run_id")
+    e.add_argument("--dest", default="evidencias/runs")
+    e.add_argument("--config", default="config/monitor.yaml")
+    e.set_defaults(func=cmd_export)
+
+    i = sub.add_parser("import", help="Carga corridas exportadas (JSONL) en el SQLite del portal")
+    i.add_argument("run_dirs", nargs="+")
+    i.add_argument("--db")
+    i.add_argument("--config", default="config/monitor.yaml")
+    i.set_defaults(func=cmd_import)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

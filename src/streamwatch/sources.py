@@ -142,11 +142,30 @@ class LiveSource(FrameSource):
         opener: Callable[[Any], Capture] = cv2.VideoCapture,
         resolver: Callable[[str], str] = resolve_youtube,
         max_backoff_s: float = 10.0,
+        pace: bool | None = None,
+        max_lag_s: float = 2.0,
     ) -> None:
         super().__init__(cfg, clock)
         self.opener = opener
         self.resolver = resolver
         self.max_backoff_s = max_backoff_s
+        # HLS entrega segmentos de ~5 s que FFmpeg decodifica en ráfaga. Con pace=True cada frame se publica
+        # cuando le toca según su PTS, así el "último frame" avanza a ritmo real y no cada 5 s.
+        self.pace = cfg.kind in ("youtube", "stream") if pace is None else pace
+        self.max_lag_s = max_lag_s
+        self._anchor: float | None = None
+
+    def _pace(self, cap: Capture) -> None:
+        get = getattr(cap, "get", None)
+        if not self.pace or get is None:
+            return
+        pts = get(cv2.CAP_PROP_POS_MSEC) / 1000.0
+        now = self.clock()
+        if self._anchor is None or self._anchor + pts < now - self.max_lag_s:
+            self._anchor = now - pts  # (re)anclar: al conectar o si el stream se atrasó
+        wait = self._anchor + pts - now
+        if wait > 0:
+            self._stop.wait(wait)
 
     def _target(self) -> Any:
         if self.cfg.kind == "youtube":
@@ -191,11 +210,13 @@ class LiveSource(FrameSource):
                 if not first_connection:
                     self.stats.reconnects += 1
                 first_connection = False
+                self._anchor = None  # el PTS reinicia en cada conexión
                 self.stats.connected = True
                 backoff, failures = 1.0, 0
             ok, image = cap.read()
             if ok and image is not None:
                 failures = 0
+                self._pace(cap)
                 self._publish(image)
                 continue
             failures += 1
