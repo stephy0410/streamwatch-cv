@@ -1,0 +1,93 @@
+{
+  "run_id": "20261110-c2-baja-confianza",
+  "scenario": "C2",
+  "started_at": "2026-11-10T15:28:54.231Z",
+  "ended_at": "2026-11-10T15:35:54.343Z",
+  "config_id": "monitor-v1",
+  "config_ref": "monitor-v1@0dd196e29756",
+  "config_sha256": "0dd196e29756a0ece95b4d6b51cc78de6c905a3f4d500e80f871b89f74356671",
+  "model_ref": "yolo11s@sha256:85a76fe86dd8",
+  "model": {
+    "name": "yolo11s",
+    "model_ref": "yolo11s@sha256:85a76fe86dd8",
+    "weights": "models/yolo11s.pt",
+    "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "framework": "ultralytics 8.4.208",
+    "device": "mps",
+    "imgsz": 640,
+    "conf_floor": 0.1,
+    "iou": 0.45
+  },
+  "expected_model": "yolo11s",
+  "reference": "config/reference/reference-v1.json",
+  "thresholds": {
+    "lower": 0.4,
+    "upper": 0.65
+  },
+  "sampling_interval_s": 1.0,
+  "sources": [
+    {
+      "id": "sheep-barn",
+      "kind": "youtube",
+      "uri": "https://www.youtube.com/watch?v=SnHke968zAA",
+      "title": "Sheep Barn Cam · Farm Sanctuary (Watkins Glen, NY)",
+      "attribution": "Transmisión pública de Farm Sanctuary powered by explore.org",
+      "classes": [
+        "sheep",
+        "person",
+        "dog",
+        "cow",
+        "horse",
+        "bird",
+        "cat"
+      ],
+      "degrade": {
+        "kind": "lowlight",
+        "start_after_s": 120.0,
+        "brightness": 0.2,
+        "gamma": 3.0,
+        "noise_sigma": 14.0,
+        "ramp_s": 0.0,
+        "seed": 7
+      },
+      "faults": []
+    },
+    {
+      "id": "puppy-playroom",
+      "kind": "youtube",
+      "uri": "https://www.youtube.com/watch?v=h-Z0wCdD3dI",
+      "title": "Puppy Playroom · Warrior Canine Connection (Maryland)",
+      "attribution": "Transmisión pública de Warrior Canine Connection powered by explore.org",
+      "classes": [
+        "dog",
+        "person",
+        "cat",
+        "sheep",
+        "cow",
+        "horse",
+        "bird"
+      ],
+      "degrade": null,
+      "faults": []
+    }
+  ],
+  "git": {
+    "rev": "eaf9a78dae99a91234ca97227fb1636a750c3f78",
+    "dirty": false
+  },
+  "host": {
+    "platform": "macOS-15.7.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.12.6",
+    "streamwatch": "0.1.0"
+  },
+  "ended_reason": "duration",
+  "duration_s": 420.1,
+  "frames_processed": {
+    "sheep-barn": 407,
+    "puppy-playroom": 407
+  },
+  "open_alerts_at_end": [
+    "alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-002"
+  ]
+}

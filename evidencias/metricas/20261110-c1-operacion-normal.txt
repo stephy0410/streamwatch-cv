@@ -1,0 +1,20 @@
+métrica                                 recalculado  metrics.json  ok
+G1.p50_ms                                   26.5650       26.5700  ✓
+G1.p95_ms                                   45.4435       45.4400  ✓
+G2.fps.puppy-playroom                        0.9905        0.9905  ✓
+G2.fps.sheep-barn                            0.9907        0.9907  ✓
+G3.mean_cpu                                 43.9376       43.9000  ✓
+G3.p95_cpu                                  47.3000       47.3000  ✓
+G4.rate                                      0.2701        0.2701  ✓
+G4.rate.puppy-playroom                       0.4365        0.4365  ✓
+G4.rate.sheep-barn                           0.1379        0.1379  ✓
+G5.coverage                                  1.0000        1.0000  ✓
+G6.age_at_end_s.puppy-playroom               6.9850        6.9850  ✓
+G6.age_at_end_s.sheep-barn                   6.0060        6.0060  ✓
+G6.gap_p95_s.puppy-playroom                  1.0270        1.0270  ✓
+G6.gap_p95_s.sheep-barn                      1.0200        1.0200  ✓
+G7.max_simultaneous                          1.0000        1.0000  ✓
+G7.open_at_end                               0.0000        0.0000  ✓
+G7.opened                                    1.0000        1.0000  ✓
+
+17/17 coinciden
