@@ -117,3 +117,32 @@ def test_degrade_ramp_is_gradual():
     full = apply_degrade(img, cfg, 100.0)
     assert half.applied["intensity"] == 0.5
     assert full.image.mean() < half.image.mean() < 200
+
+
+class BurstCapture(FakeCapture):
+    """Entrega 30 frames de golpe con PTS de 30 fps, como un segmento HLS."""
+
+    def __init__(self):
+        super().__init__(n_ok=30)
+        self.pos = 0.0
+
+    def read(self):
+        self.reads += 1
+        if self.reads <= self.n_ok:
+            self.pos = (self.reads - 1) * 1000 / 30
+            return True, np.zeros((4, 4, 3), np.uint8)
+        time.sleep(0.01)
+        return False, None
+
+    def get(self, prop):
+        return self.pos if prop == cv2.CAP_PROP_POS_MSEC else 0.0
+
+
+def test_pacing_publishes_hls_bursts_at_real_time():
+    src = LiveSource(SourceConfig(id="p", kind="stream", uri="x"), opener=lambda t: BurstCapture())
+    t0 = time.time()
+    src.start()
+    assert _wait(lambda: src.stats.frames_read >= 15)
+    took = time.time() - t0
+    src.stop()
+    assert took >= 0.4  # 15 frames a 30 fps ≈ 0.47 s, no instantáneo
