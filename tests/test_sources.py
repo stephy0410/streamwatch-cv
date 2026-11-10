@@ -82,9 +82,7 @@ def test_live_source_youtube_uses_resolver():
 
 
 def test_fault_window_blocks_frames_then_recovers():
-    cfg = SourceConfig(
-        id="f", kind="stream", uri="x", faults=[FaultConfig(start_after_s=0.2, duration_s=0.3)]
-    )
+    cfg = SourceConfig(id="f", kind="stream", uri="x", faults=[FaultConfig(start_after_s=0.2, duration_s=0.3)])
     src = LiveSource(cfg, opener=lambda t: FakeCapture())
     src.start()
     assert _wait(lambda: src.stats.in_outage)

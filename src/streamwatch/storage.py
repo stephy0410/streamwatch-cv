@@ -148,8 +148,7 @@ class Store:
                 )
             )
             dets.extend(
-                (e["event_id"], i, d["class_name"], d["score"], d["zone"])
-                for i, d in enumerate(e["detections"])
+                (e["event_id"], i, d["class_name"], d["score"], d["zone"]) for i, d in enumerate(e["detections"])
             )
         with self._lock, self.conn:
             self.conn.executemany(f"INSERT OR REPLACE INTO events VALUES ({','.join('?' * 25)})", rows)
@@ -254,9 +253,7 @@ class RunRecorder:
             self._fh[kind].flush()
 
     def start(self, meta: dict[str, Any], config: dict[str, Any]) -> None:
-        (self.root / "config.json").write_text(
-            json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        (self.root / "config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
         self.write_meta(meta)
         if self.store:
             self.store.upsert_config(meta["config_ref"], config)
