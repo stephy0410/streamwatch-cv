@@ -1,0 +1,52 @@
+# Reglas de Prometheus. Son una segunda línea, independiente del motor de alertas del monitor
+# (src/streamwatch/alerts.py): si el proceso del monitor muere, sus propias alertas no pueden avisar,
+# pero StreamWatchMonitorDown sí.
+groups:
+  - name: streamwatch-recording
+    rules:
+      - record: streamwatch:fps:rate1m
+        expr: sum by (source) (rate(sw_frames_processed_total[1m]))
+      - record: streamwatch:inference_p95_seconds:rate1m
+        expr: histogram_quantile(0.95, sum by (le, source) (rate(sw_inference_seconds_bucket[1m])))
+      - record: streamwatch:empty_frame_share:rate1m
+        expr: |
+          sum by (source) (rate(sw_frames_without_detections_total[1m]))
+          / sum by (source) (rate(sw_frames_processed_total[1m]))
+
+  - name: streamwatch-alerts
+    rules:
+      - alert: StreamWatchMonitorDown
+        expr: up{job="streamwatch-monitor"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations:
+          summary: "El monitor no responde en :9108"
+          action: "Revisar el proceso `streamwatch monitor` y su log."
+      - alert: StreamWatchSourceStale
+        expr: sw_last_frame_age_seconds > 15
+        for: 0s
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.source }} sin frames nuevos hace {{ $value | humanizeDuration }}"
+          action: "Misma condición que stream-stale-v1: revisar la transmisión y la red."
+      - alert: StreamWatchBelowTargetFps
+        expr: streamwatch:fps:rate1m < 0.8
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.source }} procesa {{ $value | printf \"%.2f\" }} fps (objetivo 1.0)"
+          action: "Revisar latencia de inferencia y CPU/GPU; el muestreo descarta frames si el modelo no alcanza."
+      - alert: StreamWatchInferenceSlow
+        expr: streamwatch:inference_p95_seconds:rate1m > 0.2
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "Inferencia p95 de {{ $labels.source }} en {{ $value | humanizeDuration }}"
+          action: "Línea base con yolo11s en Apple M3: p95 ≈ 45 ms. Revisar dispositivo (MPS/CPU) y carga."
+      - alert: StreamWatchRuleAlertOpen
+        expr: sw_alerts_open > 0
+        for: 0s
+        labels: {severity: warning}
+        annotations:
+          summary: "Regla {{ $labels.rule }} con alerta abierta en {{ $labels.source }}"
+          action: "Ver el detalle, las capturas y la acción sugerida en el portal (/alerts)."

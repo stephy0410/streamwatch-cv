@@ -21,3 +21,22 @@ jobs:
         run: uv run ruff check . && uv run ruff format --check .
       - name: Pruebas
         run: uv run pytest -m "not vision"
+
+  ops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar docker compose
+        run: docker compose -f ops/docker-compose.yml config -q
+      - name: Validar configuración y reglas de Prometheus (promtool)
+        run: >
+          docker run --rm -v "$PWD/ops/prometheus:/etc/prometheus:ro" --entrypoint promtool
+          prom/prometheus:v2.55.1 check config /etc/prometheus/prometheus.yml
+      - name: Validar el JSON del dashboard de Grafana
+        run: python3 -c "import json; d=json.load(open('ops/grafana/dashboards/streamwatch.json')); assert d['uid'] == 'streamwatch' and d['panels']"
+      - name: Construir la imagen del portal y probar /healthz
+        run: |
+          docker build -f ops/Dockerfile -t streamwatch-portal .
+          docker run -d --name portal -p 8000:8000 streamwatch-portal
+          for i in $(seq 1 30); do curl -fs localhost:8000/healthz && exit 0; sleep 1; done
+          docker logs portal; exit 1
