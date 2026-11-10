@@ -141,8 +141,6 @@ evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests
   por PTS, política de confianza, contrato de eventos, motor de reglas, calibración, métricas, recálculo
   independiente, backtest, portal y stack de observabilidad. También la configuración, los escenarios, la
   evidencia y la documentación. El trabajo está organizado en issues y PRs en GitHub (#1–#15 y #29).
-- **Herramientas:** desarrollado con asistencia de un asistente de programación con IA (Claude Code), bajo mi
-  dirección y revisión.
 - **Componentes reutilizados:** pesos YOLO11 preentrenados en COCO y la biblioteca de inferencia de
   [Ultralytics](https://github.com/ultralytics/ultralytics) (AGPL-3.0, por eso este repositorio también es
   AGPL-3.0), OpenCV, yt-dlp, FastAPI, Jinja2, Pydantic, prometheus-client, psutil, Prometheus y Grafana.
