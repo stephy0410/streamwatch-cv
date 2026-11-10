@@ -1,0 +1,88 @@
+{
+  "run_id": "20261110-s2-cambio-version",
+  "scenario": "S2",
+  "started_at": "2026-11-10T15:53:11.734Z",
+  "ended_at": "2026-11-10T15:58:12.716Z",
+  "config_id": "monitor-v2",
+  "config_ref": "monitor-v2@9cb8895e3b40",
+  "config_sha256": "9cb8895e3b40e4117dbe1734770236372d408b043c933a70dc0a8d74fcec748f",
+  "model_ref": "yolo11n@sha256:0ebbc80d4a76",
+  "model": {
+    "name": "yolo11n",
+    "model_ref": "yolo11n@sha256:0ebbc80d4a76",
+    "weights": "models/yolo11n.pt",
+    "sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1",
+    "framework": "ultralytics 8.4.208",
+    "device": "mps",
+    "imgsz": 640,
+    "conf_floor": 0.1,
+    "iou": 0.45
+  },
+  "expected_model": "yolo11s",
+  "reference": "config/reference/reference-v2.json",
+  "thresholds": {
+    "lower": 0.4,
+    "upper": 0.65
+  },
+  "sampling_interval_s": 1.0,
+  "sources": [
+    {
+      "id": "sheep-barn",
+      "kind": "youtube",
+      "uri": "https://www.youtube.com/watch?v=SnHke968zAA",
+      "title": "Sheep Barn Cam · Farm Sanctuary (Watkins Glen, NY)",
+      "attribution": "Transmisión pública de Farm Sanctuary powered by explore.org",
+      "classes": [
+        "sheep",
+        "person",
+        "dog",
+        "cow",
+        "horse",
+        "bird",
+        "cat"
+      ],
+      "degrade": null,
+      "faults": []
+    },
+    {
+      "id": "puppy-playroom",
+      "kind": "youtube",
+      "uri": "https://www.youtube.com/watch?v=h-Z0wCdD3dI",
+      "title": "Puppy Playroom · Warrior Canine Connection (Maryland)",
+      "attribution": "Transmisión pública de Warrior Canine Connection powered by explore.org",
+      "classes": [
+        "dog",
+        "person",
+        "cat",
+        "sheep",
+        "cow",
+        "horse",
+        "bird"
+      ],
+      "degrade": null,
+      "faults": []
+    }
+  ],
+  "git": {
+    "rev": "af7c6abf4714f4a20b5e6ecfebd54d9b621e240a",
+    "dirty": true
+  },
+  "host": {
+    "platform": "macOS-15.7.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.12.6",
+    "streamwatch": "0.1.0"
+  },
+  "ended_reason": "duration",
+  "duration_s": 301.0,
+  "frames_processed": {
+    "sheep-barn": 290,
+    "puppy-playroom": 290
+  },
+  "open_alerts_at_end": [
+    "alt-20261110-s2-cambio-version-model-version-sheep-barn-001",
+    "alt-20261110-s2-cambio-version-low-confidence-puppy-playroom-001",
+    "alt-20261110-s2-cambio-version-confidence-shift-puppy-playroom-001",
+    "alt-20261110-s2-cambio-version-model-version-puppy-playroom-001"
+  ]
+}

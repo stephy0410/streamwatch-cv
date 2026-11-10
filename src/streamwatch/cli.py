@@ -24,6 +24,9 @@ def cmd_monitor(args: argparse.Namespace) -> int:
     print(f"Corrida {mon.run_id} · {cfg.config_ref} · {detector.model_ref} · {detector.device}", flush=True)
     meta = mon.run(duration_s=args.duration, max_frames=args.max_frames)
     print(json.dumps({k: meta[k] for k in ("run_id", "duration_s", "frames_processed", "ended_reason")}, indent=2))
+    from streamwatch.metrics import write as write_metrics
+
+    print(f"Métricas: {write_metrics(mon.run_dir)}")  # antes de exportar, para que viajen con la corrida
     if args.export:
         dst = export_run(mon.run_dir, Path(args.export))
         print(f"Exportada a {dst}")

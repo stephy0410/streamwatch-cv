@@ -108,3 +108,14 @@ def test_inference_error_is_recorded_not_fatal(root, tmp_path, frames):
     err = [e for e in events if e["status"] == "error"]
     assert len(err) == 1 and err[0]["frame_state"] == "error" and err[0]["max_score"] is None
     assert "fallo simulado" in err[0]["error"]
+
+
+def test_git_revision_lists_dirty_paths(tmp_path):
+    import subprocess
+
+    from streamwatch.monitor import git_revision
+
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "a.txt").write_text("x")
+    info = git_revision(tmp_path)
+    assert info["dirty"] is True and info["dirty_paths"] == ["?? a.txt"]

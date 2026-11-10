@@ -1,7 +1,7 @@
 # Escenarios ejecutados
 
-Cada escenario es una corrida real del monitor sobre las dos cámaras en vivo, con inferencia YOLO11s en cada frame
-muestreado. Lo único que cambia entre escenarios es el overlay de `config/scenarios/`. La evidencia completa de cada
+Cada escenario es una corrida real del monitor sobre las dos cámaras en vivo, con inferencia YOLO11 en cada frame
+muestreado. C1 y C2 son los escenarios base; S1–S3 son extras. Lo único que cambia entre escenarios es el overlay de `config/scenarios/`. La evidencia completa de cada
 corrida (eventos, alertas, evaluaciones de reglas, capturas, recursos y métricas) está en `evidencias/runs/<corrida>/`.
 
 | | C1 · Operación normal | C2 · Baja confianza |
@@ -106,3 +106,105 @@ Capturas del portal: [`04`](../evidencias/portal/04-alerta-c2-baja-confianza-she
    distribución de puntuaciones aguantó el cambio de conteo.
 4. **Inferencia más rápida con menos objetos.** El p50 del granero bajó de 40.5 ms (C1) a 31.3 ms (C2): con menos
    candidatos, el NMS trabaja menos. El tiempo de inferencia depende del contenido, no solo del modelo.
+
+---
+
+# Escenarios extra (S1–S3, `monitor-v2`)
+
+Corren con `monitor-v2`, que agrega `detector-silence-v1` e histéresis (ver [`ALERTAS.md`](ALERTAS.md)). Se
+lanzaron en secuencia con el script de la tabla, desde la revisión `af7c6ab`.
+
+| | S1 · Interrupción | S2 · Cambio de versión | S3 · Cambio sostenido gradual |
+|---|---|---|---|
+| Corrida | [`20261110-s1-interrupcion`](../evidencias/runs/20261110-s1-interrupcion) | [`20261110-s2-cambio-version`](../evidencias/runs/20261110-s2-cambio-version) | [`20261110-s3-atardecer-gradual`](../evidencias/runs/20261110-s3-atardecer-gradual) |
+| Overlay | [`s1-interrupcion.yaml`](../config/scenarios/s1-interrupcion.yaml) | [`s2-cambio-version.yaml`](../config/scenarios/s2-cambio-version.yaml) | [`s3-atardecer-gradual.yaml`](../config/scenarios/s3-atardecer-gradual.yaml) |
+| Horario (UTC) | 15:49:09 → 15:53:09 | 15:53:11 → 15:58:12 | 15:58:14 → 16:05:14 |
+| `config_ref` | `monitor-v2@ba374198e4b7` | `monitor-v2@9cb8895e3b40` | `monitor-v2@5c513e9e9bbb` |
+| `model_ref` | `yolo11s@sha256:85a76fe86dd8` | **`yolo11n@sha256:0ebbc80d4a76`** | `yolo11s@sha256:85a76fe86dd8` |
+| G1 inferencia p50 / p95 | 36.3 / 45.3 ms | **23.8 / 29.7 ms** | 24.7 / 39.6 ms |
+| G2 FPS (granero · cachorros) | 0.991 · **0.731** (corte de 60 s) | 0.991 · 0.991 | 0.995 · 0.995 |
+| G4 baja confianza | 0.220 | 0.276 (cachorros **0.786**) | 0.390 |
+| G5 trazabilidad | 399/399 | 580/580 | 819/819 |
+| G6 intervalo máx. entre reportes (cachorros) | **61.5 s** | 1.06 s | 1.08 s |
+| G7 alertas / activas al final | 4 / 3 | 6 / 4 | 4 / 2 |
+| Recálculo independiente | 17/17 ✓ | 17/17 ✓ | 17/17 ✓ |
+
+**Árbol de trabajo.** Las tres corridas registran `git.dirty = true`. Después del commit `af7c6ab` (que contiene el
+código y los overlays usados) quedaron archivos sin seguimiento ajenos al monitor: `ops/` (stack de
+observabilidad, #14), `.dockerignore` y el script de lanzamiento en `logs/`. Desde esta entrega `run.json`
+guarda también `git.dirty_paths`, para que esa comprobación no dependa de esta nota.
+
+## S1 · Interrupción y recuperación
+
+A los 90 s el monitor cierra la captura de la sala de cachorros durante 60 s (marcas `outage_start` 15:50:45 y
+`outage_end` 15:51:44 en `markers.jsonl`).
+
+| Hora UTC | Alerta | Qué pasó |
+|---|---|---|
+| 15:50:59 | `stream-stale-v1` cachorros, **critical** | 15.0 s sin frames. Tiempo de detección: **14.1 s** desde la marca (la regla es `> 15 s` desde el último frame, que llegó 0.9 s antes del corte) |
+| 15:51:44 | — | Fin de la falla: el monitor vuelve a resolver la URL y reconecta (`reconnects = 1`, `read_failures = 0`) |
+| 15:51:46 | `stream-stale-v1` resuelta | 2 s después de la reconexión. El granero no se vio afectado (FPS 0.991) |
+
+**Hallazgo: el modelo deja de ver cachorros que están en la imagen.** Después de la recuperación se abrieron
+`detector-silence-v1` (15:52:33) y `confidence-shift-v1` (15:52:34) en la sala de cachorros, **sin relación con el
+corte**. La captura del disparador
+([`000136.jpg`](../evidencias/runs/20261110-s1-interrupcion/captures/puppy-playroom/000136.jpg)) muestra unos
+ocho cachorros dormidos y bien visibles, y YOLO11s reporta **0 detecciones**. Es la misma escena que el frame 2
+([`000002.jpg`](../evidencias/runs/20261110-s1-interrupcion/captures/puppy-playroom/000002.jpg)), con 4
+detecciones. Los cachorros amontonados, boca arriba y vistos desde arriba son un caso fuera de la distribución de
+COCO. La regla nueva lo detectó sin etiquetas, y la captura vinculada permite confirmarlo a simple vista. Es un
+**verdadero positivo de fallo del modelo**: el escenario previsto para `detector-silence-v1` era la poca luz, y
+apareció un caso real. Capturas: [`21`](../evidencias/portal/21-alerta-s1-silencio-cachorros.png) y
+[`22`](../evidencias/portal/22-evento-s1-cachorros-sin-detecciones.png).
+
+## S2 · Cambio de versión del modelo
+
+Se desplegó `yolo11n` (verificado por SHA-256) con `expected_name: yolo11s`.
+
+- **`model-version-v1` (critical) en el primer frame de cada fuente** (15:53:19), con `M-version-mismatch` en
+  580 de 580 eventos. Ambas quedan abiertas hasta el final, como corresponde: el modelo no aprobado sigue
+  desplegado.
+- **Sala de cachorros:** 39 % de frames vacíos, confianza media 0.283 (yolo11s en C1: 0.474) y 2.1 detecciones
+  por frame (C1: 9.4). Se abrieron `detector-silence` (a los 22 s), `low-confidence` y `confidence-shift`.
+  Coincide con la sonda de selección de modelo ([`MODELO.md`](MODELO.md)): yolo11n no ve cachorros dormidos.
+- **Granero:** con yolo11n la confianza media fue 0.768, contra 0.775 de yolo11s en S1, con un conteo parecido.
+  **Ninguna regla de confianza se disparó.** Si la versión no estuviera registrada en cada evento, el cambio de
+  modelo habría pasado inadvertido en esta cámara. Por eso `model-version-v1` compara la identidad del modelo y no
+  infiere la versión a partir de la confianza.
+- yolo11n bajó el p95 de inferencia de 45 a 30 ms. **Ganar velocidad no compensa la pérdida en la cámara de
+  cachorros**, y esa es la decisión que el monitor permite justificar.
+
+Capturas: [`30`](../evidencias/portal/30-alerta-s2-version.png),
+[`31`](../evidencias/portal/31-alerta-s2-silencio-yolo11n.png) y
+[`32-dashboard-s2.png`](../evidencias/portal/32-dashboard-s2.png).
+
+## S3 · Cambio sostenido gradual
+
+Desde t = 60 s (marca `degrade_start` 15:59:14), el brillo del granero baja en rampa durante 240 s hasta × 0.25.
+A diferencia de C2 no hay apagón: la deriva es lenta.
+
+| Hora UTC | Alerta | Tiempo desde la marca |
+|---|---|---|
+| 16:00:06 | `low-confidence` granero #001 | 51.2 s |
+| 16:00:53 | **`confidence-shift-v1` granero**: media 0.492 frente a 0.689 de referencia (caída 0.197 ≥ 0.15) | 98.4 s; **sigue abierta** hasta el final |
+| 16:03:39 → 16:05:11 | `low-confidence` #001 resuelta, #002 abierta y resuelta, #003 abierta | — |
+
+- La regla de **cambio sostenido** (ventana de 60 frames) da la señal estable de la deriva: se abre una vez y no
+  se cierra.
+- `detector-silence-v1` **no** se disparó: con luz tenue el modelo siguió detectando ovejas, solo que con menos
+  confianza. Cada regla cubre un modo de fallo distinto.
+- `low-confidence-v1` (ventana de 20 frames) volvió a oscilar pese a la histéresis de 0.05. Con hasta 200
+  detecciones por ventana, la proporción va de 0.30 a 0.45 alrededor del umbral 0.35.
+  **Barrido con backtest** ([`barrido-histeresis-low-confidence.txt`](../evidencias/backtests/barrido-histeresis-low-confidence.txt)):
+
+  | `clear_margin` | Alertas `low-confidence` del granero en S3 | Efecto en C1 / C2 (control) |
+  |---|---|---|
+  | 0.05 (actual) | 3 (oscila) | — |
+  | **0.10** | **1** | La alerta de cachorros de C1 dura 22 s (antes 14 s); la de control en C2 dura 21 s (antes 17 s). Sin alertas nuevas |
+  | 0.15 | 1 | Las de control duran 53 s y 36 s |
+
+  Recomendación para la siguiente versión de configuración: `clear_margin: 0.10`. No se cambió durante la campaña
+  de escenarios para que S1–S3 compartan las mismas reglas.
+
+Capturas: [`40`](../evidencias/portal/40-alerta-s3-cambio-sostenido.png) y
+[`41-dashboard-s3.png`](../evidencias/portal/41-dashboard-s3.png).
