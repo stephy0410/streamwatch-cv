@@ -1,0 +1,60 @@
+# Configuración base del monitor (versionada). Los escenarios la sobrescriben con config/scenarios/*.yaml.
+# Cada evento guarda config_ref = <config_id>@<sha256[:12]> de la configuración efectiva.
+config_id: monitor-v1
+
+sources:
+  - id: sheep-barn
+    kind: youtube
+    uri: https://www.youtube.com/watch?v=SnHke968zAA
+    title: "Sheep Barn Cam · Farm Sanctuary (Watkins Glen, NY)"
+    domain: agtech
+    attribution: "Transmisión pública de Farm Sanctuary powered by explore.org"
+    classes: [sheep, person, dog, cow, horse, bird, cat]
+  - id: puppy-playroom
+    kind: youtube
+    uri: https://www.youtube.com/watch?v=h-Z0wCdD3dI
+    title: "Puppy Playroom · Warrior Canine Connection (Maryland)"
+    domain: animal-care
+    attribution: "Transmisión pública de Warrior Canine Connection powered by explore.org"
+    classes: [dog, person, cat, sheep, cow, horse, bird]
+
+sampling:
+  interval_s: 1.0          # 1 frame por fuente por segundo; el resto se descarta por muestreo
+
+model:
+  name: yolo11s
+  weights: yolo11s.pt
+  sha256: null             # se fija en docs/MODELO.md al verificar el artefacto
+  expected_name: yolo11s   # versión aprobada para producción
+  imgsz: 640
+  conf_floor: 0.10         # piso de salida: deja observar la zona de baja confianza
+  iou: 0.45
+  device: auto             # mps en Apple Silicon, cuda si existe, cpu en otro caso
+
+confidence:
+  lower: 0.30              # provisional; se calibra con la corrida de referencia
+  upper: 0.60
+  reference: null
+
+alerts:
+  low_confidence: {window_frames: 20, min_detections: 15, rate_threshold: 0.6, persistence: 3, clear_after: 5}
+  confidence_shift: {window_frames: 60, min_detections: 40, tolerance: 0.10, persistence: 15, clear_after: 10}
+  stream_stale: {max_age_s: 15}
+  model_version: {enabled: true}
+
+captures:
+  normal_every_s: 60
+  low_conf_every_s: 10
+  on_alert: true
+  max_width: 960
+  jpeg_quality: 80
+
+storage:
+  db: data/streamwatch.db
+  runs_dir: data/runs
+  live_dir: data/live
+
+telemetry:
+  prometheus_port: 9108
+  resource_every_s: 5
+  source_stats_every_s: 5
