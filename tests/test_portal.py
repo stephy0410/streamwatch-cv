@@ -119,3 +119,12 @@ def test_chart_breaks_line_on_gaps_and_keeps_colors_stable():
     b = line_chart({"alfa": gap, "zeta": gap}, "t", "y", 0, 1)
     assert a == b  # el color depende del nombre, no del orden de llegada
     assert a.index(PALETTE[0]) < a.index(PALETTE[1])
+
+
+def test_empty_and_unknown_states(client):
+    csv_lines = client.get("/events.csv?run_id=nope").text.strip().splitlines()
+    assert len(csv_lines) == 1 and csv_lines[0].startswith("event_id")  # solo encabezado
+    assert client.get("/events.jsonl?run_id=nope").text.strip() == ""
+    assert "No existe esa corrida" in client.get("/dashboard?run_id=nope").text
+    assert "No hay capturas con estos filtros" in client.get("/captures?run_id=nope").text
+    assert client.post("/events/nope/review", data={"verdict": "confirmada"}).status_code == 404

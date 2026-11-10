@@ -5,8 +5,9 @@ salidas con confianza (G4), eventos e imágenes (G5), dos fuentes y una versión
 Ningún grupo se excluye.
 
 - **Cálculo:** `uv run streamwatch metrics <corrida>` → `<corrida>/metrics.json` (`src/streamwatch/metrics.py`).
-- **Verificación independiente:** `python -I scripts/recompute_metrics.py <corrida>` recalcula las métricas base
-  leyendo solo los JSONL, con código propio de la biblioteca estándar, y compara con `metrics.json`.
+- **Verificación independiente:** `python -I scripts/recompute_metrics.py <corrida>` lee solo los JSONL y, con
+  código propio de la biblioteca estándar, recalcula las 17 métricas base (`G*`) y las adicionales que se reclaman
+  como extra (`X.*`). Después compara todo con `metrics.json`.
 - **En vivo:** las mismas señales se exponen en Prometheus (`:9108/metrics`) mientras corre el monitor.
 - **Percentiles:** interpolación lineal sobre valores ordenados, `q·(n−1)` (igual que `numpy.percentile`).
 - **Sin observaciones elegibles:** el valor es `null`, nunca `0`.
@@ -41,7 +42,9 @@ los siete grupos, una captura alterada que rompe G5 y el tiempo de detección.
 | M-confidence-distribution | G4 | Histograma de confianza por deciles | Conteo de puntuaciones de detecciones candidatas |
 | M-images-linked | G5 | Imágenes vinculadas y verificadas | Eventos con `image_ref` cuyo archivo existe y coincide con su SHA-256, y desglose por motivo de captura |
 | M-version-mismatch | G6 | Versión esperada frente a reportada | Eventos cuyo `model_name` ≠ `expected_model` |
-| M-time-to-detect | G7 | Tiempo de detección | Marca del escenario (`degrade_start`, `outage_start`) → primera alerta de la regla correspondiente en esa fuente |
+| M-time-to-detect | G7 | Tiempo de detección | Marca del escenario (`degrade_start`, `outage_start`) → primera alerta de la regla correspondiente en esa fuente (`detector-silence-v1` solo si está activa en la configuración de la corrida) |
+
+Niveles reclamados y casos verificados: [`EXTRAS.md`](EXTRAS.md#m--métricas-adicionales).
 
 La confianza describe el comportamiento del modelo, no su acierto: no se calculan accuracy, precision, recall ni mAP
 porque no hay etiquetas reales.

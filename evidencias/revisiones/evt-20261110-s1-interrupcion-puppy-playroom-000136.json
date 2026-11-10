@@ -1,0 +1,13 @@
+{
+  "event_id": "evt-20261110-s1-interrupcion-puppy-playroom-000136",
+  "image_ref": "captures/puppy-playroom/000136.jpg",
+  "image_sha256": "374db7a725860b69bc722449b77a65d647764a538f0a6db9e191cae4bfb0edda",
+  "n_detections": 0,
+  "frame_state": "no_detections",
+  "review": {
+    "event_id": "evt-20261110-s1-interrupcion-puppy-playroom-000136",
+    "reviewed_at": "2026-11-10T16:19:41+00:00",
+    "verdict": "confirmada",
+    "note": "Fallo real del modelo: ~8 cachorros dormidos visibles y 0 detecciones (PM-4). Candidata para conjunto de reentrenamiento."
+  }
+}

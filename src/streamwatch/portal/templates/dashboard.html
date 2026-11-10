@@ -21,5 +21,5 @@
 <div class="grid g2">{% for c in charts %}<div class="card">{{ c|safe }}</div>{% endfor %}</div>
 {% if data.alerts %}<div class="card"><h2>Alertas de la corrida</h2><table><tr><th>Abierta</th><th>Resuelta</th><th>Regla</th><th>Fuente</th><th>Valor</th></tr>
 {% for a in data.alerts %}<tr><td><a href="/alerts/{{ a.alert_id }}">{{ a.opened_at|short_ts }}</a></td><td>{{ a.resolved_at|short_ts }}</td><td>{{ RULE_LABELS.get(a.rule_id, a.rule_id) }}</td><td>{{ a.source_id }}</td><td>{{ a.value|num(3) }}</td></tr>{% endfor %}</table></div>{% endif %}
-{% else %}<p class="empty">No hay corridas.</p>{% endif %}
+{% else %}<p class="empty">{% if facets.runs %}No existe esa corrida.{% else %}No hay corridas.{% endif %}</p>{% endif %}
 {% endblock %}
