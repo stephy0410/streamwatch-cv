@@ -56,9 +56,29 @@ frame procesado en `events.jsonl` y en SQLite.
   "e2e_ms": 48.6,
   "degrade": null,
   "origin": null,
-  "image_ref": "captures/sheep-barn-000042.jpg",
+  "image_ref": "captures/sheep-barn/000042.jpg",
   "image_sha256": "…",
   "capture_reason": "normal_sample",
   "error": null
 }
 ```
+
+## Política de captura (`captures:` en la configuración)
+
+No se guarda cada frame. En cada frame procesado, `CapturePolicy.decide` (`src/streamwatch/captures.py`) elige a
+lo más un motivo, en este orden de prioridad:
+
+| Motivo (`capture_reason`) | Condición | Frecuencia máxima por fuente |
+|---|---|---|
+| `alert_opened` | El frame abrió una alerta (es el `trigger_event_id`) | Siempre (`on_alert: true`) |
+| `low_confidence` | ≥ `low_conf_min_share` (50 %) de las detecciones del frame bajo el umbral inferior | 1 cada `low_conf_every_s` (15 s; 120 s en S4) |
+| `normal_sample` | Muestra de operación normal | 1 cada `normal_every_s` (60 s; 300 s en S4) |
+
+- Se guarda **la imagen que recibió el modelo**: si el escenario la degradó (C2, S3), la captura está degradada.
+- JPEG con calidad 75 y ancho máximo de 800 px. Las cajas se guardan en píxeles del frame original y el portal
+  las dibuja con un `viewBox` del tamaño original (`frame_size`), así que coinciden aunque la imagen esté reducida.
+- `image_ref` es relativo a la carpeta de la corrida (`captures/<fuente>/<seq>.jpg`) y `image_sha256` permite
+  verificar que el archivo no cambió (G5 y M8).
+- **Sin expiración automática.** Ningún proceso borra capturas. `streamwatch export` copia la corrida completa a
+  `evidencias/runs/` y solo reemplaza la copia anterior de **la misma** corrida si se vuelve a exportar a mano.
+  `streamwatch import` reescribe las filas de SQLite de una corrida (es idempotente) sin tocar archivos.
