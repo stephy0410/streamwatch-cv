@@ -43,12 +43,17 @@ ZONE_COLORS = {"accepted": (80, 200, 80), "doubt": (0, 190, 255), "low": (60, 60
 
 
 def git_revision(cwd: str | Path = ".") -> dict[str, Any]:
+    """Revisión del código. ``dirty_paths`` lista lo que difiere de ``rev`` (``M`` modificado, ``??`` sin
+    seguimiento) para poder comprobar si lo pendiente afecta al monitor o es ajeno (p. ej. documentación)."""
     try:
         rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True).stdout.strip()
-        dirty = bool(subprocess.run(["git", "status", "--porcelain"], cwd=cwd, capture_output=True, text=True).stdout)
-        return {"rev": rev or None, "dirty": dirty}
+        status = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=normal"], cwd=cwd, capture_output=True, text=True
+        ).stdout
+        paths = [line.strip() for line in status.splitlines() if line.strip()]
+        return {"rev": rev or None, "dirty": bool(paths), "dirty_paths": paths[:50]}
     except OSError:
-        return {"rev": None, "dirty": None}
+        return {"rev": None, "dirty": None, "dirty_paths": []}
 
 
 def new_run_id(scenario: str | None, now: float | None = None) -> str:

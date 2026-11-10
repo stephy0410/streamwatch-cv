@@ -1,0 +1,9 @@
+# S2 · Cambio de versión: se despliega yolo11n (más rápido) cuando la versión aprobada es yolo11s.
+# Se espera model-version-v1 (critical) desde el primer frame y, porque la referencia es de yolo11s, un cambio en la
+# distribución de confianza. En la sonda de selección, yolo11n no detectó ningún cachorro dormido (docs/MODELO.md).
+scenario: S2
+model:
+  name: yolo11n
+  weights: models/yolo11n.pt
+  sha256: 0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1
+  expected_name: yolo11s

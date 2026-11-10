@@ -1,0 +1,22 @@
+# Barrido de histéresis de low-confidence-v1 (clear_margin) con streamwatch backtest sobre corridas grabadas
+# Base: config/monitor.yaml (monitor-v2) + overlay alerts.low_confidence.clear_margin = m. Columnas: corrida, abierta, resuelta, fuente, valor
+== clear_margin 0.05
+c1-operacion-normal 2026-11-10T15:24:21.646Z 2026-11-10T15:24:35.781Z puppy-playroom 0.6919
+c2-baja-confianza 2026-11-10T15:32:33.435Z abierta sheep-barn 0.9412
+c2-baja-confianza 2026-11-10T15:33:18.909Z 2026-11-10T15:33:36.076Z puppy-playroom 0.6558
+s1-interrupcion 2026-11-10T15:50:45.178Z abierta puppy-playroom 0.6889
+s3-atardecer-gradual 2026-11-10T16:00:06.078Z 2026-11-10T16:03:39.169Z sheep-barn 0.3548
+s3-atardecer-gradual 2026-11-10T16:03:54.245Z 2026-11-10T16:05:05.614Z sheep-barn 0.3762
+s3-atardecer-gradual 2026-11-10T16:05:11.657Z abierta sheep-barn 0.4105
+== clear_margin 0.10
+c1-operacion-normal 2026-11-10T15:24:21.646Z 2026-11-10T15:24:43.853Z puppy-playroom 0.6919
+c2-baja-confianza 2026-11-10T15:32:33.435Z abierta sheep-barn 0.9412
+c2-baja-confianza 2026-11-10T15:33:18.909Z 2026-11-10T15:33:40.089Z puppy-playroom 0.6558
+s1-interrupcion 2026-11-10T15:50:45.178Z abierta puppy-playroom 0.6889
+s3-atardecer-gradual 2026-11-10T16:00:06.078Z abierta sheep-barn 0.3548
+== clear_margin 0.15
+c1-operacion-normal 2026-11-10T15:24:21.646Z 2026-11-10T15:25:14.171Z puppy-playroom 0.6919
+c2-baja-confianza 2026-11-10T15:32:33.435Z abierta sheep-barn 0.9412
+c2-baja-confianza 2026-11-10T15:33:18.909Z 2026-11-10T15:33:55.255Z puppy-playroom 0.6558
+s1-interrupcion 2026-11-10T15:50:45.178Z abierta puppy-playroom 0.6889
+s3-atardecer-gradual 2026-11-10T16:00:06.078Z abierta sheep-barn 0.3548

@@ -1,0 +1,305 @@
+{
+  "run_id": "20261110-s3-atardecer-gradual",
+  "scenario": "S3",
+  "config_ref": "monitor-v2@5c513e9e9bbb",
+  "model_ref": "yolo11s@sha256:85a76fe86dd8",
+  "computed_at": "2026-11-10T16:05:53.774Z",
+  "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
+  "base": {
+    "G1": {
+      "group": "G1",
+      "name": "Tiempo de inferencia (p50 / p95)",
+      "unit": "ms",
+      "population": "eventos con status=ok; preprocesado + modelo + NMS medido con perf_counter",
+      "window": "corrida completa",
+      "overall": {
+        "n": 819,
+        "mean": 27.07,
+        "p50": 24.74,
+        "p95": 39.59,
+        "max": 134.0
+      },
+      "by_source": {
+        "sheep-barn": {
+          "n": 410,
+          "mean": 32.95,
+          "p50": 32.76,
+          "p95": 41.57,
+          "max": 134.0
+        },
+        "puppy-playroom": {
+          "n": 409,
+          "mean": 21.17,
+          "p50": 20.71,
+          "p95": 23.65,
+          "max": 55.42
+        }
+      }
+    },
+    "G2": {
+      "group": "G2",
+      "name": "FPS de procesamiento",
+      "unit": "frames/s por fuente",
+      "population": "todos los eventos (ok y error) de la fuente",
+      "window": "del primer al último evento de la fuente: (n − 1) / (t_último − t_primero)",
+      "target": 1.0,
+      "by_source": {
+        "sheep-barn": {
+          "frames": 410,
+          "span_s": 410.914,
+          "fps": 0.9953
+        },
+        "puppy-playroom": {
+          "frames": 409,
+          "span_s": 409.985,
+          "fps": 0.9952
+        }
+      }
+    },
+    "G3": {
+      "group": "G3",
+      "name": "CPU del proceso",
+      "unit": "% de un núcleo (psutil.Process.cpu_percent)",
+      "population": "muestras de resources.jsonl excepto la primera",
+      "window": "corrida completa, una muestra cada ~5.0 s",
+      "overall": {
+        "n": 81,
+        "mean": 44.0,
+        "p50": 45.8,
+        "p95": 48.5,
+        "max": 49.3
+      },
+      "cpu_count": 8
+    },
+    "G4": {
+      "group": "G4",
+      "name": "Proporción de baja confianza",
+      "unit": "detecciones con s < lower / detecciones puntuadas",
+      "population": "detecciones candidatas (≥ conf_floor, clases monitoreadas) de eventos status=ok",
+      "window": "corrida completa (la regla low-confidence-v1 usa ventanas deslizantes)",
+      "lower_threshold": 0.4,
+      "overall": {
+        "low": 2644,
+        "scored": 6780,
+        "rate": 0.39
+      },
+      "by_source": {
+        "sheep-barn": {
+          "low": 1666,
+          "scored": 4301,
+          "rate": 0.3874
+        },
+        "puppy-playroom": {
+          "low": 978,
+          "scored": 2479,
+          "rate": 0.3945
+        }
+      }
+    },
+    "G5": {
+      "group": "G5",
+      "name": "Cobertura de trazabilidad",
+      "unit": "eventos trazables / eventos",
+      "population": "todos los eventos de la corrida",
+      "definition": "trazable = campos de identidad no vacíos (event_id, run_id, frame_id, source_id, timestamp, model_ref, config_ref), config_ref y model_ref iguales a los de run.json, y si tiene image_ref: archivo existente con el SHA-256 registrado",
+      "traced": 819,
+      "events": 819,
+      "coverage": 1.0
+    },
+    "G6": {
+      "group": "G6",
+      "name": "Tiempo desde el último reporte por fuente",
+      "unit": "s",
+      "population": "eventos de cada fuente; 'gap' = tiempo entre eventos consecutivos",
+      "window": "corrida completa; age_at_end = fin de la corrida − último evento",
+      "by_source": {
+        "sheep-barn": {
+          "gap_s": {
+            "n": 409,
+            "mean": 1.005,
+            "p50": 1.003,
+            "p95": 1.02,
+            "max": 1.083
+          },
+          "age_at_end_s": 0.969
+        },
+        "puppy-playroom": {
+          "gap_s": {
+            "n": 408,
+            "mean": 1.005,
+            "p50": 1.004,
+            "p95": 1.025,
+            "max": 1.084
+          },
+          "age_at_end_s": 0.94
+        }
+      }
+    },
+    "G7": {
+      "group": "G7",
+      "name": "Alertas activas",
+      "unit": "alertas",
+      "population": "alertas de alerts.jsonl (último estado de cada alert_id)",
+      "window": "corrida completa",
+      "opened": 4,
+      "open_at_end": 2,
+      "max_simultaneous": 2,
+      "by_rule": {
+        "low-confidence-v1": 3,
+        "confidence-shift-v1": 1
+      }
+    }
+  },
+  "extra": {
+    "M-capture-fps": {
+      "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
+      "by_source": {
+        "puppy-playroom": {
+          "fps": 29.7691,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 11946
+        },
+        "sheep-barn": {
+          "fps": 29.8318,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 11971
+        }
+      }
+    },
+    "M-e2e-latency": {
+      "name": "Latencia frame decodificado → evento (G2)",
+      "unit": "ms",
+      "overall": {
+        "n": 819,
+        "mean": 73.23,
+        "p50": 60.32,
+        "p95": 124.07,
+        "max": 472.12
+      }
+    },
+    "M-ram": {
+      "name": "Memoria residente del proceso (G3)",
+      "unit": "MB",
+      "overall": {
+        "n": 82,
+        "mean": 334.1,
+        "p50": 317.8,
+        "p95": 559.4,
+        "max": 784.6
+      }
+    },
+    "M-frames-without-detections": {
+      "name": "Proporción de frames sin detecciones (G4)",
+      "by_source": {
+        "sheep-barn": {
+          "frames": 410,
+          "without": 0,
+          "rate": 0.0
+        },
+        "puppy-playroom": {
+          "frames": 409,
+          "without": 2,
+          "rate": 0.0049
+        }
+      }
+    },
+    "M-detections-per-frame": {
+      "name": "Detecciones por frame (G4)",
+      "by_source": {
+        "sheep-barn": {
+          "n": 410,
+          "mean": 10.49,
+          "p50": 10.0,
+          "p95": 17.0,
+          "max": 21
+        },
+        "puppy-playroom": {
+          "n": 409,
+          "mean": 6.06,
+          "p50": 6.0,
+          "p95": 10.0,
+          "max": 12
+        }
+      }
+    },
+    "M-confidence-distribution": {
+      "name": "Distribución de confianza por deciles (G4)",
+      "bins": [
+        "0.0-0.1",
+        "0.1-0.2",
+        "0.2-0.3",
+        "0.3-0.4",
+        "0.4-0.5",
+        "0.5-0.6",
+        "0.6-0.7",
+        "0.7-0.8",
+        "0.8-0.9",
+        "0.9-1.0"
+      ],
+      "counts": [
+        0,
+        1123,
+        779,
+        742,
+        638,
+        570,
+        659,
+        914,
+        959,
+        396
+      ],
+      "mean": 0.5169
+    },
+    "M-images-linked": {
+      "name": "Imágenes vinculadas y verificadas (G5)",
+      "events_with_image": 57,
+      "verified": 57,
+      "rate": 1.0,
+      "by_reason": {
+        "normal_sample": 14,
+        "low_confidence": 39,
+        "alert_opened": 4
+      }
+    },
+    "M-version-mismatch": {
+      "name": "Versión esperada frente a reportada (G6)",
+      "expected": "yolo11s",
+      "reported": [
+        "yolo11s"
+      ],
+      "mismatched_events": 0
+    },
+    "M-time-to-detect": {
+      "name": "Tiempo de detección: marca del escenario → primera alerta de la regla (G7)",
+      "unit": "s",
+      "items": [
+        {
+          "marker": "degrade_start",
+          "source_id": "sheep-barn",
+          "marker_ts": "2026-11-10T15:59:14.812Z",
+          "rule_id": "low-confidence-v1",
+          "alert_id": "alt-20261110-s3-atardecer-gradual-low-confidence-sheep-barn-001",
+          "seconds": 51.19
+        },
+        {
+          "marker": "degrade_start",
+          "source_id": "sheep-barn",
+          "marker_ts": "2026-11-10T15:59:14.812Z",
+          "rule_id": "confidence-shift-v1",
+          "alert_id": "alt-20261110-s3-atardecer-gradual-confidence-shift-sheep-barn-001",
+          "seconds": 98.43
+        },
+        {
+          "marker": "degrade_start",
+          "source_id": "sheep-barn",
+          "marker_ts": "2026-11-10T15:59:14.812Z",
+          "rule_id": "detector-silence-v1",
+          "alert_id": null,
+          "seconds": null
+        }
+      ]
+    }
+  }
+}

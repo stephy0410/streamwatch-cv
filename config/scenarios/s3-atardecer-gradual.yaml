@@ -1,0 +1,7 @@
+# S3 · Cambio sostenido gradual: desde t=60 s la luz del granero baja en rampa durante 240 s hasta brillo ×0.25
+# (gamma 2.5, ruido σ=10), como un atardecer comprimido. Prueba que confidence-shift-v1 detecta una deriva lenta,
+# no solo un apagón. Los cachorros son el control.
+scenario: S3
+sources:
+  - id: sheep-barn
+    degrade: {kind: lowlight, start_after_s: 60, ramp_s: 240, brightness: 0.25, gamma: 2.5, noise_sigma: 10, seed: 11}

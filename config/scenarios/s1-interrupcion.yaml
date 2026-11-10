@@ -1,0 +1,7 @@
+# S1 · Interrupción y recuperación: a los 90 s se corta la sala de cachorros durante 60 s (el monitor cierra la
+# captura, como una caída de red). Se espera stream-stale-v1 (critical) a los ~15 s del corte, reconexión al
+# terminar la falla y resolución automática. El granero sigue normal: las fuentes son independientes.
+scenario: S1
+sources:
+  - id: puppy-playroom
+    faults: [{kind: outage, start_after_s: 90, duration_s: 60}]
