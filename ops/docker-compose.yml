@@ -1,0 +1,53 @@
+# Observabilidad de StreamWatch CV: Prometheus + Grafana + portal.
+#
+# El monitor corre en el host (`uv run streamwatch monitor ...`) porque usa la GPU (MPS/CUDA) y expone
+# :9108/metrics. Prometheus lo raspa por host.docker.internal.
+#
+#   docker compose -f ops/docker-compose.yml up -d
+#   Grafana http://localhost:3000 (anónimo, solo lectura) · Prometheus http://localhost:9090 · Portal http://localhost:8080
+name: streamwatch
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    ports: ["9090:9090"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/streamwatch.json
+      GF_USERS_DEFAULT_THEME: light
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+    restart: unless-stopped
+
+  # Portal de evidencias: al arrancar importa evidencias/runs/* a su propio SQLite y lo sirve. No comparte el
+  # SQLite vivo del host: WAL usa memoria compartida, que no es coherente a través de la VM de Docker Desktop.
+  # Para operar en vivo se usa el portal nativo (`uv run streamwatch portal`).
+  portal:
+    build:
+      context: ..
+      dockerfile: ops/Dockerfile
+    volumes:
+      - ../evidencias:/app/evidencias:ro
+    ports: ["8080:8000"]
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:

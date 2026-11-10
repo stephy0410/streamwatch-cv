@@ -2,3 +2,7 @@
 # (~21:47 UTC el 2026-11-10) y el final del crepúsculo civil (~22:17 UTC). Cualquier cambio de confianza es de la
 # escena real (luz natural → iluminación del granero o IR).
 scenario: S4
+# 90 min: capturas más espaciadas para que la evidencia no crezca de más (las alertas siempre se capturan).
+captures:
+  normal_every_s: 300
+  low_conf_every_s: 120

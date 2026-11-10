@@ -1,0 +1,9 @@
+.venv
+data
+models
+evidencias
+logs
+.git
+**/__pycache__
+.pytest_cache
+.ruff_cache
