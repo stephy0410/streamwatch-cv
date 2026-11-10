@@ -50,3 +50,7 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 testpaths = ["tests"]
 addopts = "-q"
 markers = ["vision: requiere ultralytics y pesos del modelo (no corre en CI)"]
+
+[tool.ruff.lint.per-file-ignores]
+# Plantillas SVG en f-strings: partirlas reduce la legibilidad
+"src/streamwatch/portal/charts.py" = ["E501"]

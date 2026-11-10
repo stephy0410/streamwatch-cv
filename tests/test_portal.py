@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from streamwatch.monitor import Monitor
 from streamwatch.portal.app import create_app
+from streamwatch.portal.charts import PALETTE, line_chart
 from tests.fakes import BrightnessDetector
 from tests.test_monitor import make_cfg
 
@@ -53,6 +54,7 @@ def test_alert_list_and_detail_link_to_events_and_images(client):
     assert page.status_code == 200
     assert a["trigger_event_id"] in page.text and "Acción sugerida" in page.text
     assert f"/captures/p1/{a['trigger_image_ref']}" in page.text
+    assert "<svg" in page.text and "huecos = evidencia insuficiente" in page.text
 
 
 def test_run_page_shows_effective_config(client):
@@ -65,3 +67,55 @@ def test_not_found_and_path_traversal(client):
     assert client.get("/alerts/nope").status_code == 404
     assert client.get("/captures/p1/../../sw.db").status_code == 404
     assert client.get("/captures/p1/%2e%2e/%2e%2e/sw.db").status_code == 404
+
+
+def test_export_csv_and_jsonl_respect_filters(client):
+    csv_resp = client.get("/events.csv?run_id=p1&frame_state=low")
+    assert csv_resp.status_code == 200 and csv_resp.headers["content-type"].startswith("text/csv")
+    lines = csv_resp.text.strip().splitlines()
+    assert lines[0].startswith("event_id,run_id") and len(lines) > 1
+    assert all(",low," in line for line in lines[1:])
+    jl = client.get("/events.jsonl?run_id=p1").text.strip().splitlines()
+    assert len(jl) == client.get("/api/events?run_id=p1").json()["total"]
+    assert client.get("/events.xml").status_code == 404
+
+
+def test_capture_gallery_and_review_roundtrip(client):
+    page = client.get("/captures?run_id=p1")
+    assert page.status_code == 200 and "/captures/p1/captures/" in page.text and "sin revisar" in page.text
+    ev_id = client.get("/api/events?run_id=p1&has_image=1").json()["items"][0]["event_id"]
+    r = client.post(
+        f"/events/{ev_id}/review", data={"verdict": "confirmada", "note": "poca luz"}, follow_redirects=False
+    )
+    assert r.status_code == 303
+    assert client.get(f"/api/events/{ev_id}").json()["review"]["verdict"] == "confirmada"
+    assert "poca luz" in client.get(f"/events/{ev_id}").text
+    assert client.get("/captures?reviewed=1").text.count("✓ confirmada") == 1
+    assert client.post(f"/events/{ev_id}/review", data={"verdict": "xx"}).status_code == 422
+
+
+def test_dashboard_renders_svg_charts_for_run(client):
+    r = client.get("/dashboard?run_id=p1")
+    assert r.status_code == 200 and r.text.count("<svg") >= 4 and "low-confidence-v1" in r.text
+
+
+def test_live_view_serves_latest_annotated_frame(client):
+    page = client.get("/live")
+    assert page.status_code == 200 and "sheep-barn" in page.text
+    frame = client.get("/live/sheep-barn.jpg")
+    assert frame.status_code == 200 and frame.headers["content-type"] == "image/jpeg"
+    with client.stream("GET", "/live/sheep-barn.mjpg?max_frames=1") as s:
+        body = b"".join(s.iter_bytes())
+    assert body.startswith(b"--frame") and b"image/jpeg" in body
+    assert client.get("/live/otra.mjpg").status_code == 404
+
+
+def test_chart_breaks_line_on_gaps_and_keeps_colors_stable():
+    ts = [f"2026-11-10T15:00:0{i}Z" for i in range(6)]
+    gap = [(ts[0], 0.1), (ts[1], 0.2), (ts[2], None), (ts[3], 0.4), (ts[4], 0.5), (ts[5], 0.6)]
+    svg = line_chart({"b": gap}, "t", "y", 0, 1)
+    assert svg.count("<polyline") == 2  # el hueco no se interpola
+    a = line_chart({"zeta": gap, "alfa": gap}, "t", "y", 0, 1)
+    b = line_chart({"alfa": gap, "zeta": gap}, "t", "y", 0, 1)
+    assert a == b  # el color depende del nombre, no del orden de llegada
+    assert a.index(PALETTE[0]) < a.index(PALETTE[1])

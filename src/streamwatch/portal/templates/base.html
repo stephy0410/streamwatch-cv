@@ -9,7 +9,9 @@
     <a href="/" class="{{ 'on' if p == '/' }}">Resumen</a>
     <a href="/events" class="{{ 'on' if p.startswith('/events') }}">Eventos</a>
     <a href="/alerts" class="{{ 'on' if p.startswith('/alerts') }}">Alertas</a>
-    {% block extra_nav %}{% endblock %}
+    <a href="/captures" class="{{ 'on' if p.startswith('/captures') }}">Capturas</a>
+    <a href="/dashboard" class="{{ 'on' if p.startswith('/dashboard') }}">Dashboard</a>
+    <a href="/live" class="{{ 'on' if p.startswith('/live') }}">En vivo</a>
   </nav>
 </div></header>
 <main class="wrap">{% block content %}{% endblock %}</main>

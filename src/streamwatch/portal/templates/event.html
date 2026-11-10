@@ -36,6 +36,11 @@
   <div class="card"><h2>Alertas ligadas</h2>{% if ev.alerts %}<table><tr><th>Regla</th><th>Estado</th><th>Severidad</th><th>Abierta</th></tr>
   {% for a in ev.alerts %}<tr><td><a href="/alerts/{{ a.alert_id }}">{{ RULE_LABELS.get(a.rule_id, a.rule_id) }}</a></td><td>{{ status(a.status) }}</td><td>{{ sev(a.severity) }}</td><td>{{ a.opened_at|short_ts }}</td></tr>{% endfor %}</table>
   {% else %}<p class="empty">Este frame no forma parte de la ventana de ninguna alerta.</p>{% endif %}</div>
-  {% block review %}{% endblock %}
+  {% if ev.image_ref %}<div class="card" id="revision"><h2>Revisión de la captura</h2>
+  {% if ev.review %}<p><span class="pill z-accepted">{{ VERDICTS.get(ev.review.verdict, ev.review.verdict) }}</span> · {{ ev.review.reviewed_at }}{% if ev.review.note %}<br>“{{ ev.review.note }}”{% endif %}</p>{% endif %}
+  <form method="post" action="/events/{{ ev.event_id }}/review" class="filters">
+    <label>Veredicto<select name="verdict">{% for k, v in VERDICTS.items() %}<option value="{{ k }}" {{ 'selected' if ev.review and ev.review.verdict == k }}>{{ v }}</option>{% endfor %}</select></label>
+    <label style="flex:1">Nota<input type="text" name="note" maxlength="500" value="{{ ev.review.note if ev.review else '' }}" placeholder="p. ej. cachorros amontonados, poca luz"></label>
+    <button>Guardar revisión</button></form></div>{% endif %}
 </div></div>
 {% endblock %}
