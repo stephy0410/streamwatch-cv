@@ -181,7 +181,9 @@ class Monitor:
         obs = Observation(eid, source_id, now, status, tuple(scores), summary.zone_counts["low"], self.detector.name)
         outcome = self.engine.observe(obs)
 
-        reason = self.capture_policy.decide(source_id, now, summary.zone_counts["low"], bool(outcome.opened))
+        reason = self.capture_policy.decide(
+            source_id, now, summary.zone_counts["low"], len(detections), bool(outcome.opened)
+        )
         image_ref = image_sha = None
         if reason:
             image_ref, image_sha, _ = save_capture(

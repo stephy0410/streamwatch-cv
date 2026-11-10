@@ -31,23 +31,35 @@ model:
   iou: 0.45
   device: auto             # mps en Apple Silicon, cuda si existe, cpu en otro caso
 
-confidence:
-  lower: 0.30              # provisional; se calibra con la corrida de referencia
-  upper: 0.60
-  reference: null
+confidence:                # calibrados con la corrida de referencia (docs/CONFIANZA.md)
+  lower: 0.40              # media de P20 por fuente
+  upper: 0.65              # media de P50 por fuente
+  reference: config/reference/reference-v1.json
 
 alerts:
-  low_confidence: {window_frames: 20, min_detections: 15, rate_threshold: 0.6, persistence: 3, clear_after: 5}
-  confidence_shift: {window_frames: 60, min_detections: 40, tolerance: 0.10, persistence: 15, clear_after: 10}
+  low_confidence:
+    window_frames: 20      # ~20 s por fuente
+    min_detections: 15
+    rate_threshold: 0.6    # por defecto; abajo, por fuente = P95 de la referencia + 0.15
+    per_source_threshold: {sheep-barn: 0.35, puppy-playroom: 0.65}
+    persistence: 3
+    clear_after: 5
+  confidence_shift:
+    window_frames: 60      # ~1 min por fuente
+    min_detections: 40
+    tolerance: 0.15        # caída natural P05 de la referencia ≤ 0.075, más margen
+    persistence: 15
+    clear_after: 10
   stream_stale: {max_age_s: 15}
   model_version: {enabled: true}
 
 captures:
-  normal_every_s: 60
-  low_conf_every_s: 10
+  normal_every_s: 60       # muestra de operación normal
+  low_conf_every_s: 15     # frames dudosos, como máximo uno cada 15 s por fuente
+  low_conf_min_share: 0.5  # frame dudoso: ≥ 50 % de sus detecciones bajo lower
   on_alert: true
-  max_width: 960
-  jpeg_quality: 80
+  max_width: 800
+  jpeg_quality: 75
 
 storage:
   db: data/streamwatch.db

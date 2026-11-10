@@ -83,6 +83,23 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_reference(args: argparse.Namespace) -> int:
+    from streamwatch.reference import build_reference
+
+    ref = build_reference(args.run_dir, q_lower=args.q_lower, q_upper=args.q_upper, margin=args.margin)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(ref, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"{out}: umbrales {ref['thresholds']} · tolerancia de cambio {ref['recommended_shift_tolerance']}")
+    for sid, s in ref["sources"].items():
+        print(
+            f"  {sid}: media {s['mean_score']} · baja/duda/aceptada {s['share_low']}/{s['share_doubt']}/"
+            f"{s['share_accepted']} · tasa de ventana p95 {s['window_low_rate']['p95']} → umbral de regla "
+            f"{s['recommended_low_rate_threshold']}"
+        )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="streamwatch", description="Centro de monitoreo de computer vision")
     p.add_argument("-v", "--verbose", action="store_true")
@@ -113,6 +130,14 @@ def build_parser() -> argparse.ArgumentParser:
     me = sub.add_parser("metrics", help="Calcula metrics.json (G1–G7) de corridas desde sus JSONL")
     me.add_argument("run_dirs", nargs="+")
     me.set_defaults(func=cmd_metrics)
+
+    rf = sub.add_parser("reference", help="Construye la referencia de confianza desde una corrida normal")
+    rf.add_argument("run_dir")
+    rf.add_argument("--out", default="config/reference/reference-v1.json")
+    rf.add_argument("--q-lower", type=float, default=0.2)
+    rf.add_argument("--q-upper", type=float, default=0.5)
+    rf.add_argument("--margin", type=float, default=0.15)
+    rf.set_defaults(func=cmd_reference)
 
     po = sub.add_parser("portal", help="Levanta el portal web de eventos y alertas")
     po.add_argument("--db")

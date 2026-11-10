@@ -126,6 +126,9 @@ class AlertsConfig(_Strict):
 class CapturesConfig(_Strict):
     normal_every_s: float = Field(60.0, gt=0)
     low_conf_every_s: float = Field(10.0, gt=0)
+    low_conf_min_share: float = Field(
+        0.5, gt=0, le=1, description="Frame de baja confianza: fracción mínima de sus detecciones bajo lower"
+    )
     on_alert: bool = True
     max_width: int = Field(960, ge=64)
     jpeg_quality: int = Field(80, ge=10, le=100)

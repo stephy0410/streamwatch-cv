@@ -1,0 +1,276 @@
+{
+  "run_id": "20261110-ref-calibracion",
+  "scenario": "REF",
+  "config_ref": "monitor-v1@4ead7ed487a2",
+  "model_ref": "yolo11s@sha256:85a76fe86dd8",
+  "computed_at": "2026-11-10T15:14:41.414Z",
+  "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
+  "base": {
+    "G1": {
+      "group": "G1",
+      "name": "Tiempo de inferencia (p50 / p95)",
+      "unit": "ms",
+      "population": "eventos con status=ok; preprocesado + modelo + NMS medido con perf_counter",
+      "window": "corrida completa",
+      "overall": {
+        "n": 1171,
+        "mean": 31.83,
+        "p50": 25.31,
+        "p95": 45.44,
+        "max": 146.13
+      },
+      "by_source": {
+        "sheep-barn": {
+          "n": 587,
+          "mean": 40.71,
+          "p50": 40.79,
+          "p95": 46.23,
+          "max": 146.13
+        },
+        "puppy-playroom": {
+          "n": 584,
+          "mean": 22.91,
+          "p50": 22.86,
+          "p95": 24.26,
+          "max": 79.28
+        }
+      }
+    },
+    "G2": {
+      "group": "G2",
+      "name": "FPS de procesamiento",
+      "unit": "frames/s por fuente",
+      "population": "todos los eventos (ok y error) de la fuente",
+      "window": "del primer al último evento de la fuente: (n − 1) / (t_último − t_primero)",
+      "target": 1.0,
+      "by_source": {
+        "sheep-barn": {
+          "frames": 587,
+          "span_s": 591.303,
+          "fps": 0.991
+        },
+        "puppy-playroom": {
+          "frames": 584,
+          "span_s": 590.399,
+          "fps": 0.9875
+        }
+      }
+    },
+    "G3": {
+      "group": "G3",
+      "name": "CPU del proceso",
+      "unit": "% de un núcleo (psutil.Process.cpu_percent)",
+      "population": "muestras de resources.jsonl excepto la primera",
+      "window": "corrida completa, una muestra cada ~5.0 s",
+      "overall": {
+        "n": 117,
+        "mean": 43.8,
+        "p50": 45.3,
+        "p95": 47.3,
+        "max": 48.5
+      },
+      "cpu_count": 8
+    },
+    "G4": {
+      "group": "G4",
+      "name": "Proporción de baja confianza",
+      "unit": "detecciones con s < lower / detecciones puntuadas",
+      "population": "detecciones candidatas (≥ conf_floor, clases monitoreadas) de eventos status=ok",
+      "window": "corrida completa (la regla low-confidence-v1 usa ventanas deslizantes)",
+      "lower_threshold": 0.3,
+      "overall": {
+        "low": 1699,
+        "scored": 17071,
+        "rate": 0.0995
+      },
+      "by_source": {
+        "sheep-barn": {
+          "low": 597,
+          "scored": 12002,
+          "rate": 0.0497
+        },
+        "puppy-playroom": {
+          "low": 1102,
+          "scored": 5069,
+          "rate": 0.2174
+        }
+      }
+    },
+    "G5": {
+      "group": "G5",
+      "name": "Cobertura de trazabilidad",
+      "unit": "eventos trazables / eventos",
+      "population": "todos los eventos de la corrida",
+      "definition": "trazable = campos de identidad no vacíos (event_id, run_id, frame_id, source_id, timestamp, model_ref, config_ref), config_ref y model_ref iguales a los de run.json, y si tiene image_ref: archivo existente con el SHA-256 registrado",
+      "traced": 1171,
+      "events": 1171,
+      "coverage": 1.0
+    },
+    "G6": {
+      "group": "G6",
+      "name": "Tiempo desde el último reporte por fuente",
+      "unit": "s",
+      "population": "eventos de cada fuente; 'gap' = tiempo entre eventos consecutivos",
+      "window": "corrida completa; age_at_end = fin de la corrida − último evento",
+      "by_source": {
+        "sheep-barn": {
+          "gap_s": {
+            "n": 586,
+            "mean": 1.009,
+            "p50": 1.012,
+            "p95": 1.028,
+            "max": 1.077
+          },
+          "age_at_end_s": 1.013
+        },
+        "puppy-playroom": {
+          "gap_s": {
+            "n": 583,
+            "mean": 1.013,
+            "p50": 1.01,
+            "p95": 1.027,
+            "max": 2.032
+          },
+          "age_at_end_s": 0.978
+        }
+      }
+    },
+    "G7": {
+      "group": "G7",
+      "name": "Alertas activas",
+      "unit": "alertas",
+      "population": "alertas de alerts.jsonl (último estado de cada alert_id)",
+      "window": "corrida completa",
+      "opened": 0,
+      "open_at_end": 0,
+      "max_simultaneous": 0,
+      "by_rule": {}
+    }
+  },
+  "extra": {
+    "M-capture-fps": {
+      "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
+      "by_source": {
+        "puppy-playroom": {
+          "fps": 29.8252,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 17176
+        },
+        "sheep-barn": {
+          "fps": 29.8688,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 17199
+        }
+      }
+    },
+    "M-e2e-latency": {
+      "name": "Latencia frame decodificado → evento (G2)",
+      "unit": "ms",
+      "overall": {
+        "n": 1171,
+        "mean": 56.94,
+        "p50": 51.49,
+        "p95": 83.86,
+        "max": 797.77
+      }
+    },
+    "M-ram": {
+      "name": "Memoria residente del proceso (G3)",
+      "unit": "MB",
+      "overall": {
+        "n": 118,
+        "mean": 530.2,
+        "p50": 490.5,
+        "p95": 729.7,
+        "max": 766.3
+      }
+    },
+    "M-frames-without-detections": {
+      "name": "Proporción de frames sin detecciones (G4)",
+      "by_source": {
+        "sheep-barn": {
+          "frames": 587,
+          "without": 0,
+          "rate": 0.0
+        },
+        "puppy-playroom": {
+          "frames": 584,
+          "without": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-detections-per-frame": {
+      "name": "Detecciones por frame (G4)",
+      "by_source": {
+        "sheep-barn": {
+          "n": 587,
+          "mean": 20.45,
+          "p50": 21.0,
+          "p95": 23.0,
+          "max": 25
+        },
+        "puppy-playroom": {
+          "n": 584,
+          "mean": 8.68,
+          "p50": 9.0,
+          "p95": 11.0,
+          "max": 13
+        }
+      }
+    },
+    "M-confidence-distribution": {
+      "name": "Distribución de confianza por deciles (G4)",
+      "bins": [
+        "0.0-0.1",
+        "0.1-0.2",
+        "0.2-0.3",
+        "0.3-0.4",
+        "0.4-0.5",
+        "0.5-0.6",
+        "0.6-0.7",
+        "0.7-0.8",
+        "0.8-0.9",
+        "0.9-1.0"
+      ],
+      "counts": [
+        0,
+        886,
+        813,
+        1044,
+        1381,
+        2140,
+        2627,
+        3953,
+        2965,
+        1262
+      ],
+      "mean": 0.6352
+    },
+    "M-images-linked": {
+      "name": "Imágenes vinculadas y verificadas (G5)",
+      "events_with_image": 127,
+      "verified": 127,
+      "rate": 1.0,
+      "by_reason": {
+        "low_confidence": 107,
+        "normal_sample": 20
+      }
+    },
+    "M-version-mismatch": {
+      "name": "Versión esperada frente a reportada (G6)",
+      "expected": "yolo11s",
+      "reported": [
+        "yolo11s"
+      ],
+      "mismatched_events": 0
+    },
+    "M-time-to-detect": {
+      "name": "Tiempo de detección: marca del escenario → primera alerta de la regla (G7)",
+      "unit": "s",
+      "items": []
+    }
+  }
+}
