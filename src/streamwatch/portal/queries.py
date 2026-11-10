@@ -234,6 +234,6 @@ def dashboard(conn, run_id: str) -> dict[str, Any]:
         (run_id,),
     ):
         # Sin evidencia suficiente la regla no evalúa: se deja un hueco en vez de interpolar.
-        value = r["value"] if r["state"] in ("ok", "breach") else None
+        value = r["value"] if r["state"] in ("ok", "breach", "hold") else None
         low_rate.setdefault(r["source_id"], []).append((r["timestamp"], value))
     return {"events": events, "low_rate": low_rate, "alerts": alerts(conn, run_id=run_id)}

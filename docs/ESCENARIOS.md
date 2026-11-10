@@ -96,10 +96,11 @@ Capturas del portal: [`04`](../evidencias/portal/04-alerta-c2-baja-confianza-she
    `insufficient` en lugar de `breach`. Por eso el tiempo de detección fue de 99 s y no de unos 20 s. El dashboard
    muestra ese tramo como **hueco**. Esto es un compromiso de diseño, no un error: bajar el mínimo aumenta las
    falsas alarmas con pocas cajas. La señal que faltaba es la **caída de detecciones por frame** (de 4.6 a 0–1);
-   queda como mejora propuesta en [`ALERTAS.md`](ALERTAS.md).
+   se agregó en `monitor-v2` (`detector-silence-v1`). En el backtest sobre esta misma corrida detecta el apagón
+   a los **12.2 s** ([`ALERTAS.md`](ALERTAS.md#backtest-de-reglas)).
 2. **Oscilación alrededor del umbral.** La alerta #001 se resolvió y la #002 se abrió 5 s después, con valores
-   entre 0.34 y 0.37 frente al umbral 0.35. La regla usa el mismo umbral para abrir y para cerrar. La mejora es una
-   histéresis: cerrar por debajo de `umbral − δ`.
+   entre 0.34 y 0.37 frente al umbral 0.35. La regla usa el mismo umbral para abrir y para cerrar. `monitor-v2`
+   agrega histéresis (`clear_margin`): en el backtest la alerta queda abierta sin reabrirse.
 3. **La escena cambia sola.** Entre la referencia (15:04) y C2 (15:29), el granero pasó de 20.5 a 4.6 detecciones
    por frame porque las ovejas salieron. La confianza media siguió alta (0.81), así que la referencia por
    distribución de puntuaciones aguantó el cambio de conteo.

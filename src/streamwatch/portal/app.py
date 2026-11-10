@@ -38,6 +38,7 @@ STATE_LABELS = {
 RULE_LABELS = {
     "low-confidence-v1": "Baja confianza",
     "confidence-shift-v1": "Cambio sostenido",
+    "detector-silence-v1": "Silencio del detector",
     "stream-stale-v1": "Fuente sin frames",
     "model-version-v1": "Versión de modelo",
 }
@@ -180,7 +181,9 @@ def create_app(db_path: str = "data/streamwatch.db", live_dir: str = "data/live"
             if not a:
                 raise HTTPException(404, "Alerta no encontrada")
         chart = None
-        series = [(v["timestamp"], v["value"] if v["state"] in ("ok", "breach") else None) for v in a["evaluations"]]
+        series = [
+            (v["timestamp"], v["value"] if v["state"] in ("ok", "breach", "hold") else None) for v in a["evaluations"]
+        ]
         if any(v is not None for _, v in series):
             hl = [(a["threshold"], "umbral", "#b54708")] if a.get("threshold") is not None else []
             chart = line_chart(

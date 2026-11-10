@@ -1,6 +1,6 @@
 # Configuración base del monitor (versionada). Los escenarios la sobrescriben con config/scenarios/*.yaml.
 # Cada evento guarda config_ref = <config_id>@<sha256[:12]> de la configuración efectiva.
-config_id: monitor-v1
+config_id: monitor-v2   # v2: regla detector-silence e histéresis (docs/ALERTAS.md). C1/C2 corrieron con v1
 
 sources:
   - id: sheep-barn
@@ -34,7 +34,7 @@ model:
 confidence:                # calibrados con la corrida de referencia (docs/CONFIANZA.md)
   lower: 0.40              # media de P20 por fuente
   upper: 0.65              # media de P50 por fuente
-  reference: config/reference/reference-v1.json
+  reference: config/reference/reference-v2.json  # v1 + estadística de frames vacíos; umbrales idénticos
 
 alerts:
   low_confidence:
@@ -44,12 +44,21 @@ alerts:
     per_source_threshold: {sheep-barn: 0.35, puppy-playroom: 0.65}
     persistence: 3
     clear_after: 5
+    clear_margin: 0.05     # histéresis: con la alerta abierta, cierra solo bajo umbral − 0.05
   confidence_shift:
     window_frames: 60      # ~1 min por fuente
     min_detections: 40
     tolerance: 0.15        # caída natural P05 de la referencia ≤ 0.075, más margen
     persistence: 15
     clear_after: 10
+    clear_margin: 0.05
+  detector_silence:        # frames sin detecciones: el modelo se calla en vez de dudar (hallazgo de C2)
+    enabled: true
+    window_frames: 20
+    empty_share_threshold: 0.25   # referencia: 0 % de frames vacíos en ambas fuentes → max(P95 + 0.15, piso 0.25)
+    persistence: 3
+    clear_after: 5
+    clear_margin: 0.10     # 2 frames de 20
   stream_stale: {max_age_s: 15}
   model_version: {enabled: true}
 

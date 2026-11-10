@@ -12,6 +12,9 @@ Método (``docs/CONFIANZA.md``):
    Así la operación normal no dispara alertas por su variabilidad natural.
 4. Regla ``confidence-shift``: media de referencia por fuente y caída natural de la media de
    ventana: ``media − P05(media de ventana)``. La tolerancia se fija por encima de esa caída.
+5. Regla ``detector-silence``: proporción de frames sin detecciones por ventana; umbral por fuente
+   ``max(P95 + margen, piso)``. El piso evita que 3 frames vacíos sueltos (un corte, un paneo)
+   abran una alerta cuando la referencia nunca tuvo frames vacíos.
 """
 
 from __future__ import annotations
@@ -50,6 +53,9 @@ def build_reference(
     low_min_det: int = 15,
     shift_window: int = 60,
     shift_min_det: int = 40,
+    silence_window: int = 20,
+    silence_floor: float = 0.25,
+    reference_id: str = "reference-v1",
 ) -> dict[str, Any]:
     run = load_run(run_dir)
     by_source: dict[str, list[dict[str, Any]]] = {}
@@ -74,6 +80,10 @@ def build_reference(
         ]
         low_rates = [r for r, _ in sliding(seq, low_window, low_min_det)]
         means = [m for _, m in sliding(seq, shift_window, shift_min_det)]
+        empty_shares = [
+            sum(e["n_detections"] == 0 for e in ok[i - silence_window : i]) / silence_window
+            for i in range(silence_window, len(ok) + 1)
+        ]
         mean_score = sum(scores) / len(scores)
         natural_drop = mean_score - percentile(means, 0.05) if means else None
         sources[sid] = {
@@ -100,6 +110,17 @@ def build_reference(
             "recommended_low_rate_threshold": min(0.95, _ceil(percentile(low_rates, 0.95) + margin))
             if low_rates
             else None,
+            "window_empty_share": {
+                "window_frames": silence_window,
+                "n_windows": len(empty_shares),
+                "p95": round(percentile(empty_shares, 0.95), 4) if empty_shares else None,
+                "max": round(max(empty_shares), 4) if empty_shares else None,
+            },
+            "recommended_empty_share_threshold": min(
+                0.95, max(silence_floor, _ceil(percentile(empty_shares, 0.95) + margin))
+            )
+            if empty_shares
+            else None,
             "window_mean": {
                 "window_frames": shift_window,
                 "min_detections": shift_min_det,
@@ -115,7 +136,7 @@ def build_reference(
         if s["window_mean"]["natural_drop_p05"] is not None
     ]
     return {
-        "reference_id": "reference-v1",
+        "reference_id": reference_id,
         "built_from_run": run["meta"]["run_id"],
         "built_at": run["meta"].get("ended_at"),
         "model_ref": run["meta"]["model_ref"],
@@ -126,6 +147,7 @@ def build_reference(
             "weighting": "mismo peso por fuente",
             "low_rate_margin": margin,
             "rounding": "umbrales a 0.05; umbral de regla hacia arriba a 0.05",
+            "silence_floor": silence_floor,
         },
         "thresholds": {"lower": lower, "upper": upper},
         "recommended_shift_tolerance": max(0.10, _ceil(max(drops) + 0.03)) if drops else 0.10,

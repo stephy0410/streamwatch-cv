@@ -78,11 +78,24 @@ exige además 3 evaluaciones seguidas para abrir y 5 normales para resolver.
 **solo para `yolo11s` con este preprocesamiento**. Con otro modelo, la comparación indica un cambio de versión, no
 de escena (ver escenario de cambio de versión).
 
+### `detector-silence-v1` (frames vacíos, desde `monitor-v2`)
+
+Con la misma corrida de referencia y ventanas de 20 frames, la proporción de frames sin detecciones fue **0.0 en
+todas las ventanas** de ambas fuentes (568 y 565 ventanas); en C1 también fue 0.0. Umbral =
+`max(P95 + 0.15, piso 0.25) = 0.25`, es decir, 5 de 20 frames vacíos. El piso evita que 3 frames sueltos (un corte
+o un paneo) abran una alerta cuando la referencia nunca tuvo vacíos. En C2, la ventana degradada llegó a 0.95.
+
+Reproducir: `uv run streamwatch reference evidencias/runs/20261110-ref-calibracion --out
+config/reference/reference-v2.json`. `reference-v2.json` coincide con `reference-v1.json` en umbrales, medias y
+umbrales de regla; solo agrega `window_empty_share` y `recommended_empty_share_threshold`.
+
 ## Límites
 
 - La confianza no es probabilidad de acierto: una caída sostenida avisa de un **posible** cambio (iluminación,
   cámara, escena, modelo) y abre una investigación. No confirma por sí sola pérdida de calidad ni obliga a
   reentrenar.
+- Una escena realmente vacía (las ovejas salen del granero) también dispara `detector-silence-v1`. La acción
+  sugerida lo dice: abrir la captura antes de culpar al modelo.
 - La referencia se tomó de mañana. La noche cambia la escena (ver escenario extra de cambio sostenido). Antes de
   operar 24/7 conviene una referencia por franja horaria.
 - 10 minutos por cámara es una muestra corta. Los frames consecutivos están correlacionados (1 s de separación),

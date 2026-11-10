@@ -308,7 +308,10 @@ def extra_metrics(run: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-MARKER_RULE = {"degrade_start": ("low-confidence-v1", "confidence-shift-v1"), "outage_start": ("stream-stale-v1",)}
+MARKER_RULE = {
+    "degrade_start": ("low-confidence-v1", "confidence-shift-v1", "detector-silence-v1"),
+    "outage_start": ("stream-stale-v1",),
+}
 
 
 def time_to_detect(run: dict[str, Any]) -> list[dict[str, Any]]:
@@ -318,6 +321,10 @@ def time_to_detect(run: dict[str, Any]) -> list[dict[str, Any]]:
         if not rules:
             continue
         for rule in rules:
+            if rule == "detector-silence-v1" and not run["config"].get("alerts", {}).get("detector_silence", {}).get(
+                "enabled"
+            ):
+                continue  # regla no activa en esta configuración (p. ej. monitor-v1)
             alerts = sorted(
                 (a for a in run["alerts"] if a["rule_id"] == rule and a["source_id"] == m.get("source_id")),
                 key=lambda a: a["opened_at"],

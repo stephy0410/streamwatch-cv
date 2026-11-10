@@ -62,3 +62,15 @@ def test_reference_weights_sources_equally_and_sets_per_source_rule_thresholds(t
     assert rule_mucho > ref["sources"]["mucho"]["window_low_rate"]["p95"]
     assert ref["sources"]["mucho"]["mean_score"] == pytest.approx(0.775, abs=1e-3)
     assert ref["recommended_shift_tolerance"] >= 0.10
+
+
+def test_reference_reports_empty_frames_and_silence_threshold(tmp_path):
+    lleno = [[0.9, 0.8] for _ in range(60)]
+    huecos = [[] if i % 10 == 0 else [0.7] for i in range(60)]  # 10 % de frames vacíos
+    ref = build_reference(_write_run(tmp_path, {"lleno": lleno, "huecos": huecos}), reference_id="reference-x")
+    assert ref["reference_id"] == "reference-x"
+    s_lleno, s_huecos = ref["sources"]["lleno"], ref["sources"]["huecos"]
+    assert s_lleno["window_empty_share"]["max"] == 0.0
+    assert s_lleno["recommended_empty_share_threshold"] == 0.25  # piso: la referencia nunca tuvo frames vacíos
+    assert s_huecos["window_empty_share"]["p95"] == pytest.approx(0.1)
+    assert s_huecos["recommended_empty_share_threshold"] == pytest.approx(0.25)  # 0.10 + 0.15 = 0.25
