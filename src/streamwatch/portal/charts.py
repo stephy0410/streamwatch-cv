@@ -12,6 +12,18 @@ def _t(value: str) -> float:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
 
 
+def _segments(data: list[tuple[str, float | None]]) -> list[list[tuple[str, float]]]:
+    """Parte la serie en tramos contiguos sin ``None``."""
+    segs: list[list[tuple[str, float]]] = [[]]
+    for ts, v in data:
+        if v is None:
+            if segs[-1]:
+                segs.append([])
+        else:
+            segs[-1].append((ts, v))
+    return [seg for seg in segs if seg]
+
+
 def line_chart(
     series: dict[str, list[tuple[str, float | None]]],
     title: str,
@@ -65,10 +77,12 @@ def line_chart(
         out.append(
             f'<text x="{pad_l + w - 4}" y="{y(v) - 4:.1f}" font-size="10" text-anchor="end" fill="{color}">{escape(label)}</text>'
         )
-    for i, (name, data) in enumerate(series.items()):
+    # Orden estable: la misma fuente conserva su color en todas las corridas.
+    for i, (name, data) in enumerate(sorted(series.items())):
         color = PALETTE[i % len(PALETTE)]
-        path = " ".join(f"{x(_t(ts)):.1f},{y(v):.1f}" for ts, v in data if v is not None)
-        if path:
+        # Un valor None corta la línea: un hueco (p. ej. evidencia insuficiente) no se interpola.
+        for seg in _segments(data):
+            path = " ".join(f"{x(_t(ts)):.1f},{y(v):.1f}" for ts, v in seg)
             out.append(f'<polyline points="{path}" fill="none" stroke="{color}" stroke-width="1.8"/>')
         out.append(
             f'<text x="{pad_l + 8 + i * 150}" y="{height - 6}" font-size="11" fill="{color}">■ {escape(name)}</text>'

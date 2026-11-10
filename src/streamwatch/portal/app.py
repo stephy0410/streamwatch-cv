@@ -179,7 +179,20 @@ def create_app(db_path: str = "data/streamwatch.db", live_dir: str = "data/live"
             a = q.alert(conn, alert_id)
             if not a:
                 raise HTTPException(404, "Alerta no encontrada")
-        return render(request, "alert.html", a=a)
+        chart = None
+        series = [(v["timestamp"], v["value"] if v["state"] in ("ok", "breach") else None) for v in a["evaluations"]]
+        if any(v is not None for _, v in series):
+            hl = [(a["threshold"], "umbral", "#b54708")] if a.get("threshold") is not None else []
+            chart = line_chart(
+                {a["source_id"]: series},
+                f"{a['rule_id']}: valor evaluado (huecos = evidencia insuficiente)",
+                "valor",
+                0,
+                None,
+                hl,
+                [(a["opened_at"], a["resolved_at"], a["alert_id"])],
+            )
+        return render(request, "alert.html", a=a, chart=chart)
 
     @app.get("/runs/{run_id}", response_class=HTMLResponse)
     def run_page(request: Request, run_id: str):

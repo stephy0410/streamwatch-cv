@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from streamwatch.monitor import Monitor
 from streamwatch.portal.app import create_app
+from streamwatch.portal.charts import PALETTE, line_chart
 from tests.fakes import BrightnessDetector
 from tests.test_monitor import make_cfg
 
@@ -53,6 +54,7 @@ def test_alert_list_and_detail_link_to_events_and_images(client):
     assert page.status_code == 200
     assert a["trigger_event_id"] in page.text and "Acción sugerida" in page.text
     assert f"/captures/p1/{a['trigger_image_ref']}" in page.text
+    assert "<svg" in page.text and "huecos = evidencia insuficiente" in page.text
 
 
 def test_run_page_shows_effective_config(client):
@@ -106,3 +108,14 @@ def test_live_view_serves_latest_annotated_frame(client):
         body = b"".join(s.iter_bytes())
     assert body.startswith(b"--frame") and b"image/jpeg" in body
     assert client.get("/live/otra.mjpg").status_code == 404
+
+
+def test_chart_breaks_line_on_gaps_and_keeps_colors_stable():
+    ts = [f"2026-11-10T15:00:0{i}Z" for i in range(6)]
+    gap = [(ts[0], 0.1), (ts[1], 0.2), (ts[2], None), (ts[3], 0.4), (ts[4], 0.5), (ts[5], 0.6)]
+    svg = line_chart({"b": gap}, "t", "y", 0, 1)
+    assert svg.count("<polyline") == 2  # el hueco no se interpola
+    a = line_chart({"zeta": gap, "alfa": gap}, "t", "y", 0, 1)
+    b = line_chart({"alfa": gap, "zeta": gap}, "t", "y", 0, 1)
+    assert a == b  # el color depende del nombre, no del orden de llegada
+    assert a.index(PALETTE[0]) < a.index(PALETTE[1])

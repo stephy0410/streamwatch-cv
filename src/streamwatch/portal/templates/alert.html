@@ -29,6 +29,8 @@
 {% for e in a.events %}<tr><td><a href="/events/{{ e.event_id }}">{{ e.seq }}</a></td><td>{{ e.timestamp|short_ts }}</td><td>{{ state(e.frame_state) }}{% if e.degraded %} <span class="pill z-no_detections">degradada</span>{% endif %}</td>
 <td>{{ e.n_detections }}</td><td>{{ e.n_low }} / {{ e.n_doubt }} / {{ e.n_accepted }}</td><td>{{ e.max_score|num }}</td><td>{{ e.mean_score|num }}</td><td>{{ '📷' if e.image_ref else '—' }}</td></tr>{% endfor %}</table>
 {% else %}<p class="empty">Sin eventos en la ventana (p. ej. la fuente dejó de enviar frames).</p>{% endif %}</div>
-<div class="card"><h2>Evaluaciones de la regla durante la alerta</h2>
-<table><tr><th>Momento</th><th>Estado</th><th>Valor</th></tr>{% for v in a.evaluations[-40:] %}<tr><td>{{ v.timestamp|short_ts }}</td><td>{{ v.state }}</td><td>{{ v.value|num(4) }}</td></tr>{% endfor %}</table></div>
+<div class="card"><h2>Evaluaciones de la regla ({{ a.evaluations|length }}, desde el inicio de la ventana hasta la resolución)</h2>
+{% if chart %}{{ chart|safe }}{% endif %}
+<details><summary>{% if a.evaluations|length > 40 %}Últimas 40 de {{ a.evaluations|length }}{% else %}Tabla{% endif %}</summary>
+<table><tr><th>Momento</th><th>Estado</th><th>Valor</th></tr>{% for v in a.evaluations[-40:] %}<tr><td>{{ v.timestamp|short_ts }}</td><td>{{ v.state }}</td><td>{{ v.value|num(4) }}</td></tr>{% endfor %}</table></details></div>
 {% endblock %}
