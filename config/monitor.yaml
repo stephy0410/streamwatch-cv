@@ -23,8 +23,8 @@ sampling:
 
 model:
   name: yolo11s
-  weights: yolo11s.pt
-  sha256: null             # se fija en docs/MODELO.md al verificar el artefacto
+  weights: models/yolo11s.pt
+  sha256: 85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5  # docs/MODELO.md
   expected_name: yolo11s   # versión aprobada para producción
   imgsz: 640
   conf_floor: 0.10         # piso de salida: deja observar la zona de baja confianza
