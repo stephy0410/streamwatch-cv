@@ -4,8 +4,8 @@ Se guarda la imagen **que recibió el modelo** (después de una degradación de 
 hubo), reducida a ``max_width``. Motivos, en orden de prioridad:
 
 1. ``alert_opened``  — el frame que abrió una alerta (siempre, si ``on_alert``).
-2. ``low_confidence`` — el frame tiene detecciones en zona baja; como máximo una cada
-   ``low_conf_every_s`` por fuente.
+2. ``low_confidence`` — al menos ``low_conf_min_share`` de las detecciones del frame están en zona
+   baja (un frame realmente dudoso); como máximo una cada ``low_conf_every_s`` por fuente.
 3. ``normal_sample`` — muestra de operación normal, una cada ``normal_every_s`` por fuente.
 
 No hay expiración automática: las capturas viven con su corrida y se exportan con ella.
@@ -31,10 +31,11 @@ class CapturePolicy:
         last = self._last.get((source_id, reason))
         return last is None or now - last >= every_s
 
-    def decide(self, source_id: str, now: float, n_low: int, alert_opened: bool) -> str | None:
+    def decide(self, source_id: str, now: float, n_low: int, n_total: int, alert_opened: bool) -> str | None:
+        low_frame = n_total > 0 and n_low / n_total >= self.cfg.low_conf_min_share
         if alert_opened and self.cfg.on_alert:
             reason = "alert_opened"
-        elif n_low > 0 and self._due(source_id, "low_confidence", now, self.cfg.low_conf_every_s):
+        elif low_frame and self._due(source_id, "low_confidence", now, self.cfg.low_conf_every_s):
             reason = "low_confidence"
         elif self._due(source_id, "normal_sample", now, self.cfg.normal_every_s):
             reason = "normal_sample"

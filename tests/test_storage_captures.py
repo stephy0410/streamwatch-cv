@@ -38,13 +38,14 @@ def _event(i, source="s", image_ref=None):
 
 def test_capture_policy_priorities_and_rate_limits():
     p = CapturePolicy(CapturesConfig(normal_every_s=60, low_conf_every_s=10))
-    assert p.decide("a", 0, n_low=0, alert_opened=False) == "normal_sample"
-    assert p.decide("a", 1, n_low=0, alert_opened=False) is None
-    assert p.decide("a", 2, n_low=3, alert_opened=False) == "low_confidence"
-    assert p.decide("a", 5, n_low=3, alert_opened=False) is None  # límite de 10 s
-    assert p.decide("a", 6, n_low=0, alert_opened=True) == "alert_opened"  # las alertas siempre
-    assert p.decide("b", 6, n_low=0, alert_opened=False) == "normal_sample"  # límites por fuente
-    assert p.decide("a", 12, n_low=1, alert_opened=False) == "low_confidence"
+    assert p.decide("a", 0, n_low=0, n_total=5, alert_opened=False) == "normal_sample"
+    assert p.decide("a", 1, n_low=0, n_total=5, alert_opened=False) is None
+    assert p.decide("a", 2, n_low=1, n_total=5, alert_opened=False) is None  # 20 % bajo: no es frame dudoso
+    assert p.decide("a", 2, n_low=3, n_total=5, alert_opened=False) == "low_confidence"
+    assert p.decide("a", 5, n_low=3, n_total=5, alert_opened=False) is None  # límite de 10 s
+    assert p.decide("a", 6, n_low=0, n_total=5, alert_opened=True) == "alert_opened"  # las alertas siempre
+    assert p.decide("b", 6, n_low=0, n_total=0, alert_opened=False) == "normal_sample"  # límites por fuente
+    assert p.decide("a", 12, n_low=2, n_total=4, alert_opened=False) == "low_confidence"
 
 
 def test_save_capture_resizes_and_hashes(tmp_path):

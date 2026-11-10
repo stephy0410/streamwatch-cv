@@ -1,0 +1,95 @@
+{
+  "reference_id": "reference-v1",
+  "built_from_run": "20261110-ref-calibracion",
+  "built_at": "2026-11-10T15:14:35.558Z",
+  "model_ref": "yolo11s@sha256:85a76fe86dd8",
+  "config_ref": "monitor-v1@4ead7ed487a2",
+  "method": {
+    "q_lower": 0.2,
+    "q_upper": 0.5,
+    "weighting": "mismo peso por fuente",
+    "low_rate_margin": 0.15,
+    "rounding": "umbrales a 0.05; umbral de regla hacia arriba a 0.05"
+  },
+  "thresholds": {
+    "lower": 0.4,
+    "upper": 0.65
+  },
+  "recommended_shift_tolerance": 0.15,
+  "sources": {
+    "puppy-playroom": {
+      "frames": 584,
+      "frames_ok": 584,
+      "detections": 5069,
+      "detections_per_frame": 8.68,
+      "frames_without_detections_rate": 0.0,
+      "mean_score": 0.5075,
+      "score_percentiles": {
+        "p05": 0.1304,
+        "p10": 0.1792,
+        "p20": 0.2863,
+        "p25": 0.3255,
+        "p50": 0.5288,
+        "p75": 0.6977,
+        "p90": 0.774
+      },
+      "share_low": 0.3247,
+      "share_doubt": 0.3446,
+      "share_accepted": 0.3306,
+      "window_low_rate": {
+        "window_frames": 20,
+        "min_detections": 15,
+        "n_windows": 565,
+        "p50": 0.3333,
+        "p95": 0.4727,
+        "max": 0.5112
+      },
+      "recommended_low_rate_threshold": 0.65,
+      "window_mean": {
+        "window_frames": 60,
+        "min_detections": 40,
+        "n_windows": 525,
+        "p05": 0.4589,
+        "min": 0.4526,
+        "natural_drop_p05": 0.0486
+      }
+    },
+    "sheep-barn": {
+      "frames": 587,
+      "frames_ok": 587,
+      "detections": 12002,
+      "detections_per_frame": 20.45,
+      "frames_without_detections_rate": 0.0,
+      "mean_score": 0.6891,
+      "score_percentiles": {
+        "p05": 0.3017,
+        "p10": 0.416,
+        "p20": 0.5481,
+        "p25": 0.5885,
+        "p50": 0.734,
+        "p75": 0.8262,
+        "p90": 0.9021
+      },
+      "share_low": 0.0914,
+      "share_doubt": 0.2464,
+      "share_accepted": 0.6622,
+      "window_low_rate": {
+        "window_frames": 20,
+        "min_detections": 15,
+        "n_windows": 568,
+        "p50": 0.0794,
+        "p95": 0.1795,
+        "max": 0.2
+      },
+      "recommended_low_rate_threshold": 0.35,
+      "window_mean": {
+        "window_frames": 60,
+        "min_detections": 40,
+        "n_windows": 528,
+        "p05": 0.6149,
+        "min": 0.6108,
+        "natural_drop_p05": 0.0742
+      }
+    }
+  }
+}
