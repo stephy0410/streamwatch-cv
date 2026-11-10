@@ -32,9 +32,7 @@ def _event(i, source="s", image_ref=None):
         "degrade": None,
         "image_ref": image_ref,
         "capture_reason": None,
-        "detections": [
-            {"class_id": 18, "class_name": "sheep", "score": 0.2, "zone": "low", "box": [0, 0, 1, 1]}
-        ],
+        "detections": [{"class_id": 18, "class_name": "sheep", "score": 0.2, "zone": "low", "box": [0, 0, 1, 1]}],
     }
 
 
