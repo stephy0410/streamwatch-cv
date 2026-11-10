@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% from "_macros.html" import state %}
+{% block title %}Capturas{% endblock %}
+{% block content %}
+<h1>Capturas</h1><p class="sub">{{ rows|length }} imágenes (máx. 300). Cada una abre su evento, donde se puede registrar una revisión.</p>
+<div class="card"><form class="filters" method="get">
+<label>Corrida<select name="run_id"><option value="">Todas</option>{% for r in facets.runs %}<option {{ 'selected' if sel.run_id == r }}>{{ r }}</option>{% endfor %}</select></label>
+<label>Fuente<select name="source_id"><option value="">Todas</option>{% for s in facets.sources %}<option {{ 'selected' if sel.source_id == s }}>{{ s }}</option>{% endfor %}</select></label>
+<label>Motivo<select name="reason"><option value="">Todos</option>{% for r in ['alert_opened','low_confidence','normal_sample'] %}<option {{ 'selected' if sel.reason == r }}>{{ r }}</option>{% endfor %}</select></label>
+<label>Revisión<select name="reviewed"><option value="">—</option><option value="0" {{ 'selected' if sel.reviewed == '0' }}>Pendientes</option><option value="1" {{ 'selected' if sel.reviewed == '1' }}>Revisadas</option></select></label>
+<button>Filtrar</button> <a class="btn ghost" href="/captures">Limpiar</a></form></div>
+<div class="card">{% if rows %}<div class="thumbs">{% for c in rows %}<a href="/events/{{ c.event_id }}">
+<img loading="lazy" src="/captures/{{ c.run_id }}/{{ c.image_ref }}" alt="">
+<div class="cap">{{ c.source_id }} #{{ c.seq }} · {{ state(c.frame_state) }} · {{ c.capture_reason }}{% if c.degraded %} · degradada{% endif %}<br>
+{% if c.verdict %}<span class="pill z-accepted">✓ {{ c.verdict }}</span>{% else %}<span class="pill z-no_detections">sin revisar</span>{% endif %}</div></a>{% endfor %}</div>
+{% else %}<p class="empty">No hay capturas con estos filtros.</p>{% endif %}</div>
+{% endblock %}

@@ -190,3 +190,48 @@ def overview(conn: sqlite3.Connection) -> dict[str, Any]:
             ).fetchone()
         ),
     }
+
+
+def captures(conn, run_id=None, source_id=None, reason=None, reviewed=None, limit: int = 300) -> list[dict]:
+    clauses, args = ["e.image_ref IS NOT NULL"], []
+    for col, value in (("e.run_id", run_id), ("e.source_id", source_id), ("e.capture_reason", reason)):
+        if value:
+            clauses.append(f"{col} = ?")
+            args.append(value)
+    if reviewed == "1":
+        clauses.append("r.event_id IS NOT NULL")
+    elif reviewed == "0":
+        clauses.append("r.event_id IS NULL")
+    return _rows(
+        conn.execute(
+            "SELECT e.event_id, e.run_id, e.source_id, e.seq, e.timestamp, e.frame_state, e.capture_reason,"
+            " e.image_ref,"
+            " e.max_score, e.n_low, e.n_detections, e.degraded, r.verdict, r.note FROM events e"
+            " LEFT JOIN reviews r ON r.event_id = e.event_id WHERE "
+            + " AND ".join(clauses)
+            + f" ORDER BY e.timestamp DESC LIMIT {int(limit)}",
+            args,
+        )
+    )
+
+
+def dashboard(conn, run_id: str) -> dict[str, Any]:
+    events: dict[str, dict[str, list]] = {}
+    for r in conn.execute(
+        "SELECT source_id, timestamp, mean_score, inference_ms, n_detections FROM events WHERE run_id=?"
+        " ORDER BY timestamp",
+        (run_id,),
+    ):
+        d = events.setdefault(r["source_id"], {"ts": [], "mean": [], "inference_ms": [], "n_detections": []})
+        d["ts"].append(r["timestamp"])
+        d["mean"].append(r["mean_score"])
+        d["inference_ms"].append(r["inference_ms"])
+        d["n_detections"].append(r["n_detections"])
+    low_rate: dict[str, list] = {}
+    for r in conn.execute(
+        "SELECT source_id, timestamp, value FROM rule_evaluations WHERE run_id=? AND rule_id='low-confidence-v1'"
+        " AND state IN ('ok','breach') ORDER BY timestamp",
+        (run_id,),
+    ):
+        low_rate.setdefault(r["source_id"], []).append((r["timestamp"], r["value"]))
+    return {"events": events, "low_rate": low_rate, "alerts": alerts(conn, run_id=run_id)}

@@ -9,8 +9,11 @@
   <label>Estado del frame<select name="frame_state"><option value="">Todos</option>{% for k, v in STATE_LABELS.items() %}<option value="{{ k }}" {{ 'selected' if f.frame_state == k }}>{{ v }}</option>{% endfor %}</select></label>
   <label>Con imagen<select name="has_image"><option value="">—</option><option value="1" {{ 'selected' if f.has_image }}>Sí</option></select></label>
   <label>Ligado a alerta<select name="alerted"><option value="">—</option><option value="1" {{ 'selected' if f.alerted }}>Sí</option></select></label>
-  {% block extra_filters %}{% endblock %}
+  <label>Entrada<select name="degraded"><option value="">—</option><option value="1" {{ 'selected' if f.degraded }}>Degradada</option><option value="0" {{ 'selected' if f.degraded == false }}>Original</option></select></label>
+  <label>Desde (UTC)<input type="text" name="since" placeholder="2026-11-10T15:00" value="{{ f.since or '' }}"></label>
+  <label>Hasta (UTC)<input type="text" name="until" placeholder="2026-11-10T16:00" value="{{ f.until or '' }}"></label>
   <button>Filtrar</button> <a class="btn ghost" href="/events">Limpiar</a>
+  <a class="btn ghost" href="/events.csv?{{ qs }}">⬇ CSV</a> <a class="btn ghost" href="/events.jsonl?{{ qs }}">⬇ JSONL</a>
 </form></div>
 <div class="card">{% if rows %}
 <table><tr><th>Momento (UTC)</th><th>Fuente</th><th>Seq</th><th>Estado</th><th>Det.</th><th>Baja / Duda / Acept.</th><th>Máx.</th><th>Media</th><th>Inferencia</th><th>Imagen</th><th>Alertas</th></tr>

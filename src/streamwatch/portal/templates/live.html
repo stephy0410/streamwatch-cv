@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}En vivo{% endblock %}
+{% block content %}
+<h1>Vista en vivo</h1>
+<p class="sub">Último frame procesado por cámara, con las cajas coloreadas por zona (verde aceptada, ámbar duda, rojo baja). Se actualiza mientras corre <span class="mono">streamwatch monitor</span>.</p>
+{% if sources %}<div class="grid g2">{% for s in sources %}<div class="card"><h2>{{ s.id }} {% if s.age > 30 %}<span class="pill z-no_detections">sin actualizar hace {{ s.age|int }} s</span>{% else %}<span class="pill z-accepted">en vivo</span>{% endif %}</h2>
+<img style="width:100%;border-radius:8px;background:#0e1116" src="/live/{{ s.id }}.mjpg" alt="Vista en vivo de {{ s.id }}"></div>{% endfor %}</div>
+{% else %}<p class="empty card">No hay frames en vivo. Inicia el monitor: <span class="mono">uv run streamwatch monitor</span></p>{% endif %}
+{% endblock %}
