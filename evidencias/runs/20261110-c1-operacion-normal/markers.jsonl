@@ -1,0 +1,2 @@
+{"run_id": "20261110-c1-operacion-normal", "timestamp": "2026-11-10T15:18:13.157Z", "kind": "run_start", "source_id": null, "scenario": "C1"}
+{"run_id": "20261110-c1-operacion-normal", "timestamp": "2026-11-10T15:28:18.882Z", "kind": "run_end", "source_id": null, "reason": "duration"}

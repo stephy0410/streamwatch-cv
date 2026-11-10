@@ -40,3 +40,13 @@ aportan detecciones puntuadas). El umbral de `low-confidence-v1` puede fijarse p
 | `window` | `frames`, `scored_detections`, `start_event`/`end_event`, `start_ts`/`end_ts` (y referencia o versiones) |
 | `event_ids` | Eventos de la ventana que originaron la alerta (también en la tabla `alert_events`) |
 | `trigger_event_id`, `trigger_image_ref` | Frame que abrió la alerta y su captura |
+
+## Mejoras identificadas en los escenarios
+
+Salen del análisis de C2 ([`ESCENARIOS.md`](ESCENARIOS.md)) y se registran antes de cambiar las reglas, para que
+la evidencia de C1/C2 siga correspondiendo a `monitor-v1`.
+
+| Problema observado | Evidencia | Mejora propuesta |
+|---|---|---|
+| Con poca luz el modelo deja de detectar en lugar de detectar con baja confianza. `low-confidence-v1` queda en `insufficient` 78 s | C2: 19.7 % de frames sin detecciones en el granero, frente a 0 % en la referencia y en C1 | Regla de **silencio del detector**: proporción de frames sin detecciones en la ventana ≥ umbral calibrado (la referencia tiene 0 %). No usa el conteo absoluto, que varía de forma natural (20.5 → 4.6 det/frame en 25 min) |
+| La alerta oscila: se resuelve y se reabre 5 s después con valores pegados al umbral | C2: #001 resuelta con 0.344, #002 abierta con 0.365 frente a 0.35 | **Histéresis**: abrir con `≥ umbral` y cerrar solo con `< umbral − δ` |

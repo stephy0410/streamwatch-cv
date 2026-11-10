@@ -1,0 +1,3 @@
+{"run_id": "20261110-c2-baja-confianza", "timestamp": "2026-11-10T15:28:54.231Z", "kind": "run_start", "source_id": null, "scenario": "C2"}
+{"run_id": "20261110-c2-baja-confianza", "timestamp": "2026-11-10T15:30:54.419Z", "kind": "degrade_start", "source_id": "sheep-barn", "params": {"kind": "lowlight", "start_after_s": 120.0, "brightness": 0.2, "gamma": 3.0, "noise_sigma": 14.0, "ramp_s": 0.0, "seed": 7}}
+{"run_id": "20261110-c2-baja-confianza", "timestamp": "2026-11-10T15:35:54.343Z", "kind": "run_end", "source_id": null, "reason": "duration"}
