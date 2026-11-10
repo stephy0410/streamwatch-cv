@@ -37,3 +37,5 @@ pre{background:#0e1116;color:#d6e2ea;padding:14px;border-radius:10px;overflow:au
 .action{border-left:4px solid var(--brand2);background:#ecfdf6;padding:12px 14px;border-radius:0 8px 8px 0}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:24px}
 .legend span{margin-right:10px}
+
+.chart-narrow { max-width: 640px; }
