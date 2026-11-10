@@ -1,0 +1,8 @@
+# C2 · Baja confianza: misma configuración que C1. A los 120 s se baja la iluminación de la entrada del granero
+# (brillo ×0.2, gamma 3, ruido de sensor σ=14), como un granero con la luz apagada.
+# La inferencia es real: solo cambia la imagen que recibe el modelo, nunca la puntuación.
+# La sala de cachorros sigue sin cambios y sirve de control (las reglas son por fuente).
+scenario: C2
+sources:
+  - id: sheep-barn
+    degrade: {kind: lowlight, start_after_s: 120, brightness: 0.2, gamma: 3.0, noise_sigma: 14, seed: 7}
