@@ -17,6 +17,7 @@ frame procesado en `events.jsonl` y en SQLite.
 | `scenario` | Escenario (C1, C2, S1…) o `null` |
 | `status` | `ok` o `error` (inferencia fallida) |
 | `frame_state` | Zona de la mejor detección del frame (`accepted`/`doubt`/`low`), `no_detections` o `error` |
+| `frame_size` | `[ancho, alto]` del frame que recibió el modelo (las cajas están en esas coordenadas) |
 | `detections[]` | `class_id`, `class_name`, `score`, `zone`, `box` (x1, y1, x2, y2 en píxeles) |
 | `zone_counts`, `n_detections`, `max_score`, `mean_score` | Resumen del frame (`max/mean = null` sin detecciones) |
 | `inference_ms` | Preprocesado + modelo + NMS (`perf_counter`) |

@@ -202,6 +202,7 @@ class Monitor:
             scenario=self.cfg.scenario,
             status=status,
             frame_state="error" if status == "error" else summary.frame_state,
+            frame_size=[int(deg.image.shape[1]), int(deg.image.shape[0])],
             detections=[{**d.to_dict(), "zone": self.policy.zone(d.score)} for d in detections],
             n_detections=len(detections),
             zone_counts=summary.zone_counts,

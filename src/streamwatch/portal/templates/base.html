@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}StreamWatch CV{% endblock %} · StreamWatch CV</title>
+<link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/">StreamWatch <span>CV</span></a>
+  <nav>{% set p = request.url.path %}
+    <a href="/" class="{{ 'on' if p == '/' }}">Resumen</a>
+    <a href="/events" class="{{ 'on' if p.startswith('/events') }}">Eventos</a>
+    <a href="/alerts" class="{{ 'on' if p.startswith('/alerts') }}">Alertas</a>
+    {% block extra_nav %}{% endblock %}
+  </nav>
+</div></header>
+<main class="wrap">{% block content %}{% endblock %}</main>
+<footer>StreamWatch CV v{{ version }} · Monitoreo de YOLO11 sobre cámaras públicas de explore.org · La confianza es una señal de operación, no una medida de acierto.</footer>
+</body></html>

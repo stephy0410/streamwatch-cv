@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% from "_macros.html" import state, sev, status, frame %}
+{% block title %}Evento {{ ev.seq }}{% endblock %}
+{% block content %}
+<h1>Evento {{ ev.source_id }} · #{{ ev.seq }}</h1>
+<p class="sub mono">{{ ev.event_id }}</p>
+<div class="pager" style="margin:0 0 14px">{% if ev.prev_id %}<a class="btn ghost" href="/events/{{ ev.prev_id }}">← Frame anterior</a>{% endif %}
+{% if ev.next_id %}<a class="btn ghost" href="/events/{{ ev.next_id }}">Frame siguiente →</a>{% endif %}
+<a class="btn ghost" href="/api/events/{{ ev.event_id }}">JSON</a></div>
+<div class="grid g2">
+<div>
+  <div class="card">{{ frame(ev, ev.run_id) }}
+  <p class="legend" style="margin:10px 0 0"><span class="pill z-accepted">≥ {{ run.meta.thresholds.upper if run else '' }} aceptada</span><span class="pill z-doubt">duda</span><span class="pill z-low">&lt; {{ run.meta.thresholds.lower if run else '' }} baja</span>
+  {% if ev.image_ref %}<span class="mono">{{ ev.image_ref }} · motivo: {{ ev.capture_reason }}</span>{% endif %}</p></div>
+  <div class="card"><h2>Detecciones ({{ ev.n_detections }})</h2>
+  {% if ev.detections %}<table><tr><th>#</th><th>Clase</th><th>Puntuación</th><th>Zona</th><th>Caja (x1, y1, x2, y2)</th></tr>
+  {% for d in ev.detections %}<tr><td>{{ loop.index }}</td><td>{{ d.class_name }}</td><td>{{ '%.3f'|format(d.score) }}</td><td>{{ state(d.zone) }}</td><td class="mono">{{ d.box|join(', ') }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="empty">El detector no devolvió detecciones sobre el piso de salida. No equivale a error ni a confianza cero.</p>{% endif %}</div>
+</div>
+<div>
+  <div class="card"><h2>Resultado</h2><dl class="kv">
+  <dt>Estado</dt><dd>{{ ev.status }} · {{ state(ev.frame_state) }}</dd>
+  <dt>Zonas</dt><dd>baja {{ ev.zone_counts.low }} · duda {{ ev.zone_counts.doubt }} · aceptada {{ ev.zone_counts.accepted }}</dd>
+  <dt>Confianza máx. / media</dt><dd>{{ ev.max_score|num(3) }} / {{ ev.mean_score|num(3) }}</dd>
+  <dt>Inferencia</dt><dd>{{ ev.inference_ms|num(1) }} ms</dd>
+  <dt>Frame → evento</dt><dd>{{ ev.e2e_ms|num(1) }} ms</dd>
+  {% if ev.error %}<dt>Error</dt><dd class="mono">{{ ev.error }}</dd>{% endif %}
+  </dl></div>
+  <div class="card"><h2>Trazabilidad</h2><dl class="kv">
+  <dt>Corrida</dt><dd><a class="mono" href="/runs/{{ ev.run_id }}">{{ ev.run_id }}</a>{% if ev.scenario %} · escenario {{ ev.scenario }}{% endif %}</dd>
+  <dt>Frame</dt><dd class="mono">{{ ev.frame_id }}{% if ev.origin %} · {{ ev.origin }}{% endif %}</dd>
+  <dt>Decodificado</dt><dd>{{ ev.captured_at|short_ts }} UTC</dd><dt>Registrado</dt><dd>{{ ev.timestamp|short_ts }} UTC</dd>
+  <dt>Modelo</dt><dd class="mono">{{ ev.model_ref }}</dd><dt>Configuración</dt><dd class="mono">{{ ev.config_ref }}</dd>
+  <dt>Entrada transformada</dt><dd>{% if ev.degrade %}<span class="mono">{{ ev.degrade }}</span>{% else %}No{% endif %}</dd>
+  {% if ev.image_sha256 %}<dt>SHA-256 imagen</dt><dd class="mono">{{ ev.image_sha256[:16] }}…</dd>{% endif %}
+  </dl></div>
+  <div class="card"><h2>Alertas ligadas</h2>{% if ev.alerts %}<table><tr><th>Regla</th><th>Estado</th><th>Severidad</th><th>Abierta</th></tr>
+  {% for a in ev.alerts %}<tr><td><a href="/alerts/{{ a.alert_id }}">{{ RULE_LABELS.get(a.rule_id, a.rule_id) }}</a></td><td>{{ status(a.status) }}</td><td>{{ sev(a.severity) }}</td><td>{{ a.opened_at|short_ts }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="empty">Este frame no forma parte de la ventana de ninguna alerta.</p>{% endif %}</div>
+  {% block review %}{% endblock %}
+</div></div>
+{% endblock %}

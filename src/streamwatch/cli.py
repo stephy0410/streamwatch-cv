@@ -56,6 +56,17 @@ def cmd_import(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_portal(args: argparse.Namespace) -> int:
+    import uvicorn
+
+    from streamwatch.portal.app import create_app
+
+    cfg = load_config(args.config)
+    app = create_app(args.db or cfg.storage.db, cfg.storage.live_dir)
+    uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="streamwatch", description="Centro de monitoreo de computer vision")
     p.add_argument("-v", "--verbose", action="store_true")
@@ -83,6 +94,12 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--db")
     i.add_argument("--config", default="config/monitor.yaml")
     i.set_defaults(func=cmd_import)
+    po = sub.add_parser("portal", help="Levanta el portal web de eventos y alertas")
+    po.add_argument("--db")
+    po.add_argument("--host", default="127.0.0.1")
+    po.add_argument("--port", type=int, default=8000)
+    po.add_argument("--config", default="config/monitor.yaml")
+    po.set_defaults(func=cmd_portal)
     return p
 
 

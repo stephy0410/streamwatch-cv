@@ -49,6 +49,7 @@ class InferenceEvent(BaseModel):
     scenario: str | None = None
     status: Literal["ok", "error"]
     frame_state: Literal["accepted", "doubt", "low", "no_detections", "error"]
+    frame_size: list[int] | None = Field(None, description="[ancho, alto] del frame que recibió el modelo")
     detections: list[DetectionRecord] = Field(default_factory=list)
     n_detections: int = Field(0, ge=0)
     zone_counts: dict[str, int] = Field(default_factory=dict)

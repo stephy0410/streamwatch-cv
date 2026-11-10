@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% from "_macros.html" import state, sev, status, rule %}
+{% block title %}Alerta{% endblock %}
+{% block content %}
+<h1>{{ RULE_LABELS.get(a.rule_id, a.rule_id) }} · {{ a.source_id }}</h1>
+<p class="sub mono">{{ a.alert_id }} <a href="/api/alerts/{{ a.alert_id }}">JSON</a></p>
+<div class="grid g2">
+<div>
+  <div class="card"><dl class="kv">
+  <dt>Estado</dt><dd>{{ status(a.status) }} {{ sev(a.severity) }}</dd>
+  <dt>Abierta</dt><dd>{{ a.opened_at|short_ts }} UTC</dd><dt>Resuelta</dt><dd>{{ a.resolved_at|short_ts }}{% if a.resolution %} · {{ a.resolution }}{% endif %}</dd>
+  <dt>Regla</dt><dd>{{ rule(a.rule_id) }}</dd><dt>Métrica</dt><dd class="mono">{{ a.metric }} = {{ a.value|num(4) }} (umbral {{ a.threshold }}, persistencia {{ a.persistence }})</dd>
+  <dt>Corrida</dt><dd><a class="mono" href="/runs/{{ a.run_id }}">{{ a.run_id }}</a></dd><dt>Configuración</dt><dd class="mono">{{ a.config_ref }}</dd>
+  <dt>Ventana</dt><dd>{{ a.window.frames }} frames · {{ a.window.scored_detections or 0 }} detecciones · {{ a.window.start_ts|short_ts }} → {{ a.window.end_ts|short_ts }}</dd>
+  {% if a.window.reference_mean is defined and a.window.reference_mean is not none %}<dt>Media de referencia</dt><dd>{{ a.window.reference_mean|num(3) }}</dd>{% endif %}
+  {% if a.window.expected_model %}<dt>Modelo esperado / reportado</dt><dd class="mono">{{ a.window.expected_model }} / {{ a.window.reported_model }}</dd>{% endif %}
+  <dt>Evento disparador</dt><dd>{% if a.trigger_event_id %}<a class="mono" href="/events/{{ a.trigger_event_id }}">{{ a.trigger_event_id }}</a>{% else %}—{% endif %}</dd>
+  </dl></div>
+  <div class="card reason"><b>Motivo.</b> {{ a.reason }}</div>
+  <div class="card action"><b>Acción sugerida.</b> {{ a.suggested_action }}</div>
+</div>
+<div>
+  {% if a.trigger_image_ref %}<div class="card"><h2>Captura del frame que abrió la alerta</h2><a href="/events/{{ a.trigger_event_id }}"><img style="width:100%;border-radius:8px" src="/captures/{{ a.run_id }}/{{ a.trigger_image_ref }}" alt="captura"></a></div>{% endif %}
+  {% set imgs = a.events|selectattr('image_ref')|list %}
+  {% if imgs %}<div class="card"><h2>Imágenes de la ventana ({{ imgs|length }})</h2><div class="thumbs">
+  {% for e in imgs %}<a href="/events/{{ e.event_id }}"><img loading="lazy" src="/captures/{{ a.run_id }}/{{ e.image_ref }}" alt=""><div class="cap">#{{ e.seq }} · {{ STATE_LABELS[e.frame_state] }} · {{ e.capture_reason }}</div></a>{% endfor %}</div></div>{% endif %}
+</div></div>
+<div class="card"><h2>Eventos de la ventana ({{ a.events|length }})</h2>
+{% if a.events %}<table><tr><th>Seq</th><th>Momento</th><th>Estado</th><th>Det.</th><th>Baja / Duda / Acept.</th><th>Máx.</th><th>Media</th><th>Imagen</th></tr>
+{% for e in a.events %}<tr><td><a href="/events/{{ e.event_id }}">{{ e.seq }}</a></td><td>{{ e.timestamp|short_ts }}</td><td>{{ state(e.frame_state) }}{% if e.degraded %} <span class="pill z-no_detections">degradada</span>{% endif %}</td>
+<td>{{ e.n_detections }}</td><td>{{ e.n_low }} / {{ e.n_doubt }} / {{ e.n_accepted }}</td><td>{{ e.max_score|num }}</td><td>{{ e.mean_score|num }}</td><td>{{ '📷' if e.image_ref else '—' }}</td></tr>{% endfor %}</table>
+{% else %}<p class="empty">Sin eventos en la ventana (p. ej. la fuente dejó de enviar frames).</p>{% endif %}</div>
+<div class="card"><h2>Evaluaciones de la regla durante la alerta</h2>
+<table><tr><th>Momento</th><th>Estado</th><th>Valor</th></tr>{% for v in a.evaluations[-40:] %}<tr><td>{{ v.timestamp|short_ts }}</td><td>{{ v.state }}</td><td>{{ v.value|num(4) }}</td></tr>{% endfor %}</table></div>
+{% endblock %}
