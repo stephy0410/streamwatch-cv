@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import state %}
+{% block title %}Eventos{% endblock %}
+{% block content %}
+<h1>Eventos de inferencia</h1>
+<p class="sub">{{ total }} eventos con los filtros actuales. Un evento por frame procesado y por cámara.</p>
+<div class="card"><form class="filters" method="get">
+  <label>Corrida<select name="run_id"><option value="">Todas</option>{% for r in facets.runs %}<option {{ 'selected' if f.run_id == r }}>{{ r }}</option>{% endfor %}</select></label>
+  <label>Fuente<select name="source_id"><option value="">Todas</option>{% for s in facets.sources %}<option {{ 'selected' if f.source_id == s }}>{{ s }}</option>{% endfor %}</select></label>
+  <label>Estado del frame<select name="frame_state"><option value="">Todos</option>{% for k, v in STATE_LABELS.items() %}<option value="{{ k }}" {{ 'selected' if f.frame_state == k }}>{{ v }}</option>{% endfor %}</select></label>
+  <label>Con imagen<select name="has_image"><option value="">—</option><option value="1" {{ 'selected' if f.has_image }}>Sí</option></select></label>
+  <label>Ligado a alerta<select name="alerted"><option value="">—</option><option value="1" {{ 'selected' if f.alerted }}>Sí</option></select></label>
+  {% block extra_filters %}{% endblock %}
+  <button>Filtrar</button> <a class="btn ghost" href="/events">Limpiar</a>
+</form></div>
+<div class="card">{% if rows %}
+<table><tr><th>Momento (UTC)</th><th>Fuente</th><th>Seq</th><th>Estado</th><th>Det.</th><th>Baja / Duda / Acept.</th><th>Máx.</th><th>Media</th><th>Inferencia</th><th>Imagen</th><th>Alertas</th></tr>
+{% for e in rows %}<tr>
+<td><a href="/events/{{ e.event_id }}">{{ e.timestamp|short_ts }}</a></td><td>{{ e.source_id }}</td><td>{{ e.seq }}</td>
+<td>{{ state(e.frame_state) }}{% if e.degraded %} <span class="pill z-no_detections" title="Entrada transformada por escenario">degradada</span>{% endif %}</td>
+<td>{{ e.n_detections }}</td><td>{{ e.n_low }} / {{ e.n_doubt }} / {{ e.n_accepted }}</td><td>{{ e.max_score|num }}</td><td>{{ e.mean_score|num }}</td>
+<td>{{ e.inference_ms|num(1) }} ms</td><td>{{ '📷 ' ~ e.capture_reason if e.image_ref else '—' }}</td><td>{{ e.n_alerts or '—' }}</td></tr>{% endfor %}
+</table>
+<div class="pager">{% if f.page > 1 %}<a class="btn ghost" href="?{{ qs }}&page={{ f.page - 1 }}">← Anterior</a>{% endif %}
+<span>Página {{ f.page }} de {{ pages }}</span>{% if f.page < pages %}<a class="btn ghost" href="?{{ qs }}&page={{ f.page + 1 }}">Siguiente →</a>{% endif %}</div>
+{% else %}<p class="empty">No hay eventos con estos filtros.</p>{% endif %}</div>
+{% endblock %}

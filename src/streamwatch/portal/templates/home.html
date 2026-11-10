@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% from "_macros.html" import state, sev, status, rule %}
+{% block title %}Resumen{% endblock %}
+{% block content %}
+<h1>Centro de monitoreo</h1>
+<p class="sub">Granero de ovejas (AgTech) y sala de cachorros (cuidado animal) observados por YOLO11s, 1 frame/s por cámara.</p>
+<div class="grid g4">
+  <div class="card kpi"><b>{{ ov.counts.runs }}</b><span>corridas</span></div>
+  <div class="card kpi"><b>{{ ov.counts.events }}</b><span>eventos de inferencia</span></div>
+  <div class="card kpi"><b>{{ ov.counts.captures }}</b><span>imágenes capturadas</span></div>
+  <div class="card kpi"><b>{{ ov.open_alerts|length }}</b><span>alertas abiertas · {{ ov.counts.alerts }} totales</span></div>
+</div>
+<div class="grid g2">
+  <div class="card"><h2>Último evento por fuente</h2>
+  {% if ov.latest %}<table><tr><th>Fuente</th><th>Momento (UTC)</th><th>Estado</th><th>Máx.</th><th>Det.</th></tr>
+  {% for e in ov.latest %}<tr><td><b>{{ e.source_id }}</b></td><td><a href="/events/{{ e.event_id }}">{{ e.timestamp|short_ts }}</a></td>
+  <td>{{ state(e.frame_state) }}</td><td>{{ e.max_score|num }}</td><td>{{ e.n_detections }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="empty">Sin eventos. Ejecuta <span class="mono">streamwatch monitor</span> o importa una corrida.</p>{% endif %}</div>
+  <div class="card"><h2>Alertas abiertas</h2>
+  {% if ov.open_alerts %}<table><tr><th>Regla</th><th>Fuente</th><th>Severidad</th><th>Desde</th></tr>
+  {% for a in ov.open_alerts %}<tr><td><a href="/alerts/{{ a.alert_id }}">{{ RULE_LABELS.get(a.rule_id, a.rule_id) }}</a></td>
+  <td>{{ a.source_id }}</td><td>{{ sev(a.severity) }}</td><td>{{ a.opened_at|short_ts }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="empty">No hay alertas abiertas.</p>{% endif %}</div>
+</div>
+<div class="card"><h2>Corridas</h2>
+<table><tr><th>Corrida</th><th>Escenario</th><th>Inicio (UTC)</th><th>Modelo</th><th>Configuración</th><th>Eventos</th><th>Alertas</th></tr>
+{% for r in runs %}<tr><td><a class="mono" href="/runs/{{ r.run_id }}">{{ r.run_id }}</a></td><td>{{ r.scenario or '—' }}</td>
+<td>{{ r.started_at|short_ts }}</td><td class="mono">{{ r.model_ref }}</td><td class="mono">{{ r.config_ref }}</td>
+<td><a href="/events?run_id={{ r.run_id }}">{{ r.n_events }}</a></td><td><a href="/alerts?run_id={{ r.run_id }}">{{ r.n_alerts }}</a></td></tr>{% endfor %}
+</table></div>
+{% endblock %}

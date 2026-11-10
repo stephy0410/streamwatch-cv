@@ -1,0 +1,15 @@
+{% macro state(s) %}<span class="pill z-{{ s }}">{{ STATE_LABELS.get(s, s) }}</span>{% endmacro %}
+{% macro sev(s) %}<span class="pill s-{{ s }}">{{ s }}</span>{% endmacro %}
+{% macro status(s) %}<span class="pill st-{{ s }}">{{ 'abierta' if s == 'open' else 'resuelta' }}</span>{% endmacro %}
+{% macro rule(r) %}{{ RULE_LABELS.get(r, r) }} <span class="mono" style="color:#5e6b7a">{{ r }}</span>{% endmacro %}
+{% macro frame(ev, run_id) %}
+{% set w = (ev.frame_size or [1280, 720])[0] %}{% set h = (ev.frame_size or [1280, 720])[1] %}
+<div class="frame"><svg viewBox="0 0 {{ w }} {{ h }}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Frame con detecciones">
+  {% if ev.image_ref %}<image href="/captures/{{ run_id }}/{{ ev.image_ref }}" x="0" y="0" width="{{ w }}" height="{{ h }}"/>
+  {% else %}<rect width="{{ w }}" height="{{ h }}" fill="#1c222b"/><text x="{{ w/2 }}" y="{{ h/2 }}" fill="#8a96a3" text-anchor="middle" font-size="28">Sin captura para este frame (política de capturas)</text>{% endif %}
+  {% for d in ev.detections %}
+  <rect class="box {{ d.zone }}" x="{{ d.box[0] }}" y="{{ d.box[1] }}" width="{{ d.box[2]-d.box[0] }}" height="{{ d.box[3]-d.box[1] }}"/>
+  <text class="lbl {{ d.zone }}" x="{{ d.box[0] + 3 }}" y="{{ [d.box[1] - 8, 24]|max }}">{{ d.class_name }} {{ '%.2f'|format(d.score) }}</text>
+  {% endfor %}
+</svg></div>
+{% endmacro %}

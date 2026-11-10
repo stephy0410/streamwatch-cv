@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_macros.html" import sev, status %}
+{% block title %}Corrida{% endblock %}
+{% block content %}
+<h1>Corrida <span class="mono">{{ run.run_id }}</span></h1>
+<p class="sub">{{ run.meta.scenario or 'Sin escenario' }} · {{ run.started_at|short_ts }} → {{ run.ended_at|short_ts }} UTC · {{ run.meta.ended_reason }}</p>
+<div class="grid g2"><div class="card"><dl class="kv">
+<dt>Modelo</dt><dd class="mono">{{ run.model_ref }}</dd><dt>Esperado</dt><dd class="mono">{{ run.meta.expected_model }}</dd>
+<dt>Configuración</dt><dd class="mono">{{ run.config_ref }}</dd><dt>Umbrales</dt><dd>inferior {{ run.meta.thresholds.lower }} · superior {{ run.meta.thresholds.upper }}</dd>
+<dt>Muestreo</dt><dd>1 frame cada {{ run.meta.sampling_interval_s }} s por fuente</dd><dt>Frames procesados</dt><dd>{{ run.meta.frames_processed }}</dd>
+<dt>Revisión Git</dt><dd class="mono">{{ (run.meta.git.rev or '')[:12] }}{{ ' (con cambios locales)' if run.meta.git.dirty }}</dd>
+<dt>Equipo</dt><dd>{{ run.meta.host.platform }} · {{ (run.meta.model or {}).get('device') }}</dd>
+<dt>Carpeta</dt><dd class="mono">{{ run.root_dir }}</dd></dl>
+<p><a class="btn" href="/events?run_id={{ run.run_id }}">Ver eventos</a> <a class="btn ghost" href="/alerts?run_id={{ run.run_id }}">Ver alertas ({{ alerts|length }})</a></p></div>
+<div class="card"><h2>Fuentes</h2><table><tr><th>Fuente</th><th>Tipo</th><th>Clases</th><th>Escenario</th></tr>
+{% for s in run.meta.sources %}<tr><td><b>{{ s.id }}</b><br><span style="color:#5e6b7a">{{ s.title }}</span></td><td>{{ s.kind }}</td><td>{{ s.classes|join(', ') }}</td>
+<td class="mono">{{ ('degrade ' ~ s.degrade) if s.degrade }}{{ (' faults ' ~ s.faults) if s.faults }}</td></tr>{% endfor %}</table></div></div>
+<div class="card"><h2>Configuración efectiva ({{ run.config_ref }})</h2><pre>{{ run.config|tojson_pretty }}</pre></div>
+{% endblock %}
