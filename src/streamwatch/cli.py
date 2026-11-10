@@ -86,8 +86,10 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 def cmd_reference(args: argparse.Namespace) -> int:
     from streamwatch.reference import build_reference
 
-    ref = build_reference(args.run_dir, q_lower=args.q_lower, q_upper=args.q_upper, margin=args.margin)
     out = Path(args.out)
+    ref = build_reference(
+        args.run_dir, q_lower=args.q_lower, q_upper=args.q_upper, margin=args.margin, reference_id=out.stem
+    )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(ref, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{out}: umbrales {ref['thresholds']} · tolerancia de cambio {ref['recommended_shift_tolerance']}")
@@ -95,8 +97,28 @@ def cmd_reference(args: argparse.Namespace) -> int:
         print(
             f"  {sid}: media {s['mean_score']} · baja/duda/aceptada {s['share_low']}/{s['share_doubt']}/"
             f"{s['share_accepted']} · tasa de ventana p95 {s['window_low_rate']['p95']} → umbral de regla "
-            f"{s['recommended_low_rate_threshold']}"
+            f"{s['recommended_low_rate_threshold']} · frames vacíos p95 {s['window_empty_share']['p95']} → "
+            f"umbral de silencio {s['recommended_empty_share_threshold']}"
         )
+    return 0
+
+
+def cmd_backtest(args: argparse.Namespace) -> int:
+    from streamwatch.backtest import backtest, write
+
+    cfg = load_config(args.config, args.scenario) if args.config else None
+    result = backtest(args.run_dir, cfg)
+    out = write(result, Path(args.out) if args.out else None)
+    print(f"Backtest de {result['run_id']} con {result['config_ref']} → {out}")
+    print(f"  fidelidad: {result['fidelity']}")
+    for a in result["alerts"]:
+        print(
+            f"  {a['opened_at']} → {a['resolved_at'] or 'abierta'}  "
+            f"{a['rule_id']:<22} {a['source_id']:<15} {a['value']}"
+        )
+    for t in result["time_to_detect"]:
+        orig = next((o["seconds"] for o in result["recorded_time_to_detect"] if o["rule_id"] == t["rule_id"]), "n/a")
+        print(f"  tiempo de detección {t['rule_id']} ({t['source_id']}): {t['seconds']} s (grabado: {orig})")
     return 0
 
 
@@ -138,6 +160,15 @@ def build_parser() -> argparse.ArgumentParser:
     rf.add_argument("--q-upper", type=float, default=0.5)
     rf.add_argument("--margin", type=float, default=0.15)
     rf.set_defaults(func=cmd_reference)
+
+    bt = sub.add_parser(
+        "backtest", help="Reevalúa las reglas de alerta sobre los eventos grabados de una corrida (sin inferir)"
+    )
+    bt.add_argument("run_dir")
+    bt.add_argument("--config", help="Configuración a probar; sin ella se usa la de la corrida (prueba de fidelidad)")
+    bt.add_argument("--scenario", help="Overlay de escenario")
+    bt.add_argument("--out", help="Carpeta de salida (por defecto evidencias/backtests/<corrida>__<config_id>)")
+    bt.set_defaults(func=cmd_backtest)
 
     po = sub.add_parser("portal", help="Levanta el portal web de eventos y alertas")
     po.add_argument("--db")

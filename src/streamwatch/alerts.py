@@ -6,10 +6,13 @@ Cada regla se evalúa por fuente y deja una *evaluación* con su estado:
 - ``breach``        — hay evidencia suficiente y la condición se cumple
 - ``insufficient``  — la ventana no tiene el mínimo de observaciones: **no es normalidad**
 - ``no_reference``  — no hay referencia para comparar (regla de cambio sostenido)
+- ``hold``          — con la alerta abierta, el valor ya no cumple la condición pero sigue dentro del
+  margen de histéresis (``clear_margin``): ni confirma ni resuelve
 
 Una alerta se abre cuando hay ``persistence`` evaluaciones ``breach`` seguidas, y se resuelve tras
 ``clear_after`` evaluaciones ``ok`` seguidas. Las evaluaciones ``insufficient`` rompen la racha de
-``breach`` pero no cuentan para resolver. Hay como máximo una alerta abierta por regla y fuente.
+``breach`` pero no cuentan para resolver; ``hold`` rompe la racha de ``ok``. Hay como máximo una
+alerta abierta por regla y fuente.
 """
 
 from __future__ import annotations
@@ -36,6 +39,14 @@ RULES = {
         "action": (
             "Comparar con la referencia: ¿cambió la escena (noche, clima), la cámara o el modelo? Si persiste, "
             "recolectar y etiquetar muestras y recalibrar la referencia."
+        ),
+    },
+    "detector-silence-v1": {
+        "metric": "empty_frame_share",
+        "action": (
+            "Abrir las capturas: si la escena tiene objetos y el modelo no los detecta, revisar iluminación, "
+            "enfoque u obstrucción de la cámara. Si la escena está realmente vacía, es un cambio de escena y no "
+            "un fallo del modelo."
         ),
     },
     "stream-stale-v1": {
@@ -102,7 +113,7 @@ class RuleEngine:
         self.clock = clock
         self.lower = cfg.confidence.lower
         a = cfg.alerts
-        maxlen = max(a.low_confidence.window_frames, a.confidence_shift.window_frames)
+        maxlen = max(a.low_confidence.window_frames, a.confidence_shift.window_frames, a.detector_silence.window_frames)
         self.windows: dict[str, deque[Observation]] = {}
         self._maxlen = maxlen
         self.states: dict[tuple[str, str], _State] = {}
@@ -152,6 +163,9 @@ class RuleEngine:
         elif state == "ok":
             st.ok_streak += 1
             st.breach_streak = 0
+        elif state == "hold":  # dentro del margen de histéresis: no cuenta para resolver
+            st.breach_streak = 0
+            st.ok_streak = 0
         else:  # insufficient / no_reference: no confirma ni descarta
             st.breach_streak = 0
         out.evaluations.append(
@@ -205,6 +219,15 @@ class RuleEngine:
             out.resolved.append(alert)
         return out
 
+    def _classify(self, rule_id: str, source_id: str, value: float, threshold: float, margin: float) -> str:
+        """``breach`` si cumple la condición; con la alerta abierta, ``ok`` solo por debajo de
+        ``threshold − margin`` y ``hold`` en la banda intermedia."""
+        if value >= threshold:
+            return "breach"
+        if margin and self._state(rule_id, source_id).open_alert is not None and value >= threshold - margin:
+            return "hold"
+        return "ok"
+
     # --- reglas sobre observaciones -----------------------------------------------------
     def observe(self, obs: Observation) -> Outcome:
         win = self.windows.setdefault(obs.source_id, deque(maxlen=self._maxlen))
@@ -214,6 +237,7 @@ class RuleEngine:
             win.append(obs)
         out.extend(self._low_confidence(obs, win))
         out.extend(self._confidence_shift(obs, win))
+        out.extend(self._detector_silence(obs, win))
         out.extend(self._model_version(obs))
         return out
 
@@ -243,7 +267,7 @@ class RuleEngine:
             state, value = "insufficient", (low / scored if scored else None)
         else:
             value = low / scored
-            state = "breach" if value >= threshold else "ok"
+            state = self._classify("low-confidence-v1", obs.source_id, value, threshold, rule.clear_margin)
         reason = (
             f"{low} de {scored} detecciones ({(value or 0):.0%}) bajo el umbral inferior {self.lower} en los "
             f"últimos {len(items)} frames de {obs.source_id}; umbral de la regla {threshold:.0%}, "
@@ -276,7 +300,7 @@ class RuleEngine:
         else:
             mean = statistics.fmean(scores)
             drop = ref - mean
-            state = "breach" if drop >= rule.tolerance else "ok"
+            state = self._classify("confidence-shift-v1", obs.source_id, drop, rule.tolerance, rule.clear_margin)
         mean_txt = f"{ref - drop:.3f}" if drop is not None else "n/d"
         reason = (
             f"Confianza media {mean_txt} en {len(scores)} detecciones de los últimos {len(items)} frames vs "
@@ -293,6 +317,39 @@ class RuleEngine:
             state,
             drop,
             rule.tolerance,
+            rule.persistence,
+            rule.clear_after,
+            rule.severity,
+            reason,
+            info,
+        )
+
+    def _detector_silence(self, obs: Observation, win: deque[Observation]) -> Outcome:
+        rule = self.cfg.alerts.detector_silence
+        if not rule.enabled:
+            return Outcome()
+        items = self._window(win, rule.window_frames)
+        empty = sum(not o.scores for o in items)
+        threshold = rule.per_source_threshold.get(obs.source_id, rule.empty_share_threshold)
+        if len(items) < rule.window_frames:
+            state, value = "insufficient", (empty / len(items) if items else None)
+        else:
+            value = empty / len(items)
+            state = self._classify("detector-silence-v1", obs.source_id, value, threshold, rule.clear_margin)
+        reason = (
+            f"{empty} de {len(items)} frames de {obs.source_id} sin ninguna detección "
+            f"({(value or 0):.0%}, umbral {threshold:.0%}, persistencia {rule.persistence}). El modelo dejó de "
+            "detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+        )
+        info = self._window_info(items, sum(len(o.scores) for o in items))
+        info["empty_frames"] = empty
+        return self._transition(
+            "detector-silence-v1",
+            obs.source_id,
+            obs.ts,
+            state,
+            value,
+            threshold,
             rule.persistence,
             rule.clear_after,
             rule.severity,

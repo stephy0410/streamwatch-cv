@@ -9,7 +9,7 @@ def test_base_config_is_valid(root):
     cfg = load_config(root / "config/monitor.yaml")
     assert cfg.confidence.lower < cfg.confidence.upper
     assert {s.id for s in cfg.active_sources} == {"sheep-barn", "puppy-playroom"}
-    assert cfg.config_ref.startswith("monitor-v1@")
+    assert cfg.config_ref.startswith("monitor-v2@")
 
 
 def test_config_ref_changes_with_thresholds(root):

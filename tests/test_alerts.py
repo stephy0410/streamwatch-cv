@@ -124,3 +124,53 @@ def test_stream_stale_opens_and_resolves(cfg):
     assert out.opened[0]["severity"] == "critical"
     back = eng.tick("s", now=20, last_frame_at=19.5, started_at=0)
     assert back.resolved and back.resolved[0]["status"] == "resolved"
+
+
+def test_hysteresis_holds_open_alert_inside_margin(cfg):
+    cfg.alerts.low_confidence.clear_margin = 0.2  # cierra solo bajo 0.5 − 0.2 = 0.3
+    eng = RuleEngine(cfg, "r")
+    low = [0.1, 0.2, 0.25]
+    band = [0.1, 0.2, 0.9, 0.9, 0.9]  # 40 % bajo: ya no supera 0.5, pero sigue dentro del margen
+    good = [0.9, 0.8, 0.7]
+    items = [obs(i, low) for i in range(1, 5)] + [obs(i, band) for i in range(5, 11)]
+    items += [obs(i, good) for i in range(11, 16)]
+    opened, resolved, st = run(eng, items)
+    assert len(opened) == 1
+    assert st[6:10] == ["hold"] * 4  # sin histéresis serían "ok" y la alerta se cerraría
+    assert len(resolved) == 1 and resolved[0]["resolved_at"] > "1970-01-01T00:00:12"
+
+
+def test_hysteresis_does_not_apply_without_open_alert(cfg):
+    cfg.alerts.low_confidence.clear_margin = 0.2
+    eng = RuleEngine(cfg, "r")
+    _, _, st = run(eng, [obs(i, [0.1, 0.2, 0.9, 0.9, 0.9]) for i in range(1, 5)])
+    assert "hold" not in st and st[-1] == "ok"
+
+
+def test_detector_silence_opens_when_model_stops_detecting(cfg):
+    cfg.alerts.detector_silence.enabled = True
+    cfg.alerts.detector_silence.window_frames = 4
+    cfg.alerts.detector_silence.empty_share_threshold = 0.5
+    cfg.alerts.detector_silence.persistence = 2
+    cfg.alerts.detector_silence.clear_after = 2
+    eng = RuleEngine(cfg, "r")
+    items = [obs(i, [0.9, 0.8]) for i in range(1, 5)] + [obs(i, []) for i in range(5, 8)]
+    items += [obs(i, [0.9]) for i in range(8, 14)]
+    opened, resolved, sil = [], [], []
+    for o in items:
+        out = eng.observe(o)
+        opened += [a for a in out.opened if a["rule_id"] == "detector-silence-v1"]
+        resolved += [a for a in out.resolved if a["rule_id"] == "detector-silence-v1"]
+        sil += states(out, "detector-silence-v1")
+    # 3 frames de ventana incompleta, 1 normal, luego 1/4, 2/4 (breach), 3/4 (breach → abre)
+    assert sil[:7] == ["insufficient"] * 3 + ["ok", "ok", "breach", "breach"]
+    assert len(opened) == 1 and opened[0]["window"]["empty_frames"] == 3 and opened[0]["trigger_event_id"] == "e7"
+    assert len(resolved) == 1
+    # mientras tanto, low-confidence no tiene evidencia: sin la regla de silencio no habría alerta
+    assert not [a for a in opened if a["rule_id"] == "low-confidence-v1"]
+
+
+def test_detector_silence_is_off_unless_enabled(cfg):
+    eng = RuleEngine(cfg, "r")
+    out = eng.observe(obs(1, []))
+    assert not states(out, "detector-silence-v1")

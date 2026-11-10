@@ -1,0 +1,2 @@
+Backtest de 20261110-ref-calibracion con monitor-v2@bedb0c9a295a → evidencias/backtests/20261110-ref-calibracion__monitor-v2
+  fidelidad: {'checked': False, 'note': 'configuración distinta a la de la corrida: se comparan resultados'}

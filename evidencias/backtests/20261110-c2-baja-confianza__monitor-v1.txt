@@ -1,0 +1,8 @@
+Backtest de 20261110-c2-baja-confianza con monitor-v1@623c315bf48f → evidencias/backtests/20261110-c2-baja-confianza__monitor-v1
+  fidelidad: {'checked': True, 'match': True, 'recorded': 4, 'replayed': 4, 'max_time_offset_ms': 91.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-10T15:32:33.435Z → 2026-11-10T15:35:33.193Z  low-confidence-v1      sheep-barn      0.9412
+  2026-11-10T15:33:16.855Z → 2026-11-10T15:35:40.244Z  confidence-shift-v1    sheep-barn      0.4201
+  2026-11-10T15:33:18.909Z → 2026-11-10T15:33:25.963Z  low-confidence-v1      puppy-playroom  0.6558
+  2026-11-10T15:35:38.236Z → abierta  low-confidence-v1      sheep-barn      0.3651
+  tiempo de detección low-confidence-v1 (sheep-barn): 99.02 s (grabado: 98.93)
+  tiempo de detección confidence-shift-v1 (sheep-barn): 142.44 s (grabado: 142.35)

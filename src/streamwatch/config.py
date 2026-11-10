@@ -95,6 +95,8 @@ class LowConfidenceRule(_Strict):
     clear_after: int = Field(5, ge=1)
     severity: Literal["info", "warning", "critical"] = "warning"
     per_source_threshold: dict[str, float] = Field(default_factory=dict)
+    # Histéresis: con la alerta abierta, solo cuenta como normal un valor < umbral − clear_margin.
+    clear_margin: float = Field(0.0, ge=0, lt=1)
 
 
 class ConfidenceShiftRule(_Strict):
@@ -103,6 +105,21 @@ class ConfidenceShiftRule(_Strict):
     tolerance: float = Field(0.10, gt=0, le=1)
     persistence: int = Field(15, ge=1)
     clear_after: int = Field(10, ge=1)
+    severity: Literal["info", "warning", "critical"] = "warning"
+    clear_margin: float = Field(0.0, ge=0, lt=1)
+
+
+class DetectorSilenceRule(_Strict):
+    """Proporción de frames sin detecciones en la ventana. Cubre el caso en que el modelo deja de
+    detectar en lugar de detectar con baja confianza (p. ej. poca luz)."""
+
+    enabled: bool = False
+    window_frames: int = Field(20, ge=1)
+    empty_share_threshold: float = Field(0.25, gt=0, le=1)
+    per_source_threshold: dict[str, float] = Field(default_factory=dict)
+    persistence: int = Field(3, ge=1)
+    clear_after: int = Field(5, ge=1)
+    clear_margin: float = Field(0.0, ge=0, lt=1)
     severity: Literal["info", "warning", "critical"] = "warning"
 
 
@@ -119,6 +136,7 @@ class ModelVersionRule(_Strict):
 class AlertsConfig(_Strict):
     low_confidence: LowConfidenceRule = LowConfidenceRule()
     confidence_shift: ConfidenceShiftRule = ConfidenceShiftRule()
+    detector_silence: DetectorSilenceRule = DetectorSilenceRule()
     stream_stale: StreamStaleRule = StreamStaleRule()
     model_version: ModelVersionRule = ModelVersionRule()
 
