@@ -279,3 +279,43 @@ registra.
 Capturas: [`15-en-vivo-tres-fuentes.png`](../evidencias/portal/15-en-vivo-tres-fuentes.png),
 [`60-dashboard-tres-fuentes.png`](../evidencias/portal/60-dashboard-tres-fuentes.png) y
 [`61-eventos-shibuya.png`](../evidencias/portal/61-eventos-shibuya.png).
+
+## S5 · Error de inferencia
+
+[`20261111-s5b-error-inferencia`](../evidencias/runs/20261111-s5b-error-inferencia) · overlay
+[`s5-error-inferencia.yaml`](../config/scenarios/s5-error-inferencia.yaml) · `fc013d1` limpio ·
+`monitor-v4@dd01111d24f5` · 2026-11-12 03:35–03:40 UTC ·
+[recálculo 21/21 · 68/68](../evidencias/metricas/20261111-s5b-error-inferencia.txt) · fidelidad del backtest 6/6.
+
+Entre `inference_error_start` (03:36:46) y `inference_error_end` (03:37:46), la inferencia de Shibuya lanza una
+excepción en lugar de devolver detecciones, como una GPU sin memoria o unos pesos corruptos. La captura y el resto
+del monitor siguen funcionando.
+
+| Etapa | Evidencia |
+|---|---|
+| Falla | 60 eventos `status=error` con `error: RuntimeError('Falla de inferencia inyectada…')`, `frame_state=error` y `detections: []` (p. ej. `evt-20261111-s5b-error-inferencia-city-crossing-000086`). G1 (tiempo de inferencia) los excluye y M12 los cuenta: tasa 0.204 en la corrida |
+| Diagnóstico | `inference-errors-v1` **critical** a los **5.1 s** de la falla (M10): 6 de 20 inferencias fallidas ≥ 25 %, persistencia 2. La acción sugerida remite al campo `error` |
+| Reacción de las demás reglas | `low-confidence-v1` de Shibuya pasa a `insufficient` durante la falla (59 evaluaciones): sin inferencias válidas no se decide «normal» |
+| Recuperación | La alerta se resuelve **19.2 s** después de terminar la falla (M13), cuando los errores salen de la ventana de 20 frames y hay 5 evaluaciones normales seguidas |
+| Control | Granero y cachorros: 0 errores; sus alertas (noche: infrarrojo, cachorros amontonados) son las mismas de S4 y de la corrida de tres fuentes |
+
+Una primera corrida del mismo escenario, [`20261111-s5-error-inferencia`](../evidencias/runs/20261111-s5-error-inferencia)
+(`f1d7444`), detectó y resolvió la falla igual (5.1 s y 19.2 s), pero reveló que la regla de confianza seguía en
+`ok` con una ventana congelada. Se corrigió y se repitió el escenario ([PM-9](POSTMORTEM.md)).
+
+## S6 · Poco tráfico
+
+[`20261111-s6-poco-trafico`](../evidencias/runs/20261111-s6-poco-trafico) · overlay
+[`s6-poco-trafico.yaml`](../config/scenarios/s6-poco-trafico.yaml) · `f1d7444` limpio · `monitor-v4@a69ac393fa11` ·
+2026-11-12 03:28–03:34 UTC · [recálculo 21/21 · 70/70](../evidencias/metricas/20261111-s6-poco-trafico.txt) ·
+fidelidad del backtest 9/9.
+
+Entre las marcas `low_traffic_start` (03:29:55) y `low_traffic_end` (03:31:54), Shibuya entrega un frame cada
+10 s. La fuente **no se cae**: 10 s < 15 s de `stream-stale`, y no hay reconexiones.
+
+| Expectativa | Observado |
+|---|---|
+| G2 y G6 registran la caída de tráfico | Shibuya 0.665 fps en la corrida (las otras dos, 0.995); intervalo máximo entre reportes 10.05 s |
+| Las reglas no deciden con evidencia vieja | `low-confidence-v1` pasa a `insufficient` en 26 evaluaciones durante la falla. Sin `max_span_factor` habría seguido evaluando ventanas de 20 frames que abarcan más de 3 minutos |
+| No hay falsas alarmas | Ninguna alerta de Shibuya: poco tráfico no es baja confianza |
+| Recuperación | Al volver el tráfico, la regla vuelve a decidir (`ok`) **17.2 s** después de la marca de fin (M13) |

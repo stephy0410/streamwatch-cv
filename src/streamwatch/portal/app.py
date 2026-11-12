@@ -39,6 +39,7 @@ RULE_LABELS = {
     "low-confidence-v1": "Baja confianza",
     "confidence-shift-v1": "Cambio sostenido",
     "detector-silence-v1": "Silencio del detector",
+    "inference-errors-v1": "Errores de inferencia",
     "stream-stale-v1": "Fuente sin frames",
     "model-version-v1": "Versión de modelo",
 }

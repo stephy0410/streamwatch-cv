@@ -1,0 +1,112 @@
+{
+  "run_id": "20261111-s5b-error-inferencia",
+  "scenario": "S5",
+  "recorded_config_ref": "monitor-v4@dd01111d24f5",
+  "config_id": "monitor-v4",
+  "config_ref": "monitor-v4@dd01111d24f5",
+  "reference": "config/reference/reference-v3.json",
+  "events": 885,
+  "evaluations": 4425,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": true,
+    "match": true,
+    "recorded": 6,
+    "replayed": 6,
+    "max_time_offset_ms": 59.0,
+    "tolerance_ms": 1000.0,
+    "mismatches": []
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-low-confidence-puppy-playroom-001",
+      "opened_at": "2026-11-12T03:35:40.000Z",
+      "resolved_at": null,
+      "value": 1.0,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-puppy-playroom-000022",
+      "threshold": 0.65,
+      "reason": "22 de 22 detecciones (100%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-low-confidence-sheep-barn-001",
+      "opened_at": "2026-11-12T03:35:40.980Z",
+      "resolved_at": null,
+      "value": 0.4272,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-sheep-barn-000022",
+      "threshold": 0.35,
+      "reason": "179 de 419 detecciones (43%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-confidence-shift-puppy-playroom-001",
+      "opened_at": "2026-11-12T03:36:32.237Z",
+      "resolved_at": null,
+      "value": 0.2788,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-puppy-playroom-000074",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.229 en 70 detecciones de los últimos 60 frames vs referencia 0.507 (caída 0.279 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-confidence-shift-sheep-barn-001",
+      "opened_at": "2026-11-12T03:36:33.222Z",
+      "resolved_at": null,
+      "value": 0.2135,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-sheep-barn-000074",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.476 en 1274 detecciones de los últimos 60 frames vs referencia 0.689 (caída 0.214 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-inference-errors-city-crossing-001",
+      "opened_at": "2026-11-12T03:36:51.346Z",
+      "resolved_at": "2026-11-12T03:38:05.705Z",
+      "value": 0.3,
+      "rule_id": "inference-errors-v1",
+      "source_id": "city-crossing",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-city-crossing-000091",
+      "threshold": 0.25,
+      "reason": "6 de 20 inferencias de city-crossing fallaron (30%, umbral 25%, persistencia 2). Los frames fallidos no entran a las reglas de confianza: mientras falle, esas reglas se quedan sin evidencia."
+    },
+    {
+      "alert_id": "alt-20261111-s5b-error-inferencia-detector-silence-puppy-playroom-001",
+      "opened_at": "2026-11-12T03:37:55.637Z",
+      "resolved_at": "2026-11-12T03:38:16.714Z",
+      "value": 0.25,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s5b-error-inferencia-puppy-playroom-000157",
+      "threshold": 0.25,
+      "reason": "5 de 20 frames de puppy-playroom sin ninguna detección (25%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    }
+  ],
+  "time_to_detect": [
+    {
+      "marker": "inference_error_start",
+      "source_id": "city-crossing",
+      "marker_ts": "2026-11-12T03:36:46.227Z",
+      "rule_id": "inference-errors-v1",
+      "alert_id": "alt-20261111-s5b-error-inferencia-inference-errors-city-crossing-001",
+      "seconds": 5.12
+    }
+  ],
+  "recorded_time_to_detect": [
+    {
+      "marker": "inference_error_start",
+      "source_id": "city-crossing",
+      "marker_ts": "2026-11-12T03:36:46.227Z",
+      "rule_id": "inference-errors-v1",
+      "alert_id": "alt-20261111-s5b-error-inferencia-inference-errors-city-crossing-001",
+      "seconds": 5.11
+    }
+  ],
+  "repeated_alerts": 0,
+  "recorded_repeated_alerts": 0
+}

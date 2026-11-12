@@ -73,7 +73,9 @@ como probabilidad de acierto (no hay etiquetas, no se mide calidad predictiva).
 | **S2** cambio de versión | YOLO11n desplegado sin aprobación | `model-version` critical en el primer frame. En el granero, la confianza casi no cambió: solo la regla de identidad lo detecta |
 | **S3** deriva gradual | Atardecer comprimido | `confidence-shift` a los 98 s, estable durante toda la deriva |
 | **S4** noche real (90 min) | Cámara infrarroja de noche frente a la referencia de mañana | `confidence-shift` abierta los 90 min; con infrarrojo el modelo confunde ovejas con vacas (3.8 % frente a 0.3 %); corral vacío detectado y resuelto al volver los cachorros |
-| **Tres fuentes** | Shibuya junto al granero y los cachorros | Ver [ESCENARIOS.md](docs/ESCENARIOS.md#tres-fuentes-cruce-de-shibuya) |
+| **Tres fuentes** | Shibuya junto al granero y los cachorros | Shibuya sin alertas con su calibración propia (0.995 fps en las tres) |
+| **S5** error de inferencia | La inferencia de Shibuya falla 60 s | `inference-errors` critical a los 5.1 s, resuelta 19.2 s después; las reglas de confianza no deciden «normal» sin inferencias |
+| **S6** poco tráfico | Shibuya entrega 1 frame cada 10 s | Las reglas pasan a `insufficient` en lugar de decidir con evidencia vieja; recuperación en 17.2 s |
 | **Backtest** `monitor-v2` | Mejora de reglas sobre C2 grabado | Tiempo de detección **98.9 s → 12.2 s**, sin alertas nuevas en C1 ni en la referencia |
 
 Detalle: [ESCENARIOS.md](docs/ESCENARIOS.md) · Post-mortems: [POSTMORTEM.md](docs/POSTMORTEM.md) · Todas las
@@ -93,7 +95,7 @@ cifras se verifican con `python3 -I scripts/recompute_metrics.py evidencias/runs
 ```bash
 git clone https://github.com/stephy0410/streamwatch-cv.git && cd streamwatch-cv
 uv sync --extra vision          # dependencias + Ultralytics/PyTorch (el extra se omite en CI)
-uv run pytest                   # 74 pruebas sin el modelo + 2 con el modelo real
+uv run pytest                   # 79 pruebas sin el modelo + 2 con el modelo real
 
 # Escenarios (los pesos se descargan del release oficial y se verifican por SHA-256 al primer arranque)
 uv run streamwatch monitor --scenario config/scenarios/c1-normal.yaml         --duration 600 --export evidencias/runs
@@ -110,13 +112,14 @@ uv run streamwatch portal       # http://127.0.0.1:8000
 | `streamwatch reference <corrida> --out config/reference/<id>.json` | Calibra umbrales y reglas desde una corrida normal |
 | `streamwatch backtest <corrida> [--config ...]` | Reevalúa las reglas sobre eventos grabados (sin `--config`: prueba de fidelidad) |
 | `streamwatch import <corridas…> [--reviews evidencias/revisiones]` | Carga corridas y revisiones exportadas en el SQLite del portal |
-| `uv run --with playwright python scripts/capturar_portal.py --base <URL>` | Recorre y verifica 27 vistas del portal (local o demo) y regenera las capturas |
+| `uv run --with playwright python scripts/capturar_portal.py --base <URL>` | Recorre y verifica 31 vistas del portal (local o demo) y regenera las capturas |
+| `uv run python scripts/verificar_revisiones.py` | Recalcula el `config_ref` de cada corrida con el código de su revisión de Git |
 | `docker compose -f ops/docker-compose.yml up -d --build` | Prometheus `:9090`, Grafana `:3000`, portal de evidencias `:8080` |
 | `ops/aws/deploy.sh` · `terraform -chdir=ops/aws destroy` | Publica el portal de evidencias en AWS (Terraform) · lo elimina |
 
 Todos los escenarios y su duración están en [`config/scenarios/README.md`](config/scenarios/README.md). La
-configuración base es [`config/monitor.yaml`](config/monitor.yaml) (`monitor-v3`). C1 y C2 se ejecutaron con
-`monitor-v1` y S1–S4 con `monitor-v2`; la configuración efectiva de cada corrida quedó guardada en su
+configuración base es [`config/monitor.yaml`](config/monitor.yaml) (`monitor-v4`). C1 y C2 se ejecutaron con
+`monitor-v1`, S1–S4 con `monitor-v2`, Shibuya y tres fuentes con `monitor-v3` y S5–S6 con `monitor-v4`; la configuración efectiva de cada corrida quedó guardada en su
 `config.json`, y los cambios entre versiones están validados con backtest ([ALERTAS.md](docs/ALERTAS.md)).
 
 ## Estructura

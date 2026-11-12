@@ -1,0 +1,165 @@
+{
+  "alerts": {
+    "confidence_shift": {
+      "clear_after": 10,
+      "clear_margin": 0.05,
+      "min_detections": 40,
+      "persistence": 15,
+      "require_same_model": true,
+      "severity": "warning",
+      "tolerance": 0.15,
+      "window_frames": 60
+    },
+    "detector_silence": {
+      "clear_after": 5,
+      "clear_margin": 0.1,
+      "empty_share_threshold": 0.25,
+      "enabled": true,
+      "per_source_threshold": {},
+      "persistence": 3,
+      "severity": "warning",
+      "window_frames": 20
+    },
+    "inference_errors": {
+      "clear_after": 5,
+      "enabled": true,
+      "error_rate_threshold": 0.25,
+      "persistence": 2,
+      "severity": "critical",
+      "window_frames": 20
+    },
+    "low_confidence": {
+      "clear_after": 5,
+      "clear_margin": 0.1,
+      "min_detections": 15,
+      "per_source_threshold": {
+        "city-crossing": 0.95,
+        "puppy-playroom": 0.65,
+        "sheep-barn": 0.35
+      },
+      "persistence": 3,
+      "rate_threshold": 0.6,
+      "severity": "warning",
+      "window_frames": 20
+    },
+    "max_span_factor": 2.0,
+    "model_version": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "stream_stale": {
+      "max_age_s": 15.0,
+      "severity": "critical"
+    }
+  },
+  "captures": {
+    "jpeg_quality": 75,
+    "low_conf_every_s": 15.0,
+    "low_conf_min_share": 0.5,
+    "max_width": 800,
+    "normal_every_s": 60.0,
+    "on_alert": true
+  },
+  "confidence": {
+    "lower": 0.4,
+    "reference": "config/reference/reference-v3.json",
+    "upper": 0.65
+  },
+  "config_id": "monitor-v4",
+  "model": {
+    "conf_floor": 0.1,
+    "device": "auto",
+    "expected_name": "yolo11s",
+    "imgsz": 640,
+    "iou": 0.45,
+    "name": "yolo11s",
+    "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "weights": "models/yolo11s.pt"
+  },
+  "sampling": {
+    "interval_s": 1.0
+  },
+  "scenario": "S6",
+  "sources": [
+    {
+      "attribution": "Transmisión pública de Farm Sanctuary powered by explore.org",
+      "classes": [
+        "sheep",
+        "person",
+        "dog",
+        "cow",
+        "horse",
+        "bird",
+        "cat"
+      ],
+      "degrade": null,
+      "domain": "agtech",
+      "enabled": true,
+      "faults": [],
+      "id": "sheep-barn",
+      "kind": "youtube",
+      "replay_fps": null,
+      "title": "Sheep Barn Cam · Farm Sanctuary (Watkins Glen, NY)",
+      "uri": "https://www.youtube.com/watch?v=SnHke968zAA"
+    },
+    {
+      "attribution": "Transmisión pública de Warrior Canine Connection powered by explore.org",
+      "classes": [
+        "dog",
+        "person",
+        "cat",
+        "sheep",
+        "cow",
+        "horse",
+        "bird"
+      ],
+      "degrade": null,
+      "domain": "animal-care",
+      "enabled": true,
+      "faults": [],
+      "id": "puppy-playroom",
+      "kind": "youtube",
+      "replay_fps": null,
+      "title": "Puppy Playroom · Warrior Canine Connection (Maryland)",
+      "uri": "https://www.youtube.com/watch?v=h-Z0wCdD3dI"
+    },
+    {
+      "attribution": "Transmisión pública de FNNプライムオンライン (Fuji News Network)",
+      "classes": [
+        "person",
+        "bicycle",
+        "car",
+        "motorcycle",
+        "bus",
+        "truck",
+        "umbrella"
+      ],
+      "degrade": null,
+      "domain": "smart-city",
+      "enabled": true,
+      "faults": [
+        {
+          "duration_s": 120.0,
+          "kind": "low_traffic",
+          "period_s": 10.0,
+          "start_after_s": 90.0
+        }
+      ],
+      "id": "city-crossing",
+      "kind": "youtube",
+      "replay_fps": null,
+      "title": "Shibuya Scramble Crossing · FNN (Tokio)",
+      "uri": "https://www.youtube.com/watch?v=dfVK7ld38Ys"
+    }
+  ],
+  "storage": {
+    "db": "data/streamwatch.db",
+    "live_dir": "data/live",
+    "runs_dir": "data/runs"
+  },
+  "telemetry": {
+    "prometheus_port": 9108,
+    "resource_every_s": 5.0,
+    "source_stats_every_s": 5.0
+  }
+}

@@ -12,6 +12,9 @@ corrida                          revisión  dirty  config_ref grabado         re
                                  overlay: af7c6ab; archivos sin commit: no registrados
 20261111-ref-ciudad              797af05   False  monitor-v3@896335455485    monitor-v3@896335455485    ✓
 20261111-s4-anochecer-real       9eae118   False  monitor-v2@e21aacb21974    monitor-v2@e21aacb21974    ✓
+20261111-s5-error-inferencia     f1d7444   False  monitor-v4@dd01111d24f5    monitor-v4@dd01111d24f5    ✓
+20261111-s5b-error-inferencia    fc013d1   False  monitor-v4@dd01111d24f5    monitor-v4@dd01111d24f5    ✓
+20261111-s6-poco-trafico         f1d7444   False  monitor-v4@a69ac393fa11    monitor-v4@a69ac393fa11    ✓
 20261111-tres-fuentes            09b7d94   False  monitor-v3@4b17b97467d4    monitor-v3@4b17b97467d4    ✓
 
-9/9 corridas: config_ref idéntico al recalculado con el código de su revisión
+12/12 corridas: config_ref idéntico al recalculado con el código de su revisión

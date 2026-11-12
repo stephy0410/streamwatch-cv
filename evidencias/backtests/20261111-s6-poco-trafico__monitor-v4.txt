@@ -1,0 +1,12 @@
+Backtest de 20261111-s6-poco-trafico con monitor-v4@a69ac393fa11 → evidencias/backtests/20261111-s6-poco-trafico__monitor-v4
+  fidelidad: {'checked': True, 'match': True, 'recorded': 9, 'replayed': 9, 'max_time_offset_ms': 62.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  alertas repetidas (≤ 60 s): 3 (grabado: 3)
+  2026-11-12T03:28:50.096Z → 2026-11-12T03:29:43.343Z  detector-silence-v1    puppy-playroom  0.55
+  2026-11-12T03:28:51.076Z → 2026-11-12T03:29:16.179Z  low-confidence-v1      sheep-barn      0.3518
+  2026-11-12T03:29:26.282Z → abierta  low-confidence-v1      puppy-playroom  0.8148
+  2026-11-12T03:29:42.355Z → abierta  confidence-shift-v1    puppy-playroom  0.2833
+  2026-11-12T03:30:13.512Z → 2026-11-12T03:31:41.901Z  detector-silence-v1    puppy-playroom  0.3
+  2026-11-12T03:31:32.842Z → abierta  low-confidence-v1      sheep-barn      0.3536
+  2026-11-12T03:32:02.989Z → abierta  confidence-shift-v1    sheep-barn      0.1798
+  2026-11-12T03:32:41.200Z → 2026-11-12T03:33:03.310Z  detector-silence-v1    puppy-playroom  0.35
+  2026-11-12T03:33:40.507Z → 2026-11-12T03:33:50.543Z  detector-silence-v1    puppy-playroom  0.25

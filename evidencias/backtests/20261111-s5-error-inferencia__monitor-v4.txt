@@ -1,0 +1,9 @@
+Backtest de 20261111-s5-error-inferencia con monitor-v4@dd01111d24f5 → evidencias/backtests/20261111-s5-error-inferencia__monitor-v4
+  fidelidad: {'checked': True, 'match': True, 'recorded': 5, 'replayed': 5, 'max_time_offset_ms': 62.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  alertas repetidas (≤ 60 s): 1 (grabado: 1)
+  2026-11-12T03:23:47.736Z → abierta  detector-silence-v1    puppy-playroom  0.75
+  2026-11-12T03:23:50.728Z → 2026-11-12T03:25:24.133Z  low-confidence-v1      sheep-barn      0.4349
+  2026-11-12T03:24:42.976Z → abierta  confidence-shift-v1    sheep-barn      0.1906
+  2026-11-12T03:24:57.071Z → 2026-11-12T03:26:10.448Z  inference-errors-v1    city-crossing   0.3
+  2026-11-12T03:26:23.460Z → abierta  low-confidence-v1      sheep-barn      0.3893
+  tiempo de detección inference-errors-v1 (city-crossing): 5.11 s (grabado: 5.1)
