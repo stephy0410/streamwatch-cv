@@ -1,0 +1,3 @@
+Backtest de 20261110-c1-operacion-normal con monitor-v3@55d62d70c26c → evidencias/backtests/20261110-c1-operacion-normal__monitor-v3
+  fidelidad: {'checked': False, 'note': 'configuración distinta a la de la corrida: se comparan resultados'}
+  2026-11-10T15:24:21.646Z → 2026-11-10T15:24:43.853Z  low-confidence-v1      puppy-playroom  0.6919

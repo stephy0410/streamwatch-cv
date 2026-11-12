@@ -75,8 +75,9 @@ exige además 3 evaluaciones seguidas para abrir y 5 normales para resolver.
 
 `tolerance = 0.15` (caída natural máxima + 0.03, redondeada hacia arriba a 0.05) y `persistence = 15` evaluaciones
 (~15 s más tras llenar la ventana de 1 min). La referencia está en `config/reference/reference-v1.json` y vale
-**solo para `yolo11s` con este preprocesamiento**. Con otro modelo, la comparación indica un cambio de versión, no
-de escena (ver escenario de cambio de versión).
+**solo para `yolo11s` con este preprocesamiento**. Desde `monitor-v3` (`require_same_model: true`), la regla no
+compara eventos de otro modelo contra esta referencia: quedan en `no_reference` (series separadas) y el cambio de
+versión lo reporta `model-version-v1` (ver S2).
 
 ### `detector-silence-v1` (frames vacíos, desde `monitor-v2`)
 

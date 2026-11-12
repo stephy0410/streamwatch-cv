@@ -1,0 +1,5 @@
+Backtest de 20261110-s1-interrupcion con monitor-v3@55d62d70c26c → evidencias/backtests/20261110-s1-interrupcion__monitor-v3
+  fidelidad: {'checked': False, 'note': 'configuración distinta a la de la corrida: se comparan resultados'}
+  2026-11-10T15:50:45.178Z → abierta  low-confidence-v1      puppy-playroom  0.6889
+  2026-11-10T15:52:33.186Z → abierta  detector-silence-v1    puppy-playroom  0.3
+  2026-11-10T15:52:34.197Z → abierta  confidence-shift-v1    puppy-playroom  0.183

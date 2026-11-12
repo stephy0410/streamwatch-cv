@@ -1,0 +1,93 @@
+{
+  "run_id": "20261110-s3-atardecer-gradual",
+  "scenario": "S3",
+  "recorded_config_ref": "monitor-v2@5c513e9e9bbb",
+  "config_id": "monitor-v3",
+  "config_ref": "monitor-v3@55d62d70c26c",
+  "reference": "config/reference/reference-v2.json",
+  "events": 819,
+  "evaluations": 3276,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": false,
+    "note": "configuración distinta a la de la corrida: se comparan resultados"
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261110-s3-atardecer-gradual-low-confidence-sheep-barn-001",
+      "opened_at": "2026-11-10T16:00:06.078Z",
+      "resolved_at": null,
+      "value": 0.3548,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-s3-atardecer-gradual-sheep-barn-000104",
+      "threshold": 0.35,
+      "reason": "55 de 155 detecciones (35%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261110-s3-atardecer-gradual-confidence-shift-sheep-barn-001",
+      "opened_at": "2026-11-10T16:00:53.324Z",
+      "resolved_at": null,
+      "value": 0.1971,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-s3-atardecer-gradual-sheep-barn-000151",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.492 en 774 detecciones de los últimos 60 frames vs referencia 0.689 (caída 0.197 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    }
+  ],
+  "time_to_detect": [
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "low-confidence-v1",
+      "alert_id": "alt-20261110-s3-atardecer-gradual-low-confidence-sheep-barn-001",
+      "seconds": 51.27
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "confidence-shift-v1",
+      "alert_id": "alt-20261110-s3-atardecer-gradual-confidence-shift-sheep-barn-001",
+      "seconds": 98.51
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "detector-silence-v1",
+      "alert_id": null,
+      "seconds": null
+    }
+  ],
+  "recorded_time_to_detect": [
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "low-confidence-v1",
+      "alert_id": "alt-20261110-s3-atardecer-gradual-low-confidence-sheep-barn-001",
+      "seconds": 51.19
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "confidence-shift-v1",
+      "alert_id": "alt-20261110-s3-atardecer-gradual-confidence-shift-sheep-barn-001",
+      "seconds": 98.43
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:59:14.812Z",
+      "rule_id": "detector-silence-v1",
+      "alert_id": null,
+      "seconds": null
+    }
+  ]
+}

@@ -115,7 +115,7 @@ def backtest(run_dir: str | Path, cfg: MonitorConfig | None = None) -> dict[str,
             {k: a.get(k) for k in (*COMPARED, "rule_id", "source_id", "trigger_event_id", "threshold", "reason")}
             for a in replayed
         ],
-        "time_to_detect": time_to_detect(replay_run),
+        "time_to_detect": [t for t in time_to_detect(replay_run) if t["rule_id"] not in TICK_RULES],
         "recorded_time_to_detect": time_to_detect(run),
         "alerts_log": log,
     }

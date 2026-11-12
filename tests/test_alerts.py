@@ -174,3 +174,21 @@ def test_detector_silence_is_off_unless_enabled(cfg):
     eng = RuleEngine(cfg, "r")
     out = eng.observe(obs(1, []))
     assert not states(out, "detector-silence-v1")
+
+
+def test_confidence_shift_keeps_series_separate_by_model(cfg):
+    ref = {"model_ref": "yolo11s@sha256:abc", "sources": {"s": {"mean_score": 0.7}}}
+    low = [0.4, 0.45, 0.42]
+    # Sin la opción (monitor-v1/v2): YOLO11n se compara contra la referencia de YOLO11s y abre la alerta.
+    eng = RuleEngine(cfg, "r", reference=ref)
+    out = [eng.observe(obs(i, low, model="yolo11n")) for i in range(1, 6)]
+    assert any(a["rule_id"] == "confidence-shift-v1" for o in out for a in o.opened)
+    # Con require_same_model: otra serie → no_reference, sin alerta; el mismo modelo sí se compara.
+    cfg.alerts.confidence_shift.require_same_model = True
+    eng = RuleEngine(cfg, "r", reference=ref)
+    out = [eng.observe(obs(i, low, model="yolo11n")) for i in range(1, 6)]
+    assert {s for o in out for s in states(o, "confidence-shift-v1")} == {"no_reference"}
+    assert not [a for o in out for a in o.opened if a["rule_id"] == "confidence-shift-v1"]
+    eng = RuleEngine(cfg, "r", reference=ref)
+    out = [eng.observe(obs(i, low, model="yolo11s")) for i in range(1, 6)]
+    assert [a for o in out for a in o.opened if a["rule_id"] == "confidence-shift-v1"]
