@@ -14,8 +14,8 @@ operación G1–G7, alerta con reglas calibradas y muestra todo en un portal web
 > in plain view, zero detections), and a rule change validated by backtest cut time-to-detect from **99 s to
 > 12 s**. Every metric is independently recomputed from raw JSONL.
 
-Proyecto 6 de MLOps (ITESO) · entrega individual · [índice de evidencias](evidencias/INDICE.md) ·
-[inventario de extras](docs/EXTRAS.md)
+**[Demo en vivo en AWS](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com)** (portal de evidencias, solo lectura) · Proyecto 6 de MLOps (ITESO) · entrega
+individual · [índice de evidencias](evidencias/INDICE.md) · [inventario de extras](docs/EXTRAS.md)
 
 ![Alerta de silencio del detector: ocho cachorros visibles y cero detecciones](evidencias/portal/21-alerta-s1-silencio-cachorros.png)
 
@@ -32,6 +32,7 @@ Proyecto 6 de MLOps (ITESO) · entrega individual · [índice de evidencias](evi
 | **Métricas** | G1–G7 calculadas desde los JSONL y recalculadas por un script independiente. [Métricas](docs/METRICAS.md) |
 | **Portal** | Eventos y alertas con filtros, detalle con cajas sobre la captura, dashboard por corrida, vista en vivo, galería con revisión manual y exportación CSV/JSONL |
 | **Observabilidad** | Prometheus (`:9108`) con reglas de segunda línea y Grafana provisionado, en `docker compose`. [Observabilidad](docs/OBSERVABILIDAD.md) |
+| **Nube** | Portal de evidencias en AWS con Terraform: ECR privado (tag = commit) y Lightsail Container Service con HTTPS, en solo lectura. [Despliegue](ops/aws/README.md) |
 
 ## Arquitectura
 
@@ -52,6 +53,7 @@ flowchart LR
   J --> MET[metrics.json G1–G7] --> V[recompute_metrics.py<br/>independiente]
   J --> BT[backtest de reglas]
   S --> W[Portal FastAPI]
+  J -->|imagen demo, tag = commit| AWS[AWS: ECR + Lightsail<br/>Terraform]
   X --> PR[Prometheus] --> G[Grafana]
 ```
 
@@ -86,7 +88,7 @@ cifras se verifican con `python3 -I scripts/recompute_metrics.py evidencias/runs
 ```bash
 git clone https://github.com/stephy0410/streamwatch-cv.git && cd streamwatch-cv
 uv sync --extra vision          # dependencias + Ultralytics/PyTorch (el extra se omite en CI)
-uv run pytest                   # 71 pruebas no-vision + 2 con el modelo real
+uv run pytest                   # 72 pruebas sin el modelo + 2 con el modelo real
 
 # Escenarios (los pesos se descargan del release oficial y se verifican por SHA-256 al primer arranque)
 uv run streamwatch monitor --scenario config/scenarios/c1-normal.yaml         --duration 600 --export evidencias/runs
@@ -104,6 +106,7 @@ uv run streamwatch portal       # http://127.0.0.1:8000
 | `streamwatch backtest <corrida> [--config ...]` | Reevalúa las reglas sobre eventos grabados (sin `--config`: prueba de fidelidad) |
 | `streamwatch import <corridas…>` | Carga corridas exportadas en el SQLite del portal |
 | `docker compose -f ops/docker-compose.yml up -d --build` | Prometheus `:9090`, Grafana `:3000`, portal de evidencias `:8080` |
+| `ops/aws/deploy.sh` · `terraform -chdir=ops/aws destroy` | Publica el portal de evidencias en AWS (Terraform) · lo elimina |
 
 Todos los escenarios y su duración están en [`config/scenarios/README.md`](config/scenarios/README.md). La
 configuración base es [`config/monitor.yaml`](config/monitor.yaml) (`monitor-v2`); C1 y C2 se ejecutaron con
@@ -116,13 +119,15 @@ src/streamwatch/   sources · detector · confidence · events · alerts · capt
                    metrics · reference · backtest · telemetry · resources · cli · portal/
 config/            monitor.yaml · scenarios/*.yaml · reference/reference-v{1,2}.json
 scripts/           recompute_metrics.py (verificación independiente)
-ops/               docker-compose · Prometheus (reglas) · Grafana (dashboard) · Dockerfile del portal
+ops/               docker-compose · Prometheus (reglas) · Grafana (dashboard) · Dockerfile · aws/ (Terraform)
 docs/              MODELO · CONTRATO · CONFIANZA · ALERTAS · METRICAS · ESCENARIOS · OBSERVABILIDAD · POSTMORTEM · EXTRAS
-evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests/ · revisiones/ · INDICE.md
+evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests/ · revisiones/ · aws/ · INDICE.md
 ```
 
 ## Límites
 
+- La demo en AWS sirve la **evidencia grabada** en solo lectura; el monitoreo en vivo (GPU y cámaras) corre en
+  local.
 - **Sin etiquetas reales**: no se mide precisión ni recall. La confianza avisa de un posible cambio y abre una
   investigación; no confirma pérdida de calidad.
 - La referencia se tomó una mañana, con 10 minutos por cámara. Para operar 24/7 convendría una referencia por
@@ -139,11 +144,12 @@ evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests
 - **Autora:** Stephanie Borrego Arroyo ([@stephy0410](https://github.com/stephy0410)), entrega individual.
 - **Aportación propia:** todo el código de `src/`, `scripts/`, `tests/` y `ops/`: lectores de stream con pacing
   por PTS, política de confianza, contrato de eventos, motor de reglas, calibración, métricas, recálculo
-  independiente, backtest, portal y stack de observabilidad. También la configuración, los escenarios, la
+  independiente, backtest, portal, stack de observabilidad y despliegue en AWS con Terraform. También la configuración, los escenarios, la
   evidencia y la documentación. El trabajo está organizado en issues y PRs en GitHub (#1–#15 y #29).
 - **Componentes reutilizados:** pesos YOLO11 preentrenados en COCO y la biblioteca de inferencia de
   [Ultralytics](https://github.com/ultralytics/ultralytics) (AGPL-3.0, por eso este repositorio también es
-  AGPL-3.0), OpenCV, yt-dlp, FastAPI, Jinja2, Pydantic, prometheus-client, psutil, Prometheus y Grafana.
+  AGPL-3.0), OpenCV, yt-dlp, FastAPI, Jinja2, Pydantic, prometheus-client, psutil, Prometheus, Grafana y
+  Terraform (proveedor AWS).
 - **Fuentes de video:** transmisiones públicas de [explore.org](https://explore.org) (Farm Sanctuary y Warrior
   Canine Connection). Las capturas de `evidencias/` son fotogramas de esas transmisiones y se conservan como
   evidencia académica del monitoreo.

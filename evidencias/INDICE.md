@@ -52,7 +52,7 @@ uv run streamwatch backtest evidencias/runs/20261110-c2-baja-confianza   # repro
 | **R7.1** Instalación y ejecución | [`README.md`](../README.md#reproducir) | `uv sync --extra vision`; comandos por escenario en [`config/scenarios/README.md`](../config/scenarios/README.md) |
 | **R7.2** Evidencias vinculadas a Git | Este índice | Tabla de corridas: revisión del código y commit de la evidencia |
 | **R7.3** Autoría y procedencia | [`README.md`](../README.md#autoría-y-procedencia), [`docs/MODELO.md`](../docs/MODELO.md) | Componentes reutilizados y propios declarados |
-| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F7, M1–M10, S1–S4 |
+| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F8, M1–M10, S1–S4 |
 
 ## Otras evidencias
 
@@ -61,5 +61,6 @@ uv run streamwatch backtest evidencias/runs/20261110-c2-baja-confianza   # repro
 | [`portal/`](portal) | Capturas de pantalla del portal sobre los datos reales (numeradas por escenario) |
 | [`observabilidad/`](observabilidad) | Grafana durante S3, alerta de Prometheus disparada y portal en Docker |
 | [`backtests/`](backtests) | Fidelidad (`__monitor-v1`), comparación con `monitor-v2` y barrido de histéresis |
+| [`aws/`](aws) | Portal desplegado en AWS ([demo](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com), imagen `streamwatch-cv:9f6f03c61170` = commit `9f6f03c`) |
 | [`revisiones/`](revisiones) | Veredictos de revisión manual exportados del portal (la tabla `reviews` vive en SQLite) |
 | [`metricas/`](metricas) | Salida del recálculo independiente por corrida (base `G*` y extras `X.*`) |
