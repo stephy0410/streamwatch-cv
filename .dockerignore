@@ -1,9 +1,13 @@
 .venv
 data
 models
-evidencias
+evidencias/*
+!evidencias/runs
+!evidencias/revisiones
 logs
 .git
 **/__pycache__
 .pytest_cache
 .ruff_cache
+ops/aws/.terraform
+ops/aws/*.tfstate*

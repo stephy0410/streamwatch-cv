@@ -22,7 +22,9 @@ def client(tmp_path_factory):
         cv2.imwrite(str(frames / f"{i:04d}.png"), np.full((48, 64, 3), 200 if i < 12 else 40, np.uint8))
     cfg = make_cfg(root, tmp, frames)
     Monitor(cfg, BrightnessDetector(), run_id="p1", telemetry=False).run(duration_s=20)
-    return TestClient(create_app(str(tmp / "sw.db"), str(tmp / "live")))
+    client = TestClient(create_app(str(tmp / "sw.db"), str(tmp / "live")))
+    client.db_path = tmp / "sw.db"
+    return client
 
 
 def test_home_lists_run(client):
@@ -128,3 +130,28 @@ def test_empty_and_unknown_states(client):
     assert "No existe esa corrida" in client.get("/dashboard?run_id=nope").text
     assert "No hay capturas con estos filtros" in client.get("/captures?run_id=nope").text
     assert client.post("/events/nope/review", data={"verdict": "confirmada"}).status_code == 404
+
+
+def test_readonly_demo_rejects_writes_and_loads_exported_reviews(client, tmp_path):
+    import json
+
+    from streamwatch.storage import Store, import_reviews
+
+    ev_id = client.get("/api/events?run_id=p1&has_image=1").json()["items"][-1]["event_id"]
+    exported = {
+        "event_id": ev_id,
+        "review": {
+            "event_id": ev_id,
+            "reviewed_at": "2026-11-10T16:19:41+00:00",
+            "verdict": "falsa_alarma",
+            "note": "exportada",
+        },
+    }
+    (tmp_path / "r.json").write_text(json.dumps(exported))
+    (tmp_path / "otra.json").write_text(json.dumps({"review": {**exported["review"], "event_id": "evt-nope"}}))
+    assert import_reviews(Store(client.db_path), tmp_path) == 1  # la de un evento inexistente se ignora
+
+    ro = TestClient(create_app(str(client.db_path), "nope", readonly=True))
+    page = ro.get(f"/events/{ev_id}").text
+    assert "exportada" in page and "solo lectura" in page and 'action="/events/' not in page
+    assert ro.post(f"/events/{ev_id}/review", data={"verdict": "confirmada"}).status_code == 403

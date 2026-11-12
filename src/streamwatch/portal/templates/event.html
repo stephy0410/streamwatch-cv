@@ -38,9 +38,10 @@
   {% else %}<p class="empty">Este frame no forma parte de la ventana de ninguna alerta.</p>{% endif %}</div>
   {% if ev.image_ref %}<div class="card" id="revision"><h2>Revisión de la captura</h2>
   {% if ev.review %}<p><span class="pill z-accepted">{{ VERDICTS.get(ev.review.verdict, ev.review.verdict) }}</span> · {{ ev.review.reviewed_at }}{% if ev.review.note %}<br>“{{ ev.review.note }}”{% endif %}</p>{% endif %}
+  {% if READONLY %}<p class="empty">Demo pública de solo lectura: las revisiones se registran en el portal local.</p>{% else %}
   <form method="post" action="/events/{{ ev.event_id }}/review" class="filters">
     <label>Veredicto<select name="verdict">{% for k, v in VERDICTS.items() %}<option value="{{ k }}" {{ 'selected' if ev.review and ev.review.verdict == k }}>{{ v }}</option>{% endfor %}</select></label>
     <label style="flex:1">Nota<input type="text" name="note" maxlength="500" value="{{ ev.review.note if ev.review else '' }}" placeholder="p. ej. cachorros amontonados, poca luz"></label>
-    <button>Guardar revisión</button></form></div>{% endif %}
+    <button>Guardar revisión</button></form>{% endif %}</div>{% endif %}
 </div></div>
 {% endblock %}

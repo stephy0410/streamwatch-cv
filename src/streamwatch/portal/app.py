@@ -88,15 +88,17 @@ def _flag(value: str | None) -> bool:
     return value in ("1", "true", "on", "yes")
 
 
-def create_app(db_path: str = "data/streamwatch.db", live_dir: str = "data/live") -> FastAPI:
+def create_app(db_path: str = "data/streamwatch.db", live_dir: str = "data/live", readonly: bool = False) -> FastAPI:
+    """``readonly``: demo pública; rechaza escrituras (revisiones) y oculta el formulario."""
     connect(db_path).close()  # crea el esquema si el SQLite aún no existe
     app = FastAPI(title="StreamWatch CV", version=__version__)
     app.state.db_path = db_path
+    app.state.readonly = readonly
     app.state.live_dir = Path(live_dir)
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.globals.update(
-        STATE_LABELS=STATE_LABELS, RULE_LABELS=RULE_LABELS, VERDICTS=VERDICTS, version=__version__
+        STATE_LABELS=STATE_LABELS, RULE_LABELS=RULE_LABELS, VERDICTS=VERDICTS, version=__version__, READONLY=readonly
     )
     templates.env.filters["pct"] = lambda v: "—" if v is None else f"{v * 100:.0f}%"
     templates.env.filters["num"] = lambda v, d=2: "—" if v is None else f"{v:.{d}f}"
@@ -253,6 +255,8 @@ def create_app(db_path: str = "data/streamwatch.db", live_dir: str = "data/live"
 
     @app.post("/events/{event_id}/review")
     def review(event_id: str, verdict: str = Form(...), note: str = Form("")):
+        if app.state.readonly:
+            raise HTTPException(403, "Portal de solo lectura")
         if verdict not in VERDICTS:
             raise HTTPException(422, "Veredicto no válido")
         conn = connect(app.state.db_path)

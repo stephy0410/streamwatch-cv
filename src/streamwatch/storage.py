@@ -310,3 +310,19 @@ def import_run(store: Store, run_dir: str | Path) -> dict[str, int]:
         store.add_rows(kind, rows)
         counts[kind] = len(rows)
     return counts
+
+
+def import_reviews(store: Store, reviews_dir: str | Path) -> int:
+    """Carga revisiones exportadas (``{"event_id", "review": {...}}``) cuyo evento exista en la base."""
+    n = 0
+    with store.conn:
+        for path in sorted(Path(reviews_dir).glob("*.json")):
+            r = json.loads(path.read_text(encoding="utf-8")).get("review")
+            if not r or not store.conn.execute("SELECT 1 FROM events WHERE event_id=?", (r["event_id"],)).fetchone():
+                continue
+            store.conn.execute(
+                "INSERT OR REPLACE INTO reviews VALUES (?,?,?,?)",
+                (r["event_id"], r["reviewed_at"], r["verdict"], r.get("note") or ""),
+            )
+            n += 1
+    return n
