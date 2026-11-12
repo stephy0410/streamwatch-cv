@@ -3,7 +3,7 @@
   "scenario": "C1",
   "config_ref": "monitor-v1@4180b006a93a",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T01:02:39.208Z",
+  "computed_at": "2026-11-12T03:21:01.090Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -240,6 +240,34 @@
           "sheep": 36
         }
       }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "sheep-barn": {
+          "events": 587,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "puppy-playroom": {
+          "events": 585,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": []
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 1,
+      "repeated": 0,
+      "by_rule_source": {}
     },
     "M-confidence-distribution": {
       "name": "Distribución de confianza por deciles (G4)",

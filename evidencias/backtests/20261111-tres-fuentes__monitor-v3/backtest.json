@@ -3,7 +3,7 @@
   "scenario": "TRES-FUENTES",
   "recorded_config_ref": "monitor-v3@4b17b97467d4",
   "config_id": "monitor-v3",
-  "config_ref": "monitor-v3@4b17b97467d4",
+  "config_ref": "monitor-v3@33e4168fdddf",
   "reference": "config/reference/reference-v3.json",
   "events": 1774,
   "evaluations": 7096,
@@ -121,5 +121,7 @@
     }
   ],
   "time_to_detect": [],
-  "recorded_time_to_detect": []
+  "recorded_time_to_detect": [],
+  "repeated_alerts": 2,
+  "recorded_repeated_alerts": 2
 }

@@ -39,11 +39,17 @@ class DegradeConfig(_Strict):
 
 
 class FaultConfig(_Strict):
-    """Inyección controlada de fallas de la fuente (escenario de interrupción)."""
+    """Inyección controlada de fallas (escenarios).
 
-    kind: Literal["outage"] = "outage"
+    - ``outage``: la fuente corta la conexión (interrupción del stream).
+    - ``inference_error``: la inferencia de esa fuente falla (excepción) en lugar de devolver detecciones.
+    - ``low_traffic``: la fuente entrega a lo más un frame cada ``period_s`` segundos (poco tráfico).
+    """
+
+    kind: Literal["outage", "inference_error", "low_traffic"] = "outage"
     start_after_s: float = Field(..., ge=0)
     duration_s: float = Field(..., gt=0)
+    period_s: float = Field(10.0, gt=0, description="Solo low_traffic: segundos entre frames entregados")
 
 
 class SourceConfig(_Strict):
@@ -125,6 +131,17 @@ class DetectorSilenceRule(_Strict):
     severity: Literal["info", "warning", "critical"] = "warning"
 
 
+class InferenceErrorsRule(_Strict):
+    """Proporción de inferencias fallidas (``status=error``) en los últimos ``window_frames`` frames de la fuente."""
+
+    enabled: bool = False
+    window_frames: int = Field(20, ge=1)
+    error_rate_threshold: float = Field(0.25, gt=0, le=1)
+    persistence: int = Field(2, ge=1)
+    clear_after: int = Field(5, ge=1)
+    severity: Literal["info", "warning", "critical"] = "critical"
+
+
 class StreamStaleRule(_Strict):
     max_age_s: float = Field(15.0, gt=0)
     severity: Literal["info", "warning", "critical"] = "critical"
@@ -139,7 +156,11 @@ class AlertsConfig(_Strict):
     low_confidence: LowConfidenceRule = LowConfidenceRule()
     confidence_shift: ConfidenceShiftRule = ConfidenceShiftRule()
     detector_silence: DetectorSilenceRule = DetectorSilenceRule()
+    inference_errors: InferenceErrorsRule = InferenceErrorsRule()
     stream_stale: StreamStaleRule = StreamStaleRule()
+    # Evidencia vieja: si los frames de una ventana abarcan más de factor × window_frames × interval_s segundos
+    # (poco tráfico), la evaluación es ``insufficient`` en lugar de decidir con observaciones viejas.
+    max_span_factor: float | None = Field(None, gt=1)
     model_version: ModelVersionRule = ModelVersionRule()
 
 

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
 import sys
 from datetime import datetime
@@ -149,10 +150,54 @@ def recompute_extra(run: Path) -> dict[str, float | None]:
     expected = meta.get("expected_model")
     out["X.version_mismatched"] = sum(e["model_name"] != expected for e in events) if expected else None
 
+    for sid in sorted({e["source_id"] for e in events}):
+        evs = [e for e in events if e["source_id"] == sid]
+        out[f"X.error_rate.{sid}"] = sum(e["status"] == "error" for e in evs) / len(evs)
+
+    finals = {}
+    for a in rows(run / "alerts.jsonl"):
+        finals[a["alert_id"]] = a
+    repeated = 0
+    for key in {(a["rule_id"], a["source_id"]) for a in finals.values()}:
+        seq = sorted(
+            (a for a in finals.values() if (a["rule_id"], a["source_id"]) == key), key=lambda a: a["opened_at"]
+        )
+        for prev, cur in itertools.pairwise(seq):
+            if prev.get("resolved_at") and t(cur["opened_at"]) - t(prev["resolved_at"]) <= 60:
+                repeated += 1
+    out["X.repeated_alerts"] = repeated
+
+    evaluations = None
+    recovery = {"outage_end": "stream-stale-v1", "inference_error_end": "inference-errors-v1"}
+    for m in rows(run / "markers.jsonl"):
+        end = t(m["timestamp"]) if m["kind"].endswith("_end") else None
+        if m["kind"] in recovery:
+            done = [
+                t(a["resolved_at"])
+                for a in finals.values()
+                if a["rule_id"] == recovery[m["kind"]]
+                and a["source_id"] == m["source_id"]
+                and a.get("resolved_at")
+                and t(a["resolved_at"]) >= end
+            ]
+            out[f"X.ttr.{m['kind']}.{m['source_id']}"] = min(done) - end if done else None
+        elif m["kind"] == "low_traffic_end":
+            evaluations = evaluations if evaluations is not None else rows(run / "rule_evaluations.jsonl")
+            back = [
+                t(e["timestamp"])
+                for e in evaluations
+                if e["rule_id"] == "low-confidence-v1"
+                and e["source_id"] == m["source_id"]
+                and e["state"] in ("ok", "breach")
+                and t(e["timestamp"]) >= end
+            ]
+            out[f"X.ttr.{m['kind']}.{m['source_id']}"] = min(back) - end if back else None
+
     silence_on = config.get("alerts", {}).get("detector_silence", {}).get("enabled", False)
     rules = {
         "degrade_start": ["low-confidence-v1", "confidence-shift-v1"] + (["detector-silence-v1"] if silence_on else []),
         "outage_start": ["stream-stale-v1"],
+        "inference_error_start": ["inference-errors-v1"],
     }
     last = {}
     for a in rows(run / "alerts.jsonl"):
@@ -190,6 +235,12 @@ def reported_extra(m: dict) -> dict[str, float | None]:
     out["X.images_with_ref"] = x["M-images-linked"]["events_with_image"]
     out["X.images_verified"] = x["M-images-linked"]["verified"]
     out["X.version_mismatched"] = x["M-version-mismatch"]["mismatched_events"]
+    for sid, v in x.get("M-inference-errors", {}).get("by_source", {}).items():
+        out[f"X.error_rate.{sid}"] = v["rate"]
+    if "M-repeated-alerts" in x:
+        out["X.repeated_alerts"] = x["M-repeated-alerts"]["repeated"]
+    for it in x.get("M-time-to-recover", {}).get("items", []):
+        out[f"X.ttr.{it['marker']}.{it['source_id']}"] = it["seconds"]
     for it in x["M-time-to-detect"]["items"]:
         out[f"X.ttd.{it['marker']}.{it['rule_id']}.{it['source_id']}"] = it["seconds"]
     return out

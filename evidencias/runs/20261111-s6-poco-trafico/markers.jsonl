@@ -1,0 +1,4 @@
+{"run_id": "20261111-s6-poco-trafico", "timestamp": "2026-11-12T03:28:24.813Z", "kind": "run_start", "source_id": null, "scenario": "S6"}
+{"run_id": "20261111-s6-poco-trafico", "timestamp": "2026-11-12T03:29:55.325Z", "kind": "low_traffic_start", "source_id": "city-crossing"}
+{"run_id": "20261111-s6-poco-trafico", "timestamp": "2026-11-12T03:31:54.889Z", "kind": "low_traffic_end", "source_id": "city-crossing"}
+{"run_id": "20261111-s6-poco-trafico", "timestamp": "2026-11-12T03:33:55.554Z", "kind": "run_end", "source_id": null, "reason": "duration"}

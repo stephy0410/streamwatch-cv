@@ -3,7 +3,7 @@
   "scenario": "S3",
   "config_ref": "monitor-v2@5c513e9e9bbb",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T01:02:40.237Z",
+  "computed_at": "2026-11-12T03:21:02.117Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -242,6 +242,36 @@
           "person": 162,
           "sheep": 98
         }
+      }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "sheep-barn": {
+          "events": 410,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "puppy-playroom": {
+          "events": 409,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": []
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 4,
+      "repeated": 2,
+      "by_rule_source": {
+        "low-confidence-v1/sheep-barn": 2
       }
     },
     "M-confidence-distribution": {

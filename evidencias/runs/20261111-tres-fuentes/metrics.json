@@ -3,7 +3,7 @@
   "scenario": "TRES-FUENTES",
   "config_ref": "monitor-v3@4b17b97467d4",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T03:03:00.065Z",
+  "computed_at": "2026-11-12T03:21:03.641Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -182,17 +182,17 @@
     "M-capture-fps": {
       "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
       "by_source": {
-        "city-crossing": {
-          "fps": 29.6959,
-          "reconnects": 0,
-          "read_failures": 0,
-          "dropped_by_sampling": 17223
-        },
         "sheep-barn": {
           "fps": 29.7376,
           "reconnects": 0,
           "read_failures": 0,
           "dropped_by_sampling": 17247
+        },
+        "city-crossing": {
+          "fps": 29.6959,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 17223
         },
         "puppy-playroom": {
           "fps": 29.8159,
@@ -298,6 +298,42 @@
           "truck": 128,
           "umbrella": 1
         }
+      }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "puppy-playroom": {
+          "events": 593,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "sheep-barn": {
+          "events": 591,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "city-crossing": {
+          "events": 590,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": []
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 9,
+      "repeated": 2,
+      "by_rule_source": {
+        "detector-silence-v1/puppy-playroom": 1,
+        "low-confidence-v1/puppy-playroom": 1
       }
     },
     "M-confidence-distribution": {

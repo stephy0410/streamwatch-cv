@@ -77,8 +77,14 @@ def resolve_youtube(url: str, max_height: int = 720, timeout: float = 90.0) -> s
     return lines[0]
 
 
-def in_fault_window(faults: list[FaultConfig], elapsed_s: float) -> bool:
-    return any(f.start_after_s <= elapsed_s < f.start_after_s + f.duration_s for f in faults)
+def active_fault(faults: list[FaultConfig], elapsed_s: float, kind: str) -> FaultConfig | None:
+    return next(
+        (f for f in faults if f.kind == kind and f.start_after_s <= elapsed_s < f.start_after_s + f.duration_s), None
+    )
+
+
+def in_fault_window(faults: list[FaultConfig], elapsed_s: float, kind: str = "outage") -> bool:
+    return active_fault(faults, elapsed_s, kind) is not None
 
 
 class FrameSource:

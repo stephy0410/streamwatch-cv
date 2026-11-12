@@ -33,7 +33,7 @@ from streamwatch.config import MonitorConfig
 from streamwatch.detector import Detector, InferenceResult
 from streamwatch.events import InferenceEvent, event_id, frame_id, iso
 from streamwatch.resources import ResourceSampler
-from streamwatch.sources import Frame, FrameSource, apply_degrade, build_source
+from streamwatch.sources import Frame, FrameSource, active_fault, apply_degrade, build_source
 from streamwatch.storage import RunRecorder, Store
 from streamwatch.telemetry import Telemetry
 
@@ -108,6 +108,8 @@ class Monitor:
         self.last_index: dict[str, int] = dict.fromkeys(self.sources, 0)
         self.marked: set[tuple[str, str]] = set()
         self.in_outage: dict[str, bool] = dict.fromkeys(self.sources, False)
+        self.last_processed: dict[str, float] = {}
+        self.fault_state: dict[tuple[str, str], bool] = {}
         self.meta: dict[str, Any] = {}
 
     # --- metadatos ----------------------------------------------------------------------
@@ -164,6 +166,16 @@ class Monitor:
             "markers", [{"run_id": self.run_id, "timestamp": iso(now), "kind": kind, "source_id": source_id, **data}]
         )
 
+    def _fault_markers(self, sid: str, elapsed: float, now: float) -> None:
+        """Marca inicio y fin de las fallas inyectadas en el monitor (las de la fuente las marca el lector)."""
+        if sid not in self.source_cfg:
+            return
+        for kind in ("inference_error", "low_traffic"):
+            active = active_fault(self.source_cfg[sid].faults, elapsed, kind) is not None
+            if active != self.fault_state.get((sid, kind), False):
+                self.fault_state[(sid, kind)] = active
+                self._marker(now, f"{kind}_{'start' if active else 'end'}", sid)
+
     # --- procesamiento de un frame ------------------------------------------------------
     def process(self, source_id: str, frame: Frame, now: float, elapsed: float) -> dict[str, Any]:
         scfg = self.source_cfg[source_id]
@@ -175,6 +187,8 @@ class Monitor:
             self._marker(now, "degrade_start", source_id, params=scfg.degrade.model_dump())
         status, error, result = "ok", None, None
         try:
+            if active_fault(scfg.faults, elapsed, "inference_error"):
+                raise RuntimeError("Falla de inferencia inyectada por el escenario (faults: inference_error)")
             result = self.detector.predict(deg.image, scfg.classes)
         except Exception as exc:  # una inferencia fallida se registra, no tumba el monitor
             status, error = "error", repr(exc)[:300]
@@ -295,9 +309,14 @@ class Monitor:
                 if duration_s is not None and elapsed >= duration_s:
                     break
                 for sid, src in self.sources.items():
+                    self._fault_markers(sid, elapsed, loop_start)
                     frame = src.latest()
                     if frame is not None and frame.read_index != self.last_index[sid]:
+                        throttle = active_fault(self.source_cfg[sid].faults, elapsed, "low_traffic")
+                        if throttle and loop_start - self.last_processed.get(sid, -1e9) < throttle.period_s:
+                            continue  # poco tráfico: el frame se descarta como si la fuente no lo hubiera entregado
                         self.last_index[sid] = frame.read_index
+                        self.last_processed[sid] = loop_start
                         self.process(sid, frame, self.clock(), elapsed)
                     now = self.clock()
                     if src.stats.in_outage != self.in_outage[sid]:

@@ -76,3 +76,20 @@ def test_time_to_detect_from_degrade_marker(root, tmp_path):
     items = compute(tmp_path / "runs/ttd")["extra"]["M-time-to-detect"]["items"]
     low = next(i for i in items if i["rule_id"] == "low-confidence-v1")
     assert low["alert_id"] and low["seconds"] >= 0
+
+
+def test_repeated_alerts_counts_reopen_within_window():
+    from streamwatch.metrics import repeated_alerts
+
+    def a(i, o, r):
+        return {"alert_id": i, "rule_id": "x", "source_id": "s", "opened_at": o, "resolved_at": r}
+
+    run = {
+        "alerts": [
+            a("1", "2026-11-10T00:00:00.000Z", "2026-11-10T00:01:00.000Z"),
+            a("2", "2026-11-10T00:01:30.000Z", "2026-11-10T00:02:00.000Z"),  # reabre a los 30 s → repetida
+            a("3", "2026-11-10T00:10:00.000Z", None),  # 8 min después → no cuenta
+        ]
+    }
+    r = repeated_alerts(run)
+    assert r["repeated"] == 1 and r["by_rule_source"] == {"x/s": 1}

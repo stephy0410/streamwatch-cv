@@ -1,0 +1,4 @@
+{"run_id": "20261111-s5-error-inferencia", "timestamp": "2026-11-12T03:23:21.202Z", "kind": "run_start", "source_id": null, "scenario": "S5"}
+{"run_id": "20261111-s5-error-inferencia", "timestamp": "2026-11-12T03:24:51.961Z", "kind": "inference_error_start", "source_id": "city-crossing"}
+{"run_id": "20261111-s5-error-inferencia", "timestamp": "2026-11-12T03:25:51.231Z", "kind": "inference_error_end", "source_id": "city-crossing"}
+{"run_id": "20261111-s5-error-inferencia", "timestamp": "2026-11-12T03:28:22.005Z", "kind": "run_end", "source_id": null, "reason": "duration"}

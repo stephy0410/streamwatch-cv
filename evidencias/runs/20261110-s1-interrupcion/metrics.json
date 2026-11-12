@@ -3,7 +3,7 @@
   "scenario": "S1",
   "config_ref": "monitor-v2@ba374198e4b7",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T01:02:39.900Z",
+  "computed_at": "2026-11-12T03:21:01.777Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -156,17 +156,17 @@
     "M-capture-fps": {
       "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
       "by_source": {
-        "sheep-barn": {
-          "fps": 29.5171,
-          "reconnects": 0,
-          "read_failures": 0,
-          "dropped_by_sampling": 6716
-        },
         "puppy-playroom": {
           "fps": 21.6757,
           "reconnects": 1,
           "read_failures": 0,
           "dropped_by_sampling": 4930
+        },
+        "sheep-barn": {
+          "fps": 29.5171,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 6716
         }
       }
     },
@@ -240,6 +240,41 @@
           "sheep": 1729
         }
       }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "puppy-playroom": {
+          "events": 170,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "sheep-barn": {
+          "events": 229,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": [
+        {
+          "marker": "outage_end",
+          "source_id": "puppy-playroom",
+          "criterion": "stream-stale-v1 resuelta",
+          "seconds": 2.04
+        }
+      ]
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 4,
+      "repeated": 0,
+      "by_rule_source": {}
     },
     "M-confidence-distribution": {
       "name": "Distribución de confianza por deciles (G4)",

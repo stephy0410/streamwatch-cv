@@ -62,12 +62,16 @@ X.e2e_p95_ms                                                   151.0000      150
 X.empty_rate.city-crossing                                       0.0000        0.0000  ✓
 X.empty_rate.puppy-playroom                                      0.0776        0.0776  ✓
 X.empty_rate.sheep-barn                                          0.0000        0.0000  ✓
+X.error_rate.city-crossing                                       0.0000        0.0000  ✓
+X.error_rate.puppy-playroom                                      0.0000        0.0000  ✓
+X.error_rate.sheep-barn                                          0.0000        0.0000  ✓
 X.images_verified                                              138.0000      138.0000  ✓
 X.images_with_ref                                              138.0000      138.0000  ✓
 X.reconnects.city-crossing                                       0.0000        0.0000  ✓
 X.reconnects.puppy-playroom                                      0.0000        0.0000  ✓
 X.reconnects.sheep-barn                                          0.0000        0.0000  ✓
+X.repeated_alerts                                                2.0000        2.0000  ✓
 X.rss_p50_mb                                                   427.6000      427.6000  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 21/21 coinciden · total: 70/70 coinciden
+base: 21/21 coinciden · total: 74/74 coinciden

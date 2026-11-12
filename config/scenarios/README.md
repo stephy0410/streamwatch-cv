@@ -15,6 +15,8 @@ Ejecutar: `uv run streamwatch monitor --scenario config/scenarios/<archivo>.yaml
 
 | `ref-ciudad.yaml` | Referencia de Shibuya | Solo `city-crossing`; sus umbrales de regla se agregan con `reference --merge-into` | 600 s |
 | `tres-fuentes.yaml` | **Tres fuentes** | Granero, cachorros y Shibuya con `monitor-v3` | 600 s |
+| `s5-error-inferencia.yaml` | **S5 · Error de inferencia** | La inferencia de Shibuya falla 60 s desde t=90 s | 300 s |
+| `s6-poco-trafico.yaml` | **S6 · Poco tráfico** | Shibuya entrega 1 frame cada 10 s durante 120 s desde t=90 s | 330 s |
 
 C1 y C2 corrieron con `monitor-v1`; S1–S4 con `monitor-v2` (regla de silencio e histéresis); la referencia de
 Shibuya y la corrida de tres fuentes, con `monitor-v3` (ver `docs/ALERTAS.md`).

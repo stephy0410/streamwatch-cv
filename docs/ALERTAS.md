@@ -8,7 +8,7 @@ Cada regla se evalúa **por fuente**. Cada evaluación queda en `rule_evaluation
 |---|---|
 | `ok` | Hay evidencia suficiente y la condición no se cumple |
 | `breach` | Hay evidencia suficiente y la condición se cumple |
-| `insufficient` | La ventana no alcanza el mínimo de frames o detecciones. **No es normalidad** |
+| `insufficient` | La ventana no alcanza el mínimo de frames o detecciones, o (v4) sus frames abarcan demasiado tiempo por poco tráfico. **No es normalidad** |
 | `no_reference` | No hay referencia comparable: falta o, con `require_same_model`, el evento viene de otro modelo (series separadas) |
 | `hold` | Con la alerta abierta, el valor ya no cumple la condición pero sigue dentro del margen de histéresis (`clear_margin`) |
 
@@ -22,6 +22,7 @@ una alerta abierta por regla y fuente: una misma condición no genera notificaci
 |---|---|---|---|---|
 | `low-confidence-v1` | `detecciones con s < lower / detecciones puntuadas ≥ umbral` | `window_frames` frames con estado `ok`, ≥ `min_detections` detecciones | `persistence` / `clear_after` | warning |
 | `confidence-shift-v1` | `media_referencia − media_ventana ≥ tolerance` (caída sostenida) | `window_frames` frames, ≥ `min_detections` | `persistence` / `clear_after` | warning |
+| `inference-errors-v1` (v4) | `inferencias con status=error / frames ≥ error_rate_threshold` (0.25) | `window_frames` frames de **todos** los estados | `persistence` / `clear_after` | critical |
 | `detector-silence-v1` (v2) | `frames sin detecciones / frames ≥ empty_share_threshold` | `window_frames` frames con estado `ok` (ventana completa) | `persistence` / `clear_after` | warning |
 | `stream-stale-v1` | `ahora − último frame > max_age_s` | evaluada en cada vuelta del monitor | inmediata | critical |
 | `model-version-v1` | `model_name` del evento ≠ `model.expected_name` | cada evento | inmediata | critical |
@@ -63,7 +64,7 @@ pasar los eventos grabados por el motor de reglas. Usa las puntuaciones reales q
 cámara ni volver a inferir.
 
 1. **Fidelidad.** Sin `--config` se usa la configuración guardada de la corrida y las alertas deben coincidir con
-   las grabadas en `alert_id`, evento disparador, valor y estado. Resultado: **42/42 alertas en las 9 corridas**.
+   las grabadas en `alert_id`, evento disparador, valor y estado. Resultado: **62/62 alertas en las 12 corridas**.
    El desfase máximo de `opened_at` es de 138 ms: el motor evalúa con el instante del ciclo y el evento se sella
    después de inferir. `stream-stale-v1` se excluye porque depende del reloj y no de los eventos. Esta prueba
    encontró el problema de redondeo de [PM-6](POSTMORTEM.md).
@@ -91,3 +92,15 @@ fidelidad. El hash grabado se conserva en `recorded_config_ref`.
 
 `monitor-v3` es la configuración actual (`config/monitor.yaml`). Las corridas conservan la versión con la que se
 ejecutaron: C1 y C2 con v1; S1–S4 con v2.
+
+## `monitor-v4`: errores de inferencia y evidencia vieja
+
+| Cambio | Por qué | Validación |
+|---|---|---|
+| `inference-errors-v1` (critical) | Un frame con `status=error` no entra a las reglas de confianza, que entonces se quedan sin evidencia: sin esta regla, un modelo que falla en cada frame solo se vería como `insufficient`. Umbral 0.25 (5 de 20): en todas las corridas sin fallas inyectadas la tasa fue 0 % | S5 (fallas inyectadas) |
+| `max_span_factor: 2.0` | Las ventanas se cuentan en frames. Con poco tráfico, 20 frames pueden abarcar minutos y la regla decidiría con evidencia vieja. Si la ventana abarca más de 2 × 20 × 1 s = 40 s, la evaluación es `insufficient` | S6 (poco tráfico) |
+
+Backtest de v4 sobre las 9 corridas grabadas: **las mismas alertas que v3** en todas. La única diferencia, en la
+referencia de Shibuya, viene de su umbral calibrado.
+`M-repeated-alerts` cuantifica la histéresis de v3/v4: las reaperturas en ≤ 60 s bajan de 1 a 0 en C2, de 2 a 0
+en S3 y de 3 a 2 en S4.

@@ -1,0 +1,8 @@
+# S5 · Error de inferencia: a los 90 s la inferencia de city-crossing (Shibuya) falla durante 60 s: el monitor recibe
+# la excepción en lugar de detecciones (como una GPU sin memoria o pesos corruptos). Se espera: eventos status=error
+# con el mensaje, inference-errors-v1 (critical), reglas de confianza de esa fuente en insufficient (los errores no
+# son evidencia), recuperación al terminar la falla y resolución de la alerta. Granero y cachorros: control.
+scenario: S5
+sources:
+  - id: city-crossing
+    faults: [{kind: inference_error, start_after_s: 90, duration_s: 60}]

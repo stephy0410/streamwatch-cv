@@ -25,7 +25,7 @@ from typing import Any
 
 from streamwatch.alerts import Observation, RuleEngine
 from streamwatch.config import MonitorConfig
-from streamwatch.metrics import load_run, time_to_detect, ts
+from streamwatch.metrics import load_run, repeated_alerts, time_to_detect, ts
 
 TICK_RULES = {"stream-stale-v1"}
 COMPARED = ("alert_id", "opened_at", "resolved_at", "value")
@@ -121,6 +121,8 @@ def backtest(run_dir: str | Path, cfg: MonitorConfig | None = None) -> dict[str,
         ],
         "time_to_detect": [t for t in time_to_detect(replay_run) if t["rule_id"] not in TICK_RULES],
         "recorded_time_to_detect": time_to_detect(run),
+        "repeated_alerts": repeated_alerts({"alerts": replayed})["repeated"],
+        "recorded_repeated_alerts": repeated_alerts(run)["repeated"],
         "alerts_log": log,
     }
 

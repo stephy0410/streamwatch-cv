@@ -81,3 +81,13 @@ raíz, qué se cambió y cómo se verificó.
 | Causa | Con `imgsz = 640` sobre un frame de 1280×720, una persona lejana mide pocos píxeles después del *letterbox*. Es un límite de resolución del modelo, no del monitor |
 | Decisión | Mantener la identidad del modelo (mismo YOLO11s y preprocesamiento para las tres fuentes) y calibrar las **reglas** por fuente (umbral `low-confidence` 0.95 en Shibuya). Los umbrales de zona siguen siendo globales |
 | Siguiente paso | Evaluar `imgsz` mayor o inferencia por mosaicos (SAHI) **como otra versión de modelo y preprocesamiento**, con su propia referencia: por eso `require_same_model` mantiene separadas las series |
+
+## PM-9 · Durante una falla de inferencia, la regla de confianza seguía en «ok»
+
+| | |
+|---|---|
+| Detección | S5 ([`20261111-s5-error-inferencia`](../evidencias/runs/20261111-s5-error-inferencia)): durante los 60 s de errores inyectados en Shibuya, `low-confidence-v1` evaluó ~40 veces `ok` |
+| Causa raíz | Los frames con error no entran a la ventana de confianza (correcto), pero la ventana se quedaba **congelada** con los últimos 20 frames buenos. La comprobación de evidencia vieja de v4 medía la distancia entre el primer y el último frame de la ventana, que no crece si no llegan frames nuevos |
+| Cambio | La antigüedad se mide contra el **instante de la evaluación** (`fc013d1`). Así cubre a la vez poco tráfico (S6) y ventanas congeladas (S5). Prueba de regresión: `test_frozen_window_during_inference_errors_is_insufficient` |
+| Verificación | Backtest de la misma corrida con el código corregido: `insufficient` en 58 evaluaciones durante la falla (antes 19). Se repitió el escenario con el código corregido: [`20261111-s5b-error-inferencia`](../evidencias/runs/20261111-s5b-error-inferencia) |
+| Lección | Un escenario de falla sirve también para probar las suposiciones de las demás reglas, no solo la regla nueva |

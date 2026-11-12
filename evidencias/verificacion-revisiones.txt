@@ -1,0 +1,20 @@
+corrida                          revisión  dirty  config_ref grabado         recalculado en la revisión ok
+----------------------------------------------------------------------------------------------------------
+20261110-c1-operacion-normal     eaf9a78   False  monitor-v1@4180b006a93a    monitor-v1@4180b006a93a    ✓
+20261110-c2-baja-confianza       eaf9a78   False  monitor-v1@0dd196e29756    monitor-v1@0dd196e29756    ✓
+20261110-ref-calibracion         b664a3b   True   monitor-v1@4ead7ed487a2    monitor-v1@4ead7ed487a2    ✓
+                                 overlay: 9d72546 (no existía en b664a3b); archivos sin commit: no registrados
+20261110-s1-interrupcion         af7c6ab   True   monitor-v2@ba374198e4b7    monitor-v2@ba374198e4b7    ✓
+                                 overlay: af7c6ab; archivos sin commit: no registrados
+20261110-s2-cambio-version       af7c6ab   True   monitor-v2@9cb8895e3b40    monitor-v2@9cb8895e3b40    ✓
+                                 overlay: af7c6ab; archivos sin commit: no registrados
+20261110-s3-atardecer-gradual    af7c6ab   True   monitor-v2@5c513e9e9bbb    monitor-v2@5c513e9e9bbb    ✓
+                                 overlay: af7c6ab; archivos sin commit: no registrados
+20261111-ref-ciudad              797af05   False  monitor-v3@896335455485    monitor-v3@896335455485    ✓
+20261111-s4-anochecer-real       9eae118   False  monitor-v2@e21aacb21974    monitor-v2@e21aacb21974    ✓
+20261111-s5-error-inferencia     f1d7444   False  monitor-v4@dd01111d24f5    monitor-v4@dd01111d24f5    ✓
+20261111-s5b-error-inferencia    fc013d1   False  monitor-v4@dd01111d24f5    monitor-v4@dd01111d24f5    ✓
+20261111-s6-poco-trafico         f1d7444   False  monitor-v4@a69ac393fa11    monitor-v4@a69ac393fa11    ✓
+20261111-tres-fuentes            09b7d94   False  monitor-v3@4b17b97467d4    monitor-v3@4b17b97467d4    ✓
+
+12/12 corridas: config_ref idéntico al recalculado con el código de su revisión

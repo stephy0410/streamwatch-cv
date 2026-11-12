@@ -44,11 +44,14 @@ X.e2e_p50_ms                                                    52.0000       51
 X.e2e_p95_ms                                                    78.0001       78.0300  ✓
 X.empty_rate.puppy-playroom                                      0.0000        0.0000  ✓
 X.empty_rate.sheep-barn                                          0.0000        0.0000  ✓
+X.error_rate.puppy-playroom                                      0.0000        0.0000  ✓
+X.error_rate.sheep-barn                                          0.0000        0.0000  ✓
 X.images_verified                                               46.0000       46.0000  ✓
 X.images_with_ref                                               46.0000       46.0000  ✓
 X.reconnects.puppy-playroom                                      0.0000        0.0000  ✓
 X.reconnects.sheep-barn                                          0.0000        0.0000  ✓
+X.repeated_alerts                                                0.0000        0.0000  ✓
 X.rss_p50_mb                                                   505.7000      505.7000  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 17/17 coinciden · total: 51/51 coinciden
+base: 17/17 coinciden · total: 54/54 coinciden

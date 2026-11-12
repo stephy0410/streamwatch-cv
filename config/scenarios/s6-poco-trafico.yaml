@@ -1,0 +1,7 @@
+# S6 · Poco tráfico: a los 90 s city-crossing (Shibuya) entrega solo un frame cada 10 s durante 120 s (enlace
+# degradado). La fuente no se cae (10 s < 15 s de stream-stale), pero las ventanas de 20 frames se vuelven viejas:
+# se espera que las reglas pasen a insufficient (no a "normal"), y que vuelvan a decidir cuando el tráfico regresa.
+scenario: S6
+sources:
+  - id: city-crossing
+    faults: [{kind: low_traffic, start_after_s: 90, duration_s: 120, period_s: 10}]

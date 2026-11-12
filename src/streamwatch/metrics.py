@@ -289,6 +289,27 @@ def extra_metrics(run: dict[str, Any]) -> dict[str, Any]:
                 for s, evs in _by_source(ok).items()
             },
         },
+        "M-inference-errors": {
+            "name": "Tasa de errores de inferencia (G1)",
+            "unit": "eventos status=error / eventos",
+            "by_source": {
+                sid: {
+                    "events": len(evs),
+                    "errors": sum(e["status"] == "error" for e in evs),
+                    "rate": _r(sum(e["status"] == "error" for e in evs) / len(evs)),
+                }
+                for sid, evs in _by_source(run["events"]).items()
+            },
+        },
+        "M-time-to-recover": {
+            "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+            "unit": "s",
+            "items": time_to_recover(run),
+        },
+        "M-repeated-alerts": {
+            "name": f"Alertas repetidas: reaperturas de la misma regla y fuente ≤ {REPEAT_WINDOW_S:.0f} s (G7)",
+            **repeated_alerts(run),
+        },
         "M-confidence-distribution": {
             "name": "Distribución de confianza por deciles (G4)",
             "bins": [f"{i / 10:.1f}-{(i + 1) / 10:.1f}" for i in range(10)],
@@ -319,7 +340,78 @@ def extra_metrics(run: dict[str, Any]) -> dict[str, Any]:
 MARKER_RULE = {
     "degrade_start": ("low-confidence-v1", "confidence-shift-v1", "detector-silence-v1"),
     "outage_start": ("stream-stale-v1",),
+    "inference_error_start": ("inference-errors-v1",),
 }
+RECOVERY_RULE = {"outage_end": "stream-stale-v1", "inference_error_end": "inference-errors-v1"}
+REPEAT_WINDOW_S = 60.0
+
+
+def time_to_recover(run: dict[str, Any]) -> list[dict[str, Any]]:
+    """Fin de la falla (marca) → recuperación verificada.
+
+    - ``outage_end`` / ``inference_error_end``: la alerta de la regla correspondiente se resuelve.
+    - ``low_traffic_end``: la regla ``low-confidence-v1`` vuelve a tener evidencia suficiente (primera
+      evaluación ``ok`` o ``breach``), es decir, el monitor puede volver a decidir.
+    """
+    out: list[dict[str, Any]] = []
+    evaluations: list[dict[str, Any]] | None = None
+    for m in run["markers"]:
+        sid, end = m.get("source_id"), ts(m["timestamp"])
+        if m["kind"] in RECOVERY_RULE:
+            rule = RECOVERY_RULE[m["kind"]]
+            alerts = [a for a in run["alerts"] if a["rule_id"] == rule and a["source_id"] == sid]
+            done = sorted(ts(a["resolved_at"]) for a in alerts if a.get("resolved_at") and ts(a["resolved_at"]) >= end)
+            out.append(
+                {
+                    "marker": m["kind"],
+                    "source_id": sid,
+                    "criterion": f"{rule} resuelta",
+                    "seconds": _r(done[0] - end, 2) if done else None,
+                }
+            )
+        elif m["kind"] == "low_traffic_end":
+            if evaluations is None:
+                evaluations = list(read_jsonl(run["dir"] / "rule_evaluations.jsonl"))
+            back = sorted(
+                ts(e["timestamp"])
+                for e in evaluations
+                if e["rule_id"] == "low-confidence-v1"
+                and e["source_id"] == sid
+                and e["state"] in ("ok", "breach")
+                and ts(e["timestamp"]) >= end
+            )
+            out.append(
+                {
+                    "marker": m["kind"],
+                    "source_id": sid,
+                    "criterion": "low-confidence-v1 vuelve a tener evidencia suficiente",
+                    "seconds": _r(back[0] - end, 2) if back else None,
+                }
+            )
+    return out
+
+
+def repeated_alerts(run: dict[str, Any], window_s: float = REPEAT_WINDOW_S) -> dict[str, Any]:
+    """Alertas que se reabren (misma regla y fuente) a menos de ``window_s`` de resolverse la anterior."""
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    for a in run["alerts"]:
+        groups[(a["rule_id"], a["source_id"])].append(a)
+    by_key: dict[str, int] = {}
+    for (rule, sid), alerts in sorted(groups.items()):
+        alerts.sort(key=lambda a: a["opened_at"])
+        n = sum(
+            1
+            for prev, cur in pairwise(alerts)
+            if prev.get("resolved_at") and ts(cur["opened_at"]) - ts(prev["resolved_at"]) <= window_s
+        )
+        if n:
+            by_key[f"{rule}/{sid}"] = n
+    return {
+        "window_s": window_s,
+        "alerts": len(run["alerts"]),
+        "repeated": sum(by_key.values()),
+        "by_rule_source": by_key,
+    }
 
 
 def time_to_detect(run: dict[str, Any]) -> list[dict[str, Any]]:

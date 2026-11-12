@@ -19,7 +19,19 @@ evidencia**.
 | [`20261110-s3-atardecer-gradual`](runs/20261110-s3-atardecer-gradual) | S3 | `af7c6ab` (ídem) | `monitor-v2@5c513e9e9bbb` | `yolo11s@sha256:85a76fe86dd8` | `33c6663` (PR #31) | [17/17 · 46/46](metricas/20261110-s3-atardecer-gradual.txt) |
 | [`20261111-s4-anochecer-real`](runs/20261111-s4-anochecer-real) | S4 | `9eae118` (limpio, copia de trabajo aislada) | `monitor-v2@e21aacb21974` | `yolo11s@sha256:85a76fe86dd8` | `09b7d94` (PR #41) | [17/17 · 53/53](metricas/20261111-s4-anochecer-real.txt) |
 | [`20261111-ref-ciudad`](runs/20261111-ref-ciudad) | Referencia de Shibuya | `797af05` (limpio) | `monitor-v3@896335455485` | `yolo11s@sha256:85a76fe86dd8` | `09b7d94` (PR #41) | [13/13 · 40/40](metricas/20261111-ref-ciudad.txt) |
-| [`20261111-tres-fuentes`](runs/20261111-tres-fuentes) | Tres fuentes | `09b7d94` (limpio) | `monitor-v3@4b17b97467d4` | `yolo11s@sha256:85a76fe86dd8` | PR #41 | [21/21 · 70/70](metricas/20261111-tres-fuentes.txt) |
+| [`20261111-tres-fuentes`](runs/20261111-tres-fuentes) | Tres fuentes | `09b7d94` (limpio) | `monitor-v3@4b17b97467d4` | `yolo11s@sha256:85a76fe86dd8` | `14a08b9` (PR #41) | [21/21 · 70/70](metricas/20261111-tres-fuentes.txt) |
+| [`20261111-s5-error-inferencia`](runs/20261111-s5-error-inferencia) | S5 (1.ª corrida, hallazgo PM-9) | `f1d7444` (limpio) | `monitor-v4@dd01111d24f5` | `yolo11s@sha256:85a76fe86dd8` | PR #43 | [21/21 · 71/71](metricas/20261111-s5-error-inferencia.txt) |
+| [`20261111-s5b-error-inferencia`](runs/20261111-s5b-error-inferencia) | **S5** | `fc013d1` (limpio) | `monitor-v4@dd01111d24f5` | `yolo11s@sha256:85a76fe86dd8` | PR #43 | [21/21 · 68/68](metricas/20261111-s5b-error-inferencia.txt) |
+| [`20261111-s6-poco-trafico`](runs/20261111-s6-poco-trafico) | **S6** | `f1d7444` (limpio) | `monitor-v4@a69ac393fa11` | `yolo11s@sha256:85a76fe86dd8` | PR #43 | [21/21 · 70/70](metricas/20261111-s6-poco-trafico.txt) |
+
+**Verificación de revisiones** ([`verificacion-revisiones.txt`](verificacion-revisiones.txt)):
+`uv run python scripts/verificar_revisiones.py` extrae el commit de cada corrida, recalcula `config_ref` con el
+código y la configuración de ese commit y lo compara con el grabado. Resultado: **todas coinciden**, incluidas
+las corridas con `dirty: true` (referencia, S1–S3). Así, lo que estaba sin commit no cambió fuente, modelo,
+muestreo, umbrales, referencia, ventanas ni reglas. Sobre el código: el commit siguiente a `af7c6ab` (`33c6663`)
+agregó `git.dirty_paths` a `run.json`, y S1–S3 no traen ese campo, así que corrieron con el `monitor.py` de
+`af7c6ab`. En la referencia, el overlay `ref.yaml` sin commit es idéntico al que se publicó en `9d72546` (mismo
+`config_ref`).
 
 Cada carpeta de corrida contiene `run.json` (identidad, revisión, host, umbrales y motivo de fin), `config.json`
 (configuración efectiva), `events.jsonl`, `alerts.jsonl` (cada cambio de estado), `rule_evaluations.jsonl`,
@@ -58,7 +70,7 @@ shasum -a 256 $R/captures/sheep-barn/000209.jpg
 grep 'low-confidence-sheep-barn-001' $R/alerts.jsonl | head -1
 ```
 
-**Recorrido completo del portal** (27 vistas con los IDs de este índice, cada una verificada con su código
+**Recorrido completo del portal** (31 vistas con los IDs de este índice, cada una verificada con su código
 HTTP y un texto esperado): `uv run --with playwright python scripts/capturar_portal.py --base <https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com>`. Funciona
 contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 
@@ -84,7 +96,7 @@ contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 | **R7.1** Instalación y ejecución | [`README.md`](../README.md#reproducir) | `uv sync --extra vision`; comandos por escenario en [`config/scenarios/README.md`](../config/scenarios/README.md) |
 | **R7.2** Evidencias vinculadas a Git | Este índice | Tabla de corridas: revisión del código y commit de la evidencia |
 | **R7.3** Autoría y procedencia | [`README.md`](../README.md#autoría-y-procedencia), [`docs/MODELO.md`](../docs/MODELO.md) | Componentes reutilizados y propios declarados |
-| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F8, M1–M11, S1–S4 |
+| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F8, M1–M14, S1–S6 (con comandos de verificación por extra) |
 
 ## Otras evidencias
 
@@ -92,7 +104,7 @@ contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 |---|---|
 | [`portal/`](portal) | Capturas de pantalla del portal sobre los datos reales (numeradas por escenario) |
 | [`observabilidad/`](observabilidad) | Grafana durante S3, alerta de Prometheus disparada y portal en Docker |
-| [`backtests/`](backtests) | `<corrida>__<config con la que corrió>.txt` = prueba de fidelidad (**42/42 alertas en 9 corridas**); las demás versiones son comparaciones; barrido de histéresis |
+| [`backtests/`](backtests) | `<corrida>__<config con la que corrió>.txt` = prueba de fidelidad (**62/62 alertas en 12 corridas**); las demás versiones son comparaciones; barrido de histéresis |
 | [`aws/`](aws) | Portal desplegado en AWS ([demo](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com), imagen `streamwatch-cv:9f6f03c61170` = commit `9f6f03c`) |
 | [`revisiones/`](revisiones) | Veredictos de revisión manual exportados del portal (la tabla `reviews` vive en SQLite) |
 | [`metricas/`](metricas) | Salida del recálculo independiente por corrida (base `G*` y extras `X.*`) |
