@@ -74,3 +74,23 @@ def test_reference_reports_empty_frames_and_silence_threshold(tmp_path):
     assert s_lleno["recommended_empty_share_threshold"] == 0.25  # piso: la referencia nunca tuvo frames vacíos
     assert s_huecos["window_empty_share"]["p95"] == pytest.approx(0.1)
     assert s_huecos["recommended_empty_share_threshold"] == pytest.approx(0.25)  # 0.10 + 0.15 = 0.25
+
+
+def test_new_source_is_merged_with_fixed_zone_thresholds(tmp_path):
+    from streamwatch.reference import merge_reference
+
+    base_run = tmp_path / "a"
+    base_run.mkdir()
+    base = build_reference(_write_run(base_run, {"vieja": [[0.9, 0.8, 0.3]] * 60}), reference_id="reference-a")
+    new_run = tmp_path / "b"
+    new_run.mkdir()
+    fixed = (base["thresholds"]["lower"], base["thresholds"]["upper"])
+    new = build_reference(_write_run(new_run, {"nueva": [[0.2, 0.25, 0.5]] * 60}), thresholds=fixed)
+    assert new["thresholds"] == base["thresholds"]  # no se recalculan con la fuente nueva
+    merged = merge_reference(base, new, "reference-ab")
+    assert set(merged["sources"]) == {"vieja", "nueva"} and merged["thresholds"] == base["thresholds"]
+    assert merged["sources"]["vieja"] == {"built_from_run": "ref", **base["sources"]["vieja"]}
+    with pytest.raises(ValueError):
+        merge_reference(base, {**new, "model_ref": "otro"}, "x")
+    with pytest.raises(ValueError):
+        merge_reference(merged, new, "x")  # fuente repetida

@@ -18,6 +18,12 @@ G7.open_at_end                                                   0.0000        0
 G7.opened                                                        0.0000        0.0000  ✓
 X.capture_fps.puppy-playroom                                    29.8252       29.8252  ✓
 X.capture_fps.sheep-barn                                        29.8688       29.8688  ✓
+X.class.puppy-playroom.cat                                     156.0000      156.0000  ✓
+X.class.puppy-playroom.dog                                    4735.0000     4735.0000  ✓
+X.class.puppy-playroom.person                                  108.0000      108.0000  ✓
+X.class.puppy-playroom.sheep                                    70.0000       70.0000  ✓
+X.class.sheep-barn.person                                       19.0000       19.0000  ✓
+X.class.sheep-barn.sheep                                     11983.0000    11983.0000  ✓
 X.conf_hist.0.0                                                  0.0000        0.0000  ✓
 X.conf_hist.0.1                                                886.0000      886.0000  ✓
 X.conf_hist.0.2                                                813.0000      813.0000  ✓
@@ -43,4 +49,4 @@ X.reconnects.sheep-barn                                          0.0000        0
 X.rss_p50_mb                                                   490.5000      490.5000  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 17/17 coinciden · total: 43/43 coinciden
+base: 17/17 coinciden · total: 49/49 coinciden

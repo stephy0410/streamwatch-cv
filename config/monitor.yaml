@@ -17,6 +17,13 @@ sources:
     domain: animal-care
     attribution: "Transmisión pública de Warrior Canine Connection powered by explore.org"
     classes: [dog, person, cat, sheep, cow, horse, bird]
+  - id: city-crossing
+    kind: youtube
+    uri: https://www.youtube.com/watch?v=dfVK7ld38Ys
+    title: "Shibuya Scramble Crossing · FNN (Tokio)"
+    domain: smart-city
+    attribution: "Transmisión pública de FNNプライムオンライン (Fuji News Network)"
+    classes: [person, bicycle, car, motorcycle, bus, truck, umbrella]
 
 sampling:
   interval_s: 1.0          # 1 frame por fuente por segundo; el resto se descarta por muestreo

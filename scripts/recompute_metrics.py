@@ -128,6 +128,10 @@ def recompute_extra(run: Path) -> dict[str, float | None]:
         evs = [e for e in ok if e["source_id"] == sid]
         out[f"X.empty_rate.{sid}"] = sum(not e["detections"] for e in evs) / len(evs)
         out[f"X.det_per_frame_mean.{sid}"] = sum(len(e["detections"]) for e in evs) / len(evs)
+    for e in ok:
+        for d in e["detections"]:
+            key = f"X.class.{e['source_id']}.{d['class_name']}"
+            out[key] = (out.get(key) or 0) + 1
     hist = [0] * 10
     for e in ok:
         for d in e["detections"]:
@@ -178,6 +182,9 @@ def reported_extra(m: dict) -> dict[str, float | None]:
         out[f"X.empty_rate.{sid}"] = v["rate"]
     for sid, v in x["M-detections-per-frame"]["by_source"].items():
         out[f"X.det_per_frame_mean.{sid}"] = v["mean"]
+    for sid, classes in x.get("M-predictions-by-class", {}).get("by_source", {}).items():
+        for cls, n in classes.items():
+            out[f"X.class.{sid}.{cls}"] = n
     for i, c in enumerate(x["M-confidence-distribution"]["counts"]):
         out[f"X.conf_hist.{i / 10:.1f}"] = c
     out["X.images_with_ref"] = x["M-images-linked"]["events_with_image"]

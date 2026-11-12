@@ -8,7 +8,7 @@ from streamwatch.config import MonitorConfig, deep_merge, load_config
 def test_base_config_is_valid(root):
     cfg = load_config(root / "config/monitor.yaml")
     assert cfg.confidence.lower < cfg.confidence.upper
-    assert {s.id for s in cfg.active_sources} == {"sheep-barn", "puppy-playroom"}
+    assert {s.id for s in cfg.active_sources} == {"sheep-barn", "puppy-playroom", "city-crossing"}
     assert cfg.config_ref.startswith("monitor-v3@")
 
 

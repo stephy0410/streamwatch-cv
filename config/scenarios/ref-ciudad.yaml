@@ -1,0 +1,9 @@
+# Referencia de la fuente city-crossing (cruce de Shibuya). Solo corre esa cámara: los umbrales de zona globales
+# (0.40/0.65) ya están fijados y no se recalculan; de esta corrida salen las estadísticas y los umbrales de regla de
+# la fuente nueva, que se agregan a la referencia existente con `streamwatch reference --merge-into`.
+scenario: REF-CIUDAD
+sources:
+  - id: sheep-barn
+    enabled: false
+  - id: puppy-playroom
+    enabled: false
