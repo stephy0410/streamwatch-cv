@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -49,13 +50,16 @@ def cmd_export(args: argparse.Namespace) -> int:
 
 
 def cmd_import(args: argparse.Namespace) -> int:
-    from streamwatch.storage import Store, import_run
+    from streamwatch.storage import Store, import_reviews, import_run
 
     cfg = load_config(args.config)
     store = Store(args.db or cfg.storage.db)
     for run_dir in args.run_dirs:
         counts = import_run(store, run_dir)
         print(f"{run_dir}: {counts}")
+    if args.reviews:
+        n = import_reviews(store, args.reviews)
+        print(f"{args.reviews}: {n} revisiones")
     return 0
 
 
@@ -65,7 +69,8 @@ def cmd_portal(args: argparse.Namespace) -> int:
     from streamwatch.portal.app import create_app
 
     cfg = load_config(args.config)
-    app = create_app(args.db or cfg.storage.db, cfg.storage.live_dir)
+    readonly = args.readonly or os.environ.get("STREAMWATCH_READONLY", "").lower() in ("1", "true", "yes")
+    app = create_app(args.db or cfg.storage.db, cfg.storage.live_dir, readonly=readonly)
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0
 
@@ -148,7 +153,8 @@ def build_parser() -> argparse.ArgumentParser:
     e.set_defaults(func=cmd_export)
 
     i = sub.add_parser("import", help="Carga corridas exportadas (JSONL) en el SQLite del portal")
-    i.add_argument("run_dirs", nargs="+")
+    i.add_argument("run_dirs", nargs="*")
+    i.add_argument("--reviews", help="Carpeta con revisiones exportadas (evidencias/revisiones/*.json)")
     i.add_argument("--db")
     i.add_argument("--config", default="config/monitor.yaml")
     i.set_defaults(func=cmd_import)
@@ -178,6 +184,9 @@ def build_parser() -> argparse.ArgumentParser:
     po.add_argument("--host", default="127.0.0.1")
     po.add_argument("--port", type=int, default=8000)
     po.add_argument("--config", default="config/monitor.yaml")
+    po.add_argument(
+        "--readonly", action="store_true", help="Demo pública: sin escrituras (también STREAMWATCH_READONLY=1)"
+    )
     po.set_defaults(func=cmd_portal)
     return p
 

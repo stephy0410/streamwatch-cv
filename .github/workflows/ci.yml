@@ -34,9 +34,24 @@ jobs:
           prom/prometheus:v2.55.1 check config /etc/prometheus/prometheus.yml
       - name: Validar el JSON del dashboard de Grafana
         run: python3 -c "import json; d=json.load(open('ops/grafana/dashboards/streamwatch.json')); assert d['uid'] == 'streamwatch' and d['panels']"
-      - name: Construir la imagen del portal y probar /healthz
+      - name: Construir la imagen demo y probar /healthz y solo lectura
         run: |
-          docker build -f ops/Dockerfile -t streamwatch-portal .
-          docker run -d --name portal -p 8000:8000 streamwatch-portal
-          for i in $(seq 1 30); do curl -fs localhost:8000/healthz && exit 0; sleep 1; done
-          docker logs portal; exit 1
+          docker build -f ops/Dockerfile --target demo -t streamwatch-demo .
+          docker run -d --name portal -p 8000:8000 streamwatch-demo
+          for i in $(seq 1 30); do curl -fs localhost:8000/healthz && break; sleep 1; done
+          curl -fs localhost:8000/api/alerts > /dev/null
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST localhost:8000/events/x/review -d verdict=confirmada)
+          [ "$code" = "403" ] || { docker logs portal; echo "esperaba 403, obtuve $code"; exit 1; }
+
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ops/aws
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Formato
+        run: terraform fmt -check -recursive
+      - name: Validar (sin backend ni credenciales)
+        run: terraform init -backend=false -input=false && terraform validate

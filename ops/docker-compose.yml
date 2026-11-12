@@ -43,6 +43,7 @@ services:
     build:
       context: ..
       dockerfile: ops/Dockerfile
+      target: portal
     volumes:
       - ../evidencias:/app/evidencias:ro
     ports: ["8080:8000"]

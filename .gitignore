@@ -23,3 +23,9 @@ data/
 .idea/
 .vscode/
 *.log
+
+# Terraform
+ops/aws/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
