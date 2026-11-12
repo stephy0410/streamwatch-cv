@@ -52,3 +52,32 @@ raíz, qué se cambió y cómo se verificó.
 | Riesgo | El SQLite del monitor usa WAL. WAL depende de memoria compartida (`-shm`), que no es coherente entre macOS y la VM de Docker Desktop. Un portal en contenedor leyendo el mismo archivo por *bind mount* podría ver datos inconsistentes |
 | Decisión | El portal del contenedor reconstruye su propio SQLite desde los JSONL de `evidencias/runs`, que son la fuente primaria. El portal en vivo es el nativo |
 | Verificación | El contenedor importó 6 corridas al arrancar ([`portal-docker.png`](../evidencias/observabilidad/portal-docker.png)). En CI, el job `ops` construye la imagen y espera a que `/healthz` responda |
+
+## PM-6 · Redondeo justo en el umbral
+
+| | |
+|---|---|
+| Detección | La prueba de fidelidad del backtest falló en S4: una alerta con el mismo evento disparador valía 0.717 en vivo y 0.7107 en el backtest |
+| Causa raíz | El evento guardaba la puntuación redondeada a 4 decimales. La política decide la zona con el valor exacto: 0.39996 es baja, pero se guardaba como 0.4000, y quien recalculaba desde el archivo la contaba como duda. Afectó a 17 de ~350 000 detecciones en todas las corridas |
+| Cambio | La puntuación se guarda exacta. El backtest usa la zona registrada en vivo si los umbrales no cambian, y el recálculo independiente cuenta la `zone` de cada detección |
+| Verificación | Fidelidad del backtest: **32/32 alertas** en las 7 corridas. Recálculo: sin discrepancias en ninguna corrida |
+| Lección | Una tolerancia de 0.06 en el recálculo ocultaba la discrepancia; comparar alerta por alerta la hizo visible |
+
+## PM-7 · La laptop se suspende y la corrida no se entera
+
+| | |
+|---|---|
+| Detección | S4 arrancó 3 h tarde, el 11 en lugar del 10. La referencia de Shibuya tiene un hueco de 654 s entre dos eventos consecutivos |
+| Causa raíz | `sleep 17632` en macOS se congela mientras el equipo está suspendido. `caffeinate -i` evita la suspensión por inactividad, pero no la de cerrar la tapa |
+| Cambio | El lanzador espera por reloj de pared (`until date ≥ inicio`). Las corridas se lanzan con `caffeinate -i -m -d` y la tapa abierta |
+| Lo que funcionó | Las métricas lo detectaron sin intervención: en la referencia de Shibuya, G6 marca un intervalo máximo de 653.7 s y G2 baja a 0.47 fps. Para la referencia el efecto es despreciable: el único frame tardío entra en 1 de 570 ventanas |
+| Lección | Para operar 24/7 el monitor debe correr en un equipo que no se suspenda. Prometheus (`StreamWatchMonitorDown`) avisaría de una pausa así |
+
+## PM-8 · Multitudes: el detector ve ~20 de cientos de personas (Shibuya)
+
+| | |
+|---|---|
+| Detección | Vista en vivo de la corrida de tres fuentes ([`15-en-vivo-tres-fuentes.png`](../evidencias/portal/15-en-vivo-tres-fuentes.png)) y referencia de la fuente: 20.8 detecciones por frame, confianza media 0.28, 78 % en zona baja |
+| Causa | Con `imgsz = 640` sobre un frame de 1280×720, una persona lejana mide pocos píxeles después del *letterbox*. Es un límite de resolución del modelo, no del monitor |
+| Decisión | Mantener la identidad del modelo (mismo YOLO11s y preprocesamiento para las tres fuentes) y calibrar las **reglas** por fuente (umbral `low-confidence` 0.95 en Shibuya). Los umbrales de zona siguen siendo globales |
+| Siguiente paso | Evaluar `imgsz` mayor o inferencia por mosaicos (SAHI) **como otra versión de modelo y preprocesamiento**, con su propia referencia: por eso `require_same_model` mantiene separadas las series |

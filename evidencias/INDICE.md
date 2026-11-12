@@ -17,6 +17,9 @@ evidencia**.
 | [`20261110-s1-interrupcion`](runs/20261110-s1-interrupcion) | S1 | `af7c6ab` (`dirty`: solo archivos sin seguimiento ajenos al monitor) | `monitor-v2@ba374198e4b7` | `yolo11s@sha256:85a76fe86dd8` | `33c6663` (PR #31) | [17/17 · 44/44](metricas/20261110-s1-interrupcion.txt) |
 | [`20261110-s2-cambio-version`](runs/20261110-s2-cambio-version) | S2 | `af7c6ab` (ídem) | `monitor-v2@9cb8895e3b40` | **`yolo11n@sha256:0ebbc80d4a76`** | `33c6663` (PR #31) | [17/17 · 43/43](metricas/20261110-s2-cambio-version.txt) |
 | [`20261110-s3-atardecer-gradual`](runs/20261110-s3-atardecer-gradual) | S3 | `af7c6ab` (ídem) | `monitor-v2@5c513e9e9bbb` | `yolo11s@sha256:85a76fe86dd8` | `33c6663` (PR #31) | [17/17 · 46/46](metricas/20261110-s3-atardecer-gradual.txt) |
+| [`20261111-s4-anochecer-real`](runs/20261111-s4-anochecer-real) | S4 | `9eae118` (limpio, copia de trabajo aislada) | `monitor-v2@e21aacb21974` | `yolo11s@sha256:85a76fe86dd8` | `09b7d94` (PR #41) | [17/17 · 53/53](metricas/20261111-s4-anochecer-real.txt) |
+| [`20261111-ref-ciudad`](runs/20261111-ref-ciudad) | Referencia de Shibuya | `797af05` (limpio) | `monitor-v3@896335455485` | `yolo11s@sha256:85a76fe86dd8` | `09b7d94` (PR #41) | [13/13 · 40/40](metricas/20261111-ref-ciudad.txt) |
+| [`20261111-tres-fuentes`](runs/20261111-tres-fuentes) | Tres fuentes | `09b7d94` (limpio) | `monitor-v3@4b17b97467d4` | `yolo11s@sha256:85a76fe86dd8` | PR #41 | [21/21 · 70/70](metricas/20261111-tres-fuentes.txt) |
 
 Cada carpeta de corrida contiene `run.json` (identidad, revisión, host, umbrales y motivo de fin), `config.json`
 (configuración efectiva), `events.jsonl`, `alerts.jsonl` (cada cambio de estado), `rule_evaluations.jsonl`,
@@ -55,7 +58,7 @@ shasum -a 256 $R/captures/sheep-barn/000209.jpg
 grep 'low-confidence-sheep-barn-001' $R/alerts.jsonl | head -1
 ```
 
-**Recorrido completo del portal** (22 vistas con los IDs de este índice, cada una verificada con su código
+**Recorrido completo del portal** (27 vistas con los IDs de este índice, cada una verificada con su código
 HTTP y un texto esperado): `uv run --with playwright python scripts/capturar_portal.py --base <https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com>`. Funciona
 contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 
@@ -81,7 +84,7 @@ contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 | **R7.1** Instalación y ejecución | [`README.md`](../README.md#reproducir) | `uv sync --extra vision`; comandos por escenario en [`config/scenarios/README.md`](../config/scenarios/README.md) |
 | **R7.2** Evidencias vinculadas a Git | Este índice | Tabla de corridas: revisión del código y commit de la evidencia |
 | **R7.3** Autoría y procedencia | [`README.md`](../README.md#autoría-y-procedencia), [`docs/MODELO.md`](../docs/MODELO.md) | Componentes reutilizados y propios declarados |
-| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F8, M1–M10, S1–S4 |
+| **Extras** | [`docs/EXTRAS.md`](../docs/EXTRAS.md) | F1–F8, M1–M11, S1–S4 |
 
 ## Otras evidencias
 
@@ -89,7 +92,7 @@ contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
 |---|---|
 | [`portal/`](portal) | Capturas de pantalla del portal sobre los datos reales (numeradas por escenario) |
 | [`observabilidad/`](observabilidad) | Grafana durante S3, alerta de Prometheus disparada y portal en Docker |
-| [`backtests/`](backtests) | Fidelidad (`__monitor-v1`), comparación con `monitor-v2` y `monitor-v3`, y barrido de histéresis |
+| [`backtests/`](backtests) | `<corrida>__<config con la que corrió>.txt` = prueba de fidelidad (**42/42 alertas en 9 corridas**); las demás versiones son comparaciones; barrido de histéresis |
 | [`aws/`](aws) | Portal desplegado en AWS ([demo](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com), imagen `streamwatch-cv:9f6f03c61170` = commit `9f6f03c`) |
 | [`revisiones/`](revisiones) | Veredictos de revisión manual exportados del portal (la tabla `reviews` vive en SQLite) |
 | [`metricas/`](metricas) | Salida del recálculo independiente por corrida (base `G*` y extras `X.*`) |

@@ -19,6 +19,7 @@ from pathlib import Path
 
 C1, C2 = "20261110-c1-operacion-normal", "20261110-c2-baja-confianza"
 S1, S2, S3 = "20261110-s1-interrupcion", "20261110-s2-cambio-version", "20261110-s3-atardecer-gradual"
+S4, TRES = "20261111-s4-anochecer-real", "20261111-tres-fuentes"
 
 # (archivo, ruta, texto que debe aparecer)
 RECORRIDO = [
@@ -48,6 +49,11 @@ RECORRIDO = [
     ("32-dashboard-s2", f"/dashboard?run_id={S2}", "G1"),
     ("40-alerta-s3-cambio-sostenido", f"/alerts/alt-{S3}-confidence-shift-sheep-barn-001", "referencia"),
     ("41-dashboard-s3", f"/dashboard?run_id={S3}", "G1"),
+    ("50-alerta-s4-cambio-sostenido-noche", f"/alerts/alt-{S4}-confidence-shift-sheep-barn-001", "referencia"),
+    ("51-alerta-s4-corral-vacio", f"/alerts/alt-{S4}-detector-silence-puppy-playroom-001", "Silencio"),
+    ("52-dashboard-s4", f"/dashboard?run_id={S4}", "G1"),
+    ("60-dashboard-tres-fuentes", f"/dashboard?run_id={TRES}", "city-crossing"),
+    ("61-eventos-shibuya", f"/events?run_id={TRES}&source_id=city-crossing", "city-crossing"),
 ]
 
 

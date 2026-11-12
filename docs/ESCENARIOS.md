@@ -211,3 +211,71 @@ A diferencia de C2 no hay apagón: la deriva es lenta.
 
 Capturas: [`40`](../evidencias/portal/40-alerta-s3-cambio-sostenido.png) y
 [`41-dashboard-s3.png`](../evidencias/portal/41-dashboard-s3.png).
+
+## S4 · Cambio sostenido real: noche en el granero
+
+Sin degradación sintética: es el cambio de la escena real frente a la referencia, que se tomó una mañana.
+
+| | |
+|---|---|
+| Corrida | [`20261111-s4-anochecer-real`](../evidencias/runs/20261111-s4-anochecer-real) · 90 min · 10 635 eventos |
+| Overlay | [`s4-anochecer-real.yaml`](../config/scenarios/s4-anochecer-real.yaml) (solo espacia las capturas) |
+| Código | `9eae118`, **árbol limpio**, desde una copia de trabajo aislada |
+| `config_ref` | `monitor-v2@e21aacb21974` · `yolo11s@sha256:85a76fe86dd8` |
+| Horario | 2026-11-12 00:18:52 → 01:48:52 UTC (19:18–20:48 en Nueva York: ya de noche) |
+| Recálculo | [17/17 base · 53/53 total](../evidencias/metricas/20261111-s4-anochecer-real.txt) · fidelidad del backtest 14/14 |
+
+**Sobre el horario.** La corrida estaba programada para cruzar la puesta de sol (21:10 UTC), pero la Mac se
+suspendió y arrancó al despertar, ya de noche. Por eso S4 compara **noche contra día**, no la transición. Desde
+entonces el lanzador espera por reloj de pared y no con un `sleep` largo, que se congela al suspender.
+
+| Fuente | Qué cambió | Respuesta del monitor |
+|---|---|---|
+| Granero | La cámara pasa a **infrarrojo** (escala de grises). Confianza media 0.43–0.51 frente a 0.689 de referencia; detecciones bajas 44.5 % (C1: 13.8 %). El conteo se mantiene (~19 detecciones por frame) | `confidence-shift-v1` abre a las 00:20:14 (caída 0.205 ≥ 0.15) y **queda abierta los 90 min**: cambio sostenido real. Además, la proporción de `cow` sube de 0.3 % (C1) a **3.8 %** (3759 de 99 469): con infrarrojo el modelo confunde ovejas con vacas (M11) |
+| Cachorros | **Corral vacío** de 00:18 a ~01:01 UTC; después regresan los cachorros | `detector-silence-v1` abre a las 00:19:23 con 100 % de frames vacíos y **se resuelve a las 01:01:36**, cuando vuelven: transición, persistencia de 42 min y recuperación. La acción sugerida («si la escena está realmente vacía, es un cambio de escena») es la lectura correcta: el modelo no falló |
+
+- `low-confidence-v1` osciló en el granero (4 alertas con valores entre 0.36 y 0.49 frente a 0.35). En el
+  backtest con `monitor-v3` (histéresis 0.10) quedan **2**
+  ([`…s4-anochecer-real__monitor-v3.txt`](../evidencias/backtests/20261111-s4-anochecer-real__monitor-v3.txt)).
+- Captura 29.6 fps por cámara, 0 reconexiones, 0 fallos de lectura en 90 min; ~154 000 frames por cámara
+  descartados por el muestreo de 1 frame/s.
+- Lectura: la referencia de mañana no sirve de noche. En operación 24/7 haría falta una referencia por franja
+  horaria o por modo de cámara (día / infrarrojo); la regla de cambio sostenido es la que lo hace visible.
+
+Capturas: [`50`](../evidencias/portal/50-alerta-s4-cambio-sostenido-noche.png),
+[`51`](../evidencias/portal/51-alerta-s4-corral-vacio.png) y
+[`52-dashboard-s4.png`](../evidencias/portal/52-dashboard-s4.png).
+
+## Tres fuentes: cruce de Shibuya
+
+Tercera cámara agregada para cubrir un dominio de alta densidad: el cruce de Shibuya en Tokio (FNN, 24/7), con
+personas, autos, autobuses, bicicletas y motocicletas vistos desde arriba.
+
+**Referencia propia.** [`20261111-ref-ciudad`](../evidencias/runs/20261111-ref-ciudad) (10 min, solo Shibuya,
+`797af05` limpio): 20.8 detecciones por frame, confianza media 0.285 y 78 % en zona baja, por las personas
+lejanas de pocos píxeles ([PM-8](POSTMORTEM.md)). Los umbrales de zona globales (0.40/0.65) **no se recalculan**:
+`streamwatch reference --merge-into` agrega la fuente a `reference-v3.json` con el mismo modelo y umbrales. La
+regla `low-confidence` de la fuente queda en **0.95** (P95 de la ventana 0.90, máximo 0.935). Durante la propia
+referencia, con el umbral genérico de 0.6, la regla alertaba de forma continua: justo lo que la calibración por
+fuente evita. Esa corrida tiene un hueco de 654 s porque la laptop se suspendió ([PM-7](POSTMORTEM.md)); G6 lo
+registra.
+
+**Corrida con las tres fuentes.** [`20261111-tres-fuentes`](../evidencias/runs/20261111-tres-fuentes) · overlay
+[`tres-fuentes.yaml`](../config/scenarios/tres-fuentes.yaml) · `09b7d94` limpio · `monitor-v3@4b17b97467d4` ·
+2026-11-12 02:53–03:03 UTC · 1774 eventos · [recálculo 21/21 base · 70/70 total](../evidencias/metricas/20261111-tres-fuentes.txt)
+· fidelidad del backtest 9/9.
+
+| Fuente | Hora local | Det./frame | G4 baja | Inferencia p50/p95 | Alertas |
+|---|---|---|---|---|---|
+| `city-crossing` | Tokio, ~12:00 | 18.0 | 0.75 | 22.2 / 23.4 ms | **0**: la variabilidad natural del cruce (oleadas de peatones con cada semáforo) queda dentro de su referencia |
+| `sheep-barn` | NY, ~22:00 (infrarrojo) | 17.7 | 0.39 | 39.7 / 46.9 ms | `confidence-shift` y `low-confidence` abiertas: la misma noche de S4 |
+| `puppy-playroom` | Maryland, ~22:00 | 2.8 | 0.76 | 22.2 / 23.8 ms | `low-confidence`, `confidence-shift` y tres `detector-silence` breves: cachorros dormidos amontonados (PM-4) |
+
+- Las tres fuentes procesan a 0.995 fps. Agregar la tercera subió la CPU del proceso de ~44 % a 51 % (de un
+  núcleo) y la RAM a ~430 MB (p50). La GPU tiene margen de sobra (~25 ms por inferencia, 3 por segundo).
+- Predicciones por clase en Shibuya (M11): 4310 `person`, 3940 `car`, 1705 `bus`, 396 `motorcycle`, 128 `truck`,
+  118 `bicycle`.
+
+Capturas: [`15-en-vivo-tres-fuentes.png`](../evidencias/portal/15-en-vivo-tres-fuentes.png),
+[`60-dashboard-tres-fuentes.png`](../evidencias/portal/60-dashboard-tres-fuentes.png) y
+[`61-eventos-shibuya.png`](../evidencias/portal/61-eventos-shibuya.png).

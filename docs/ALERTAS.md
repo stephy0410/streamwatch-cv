@@ -63,9 +63,10 @@ pasar los eventos grabados por el motor de reglas. Usa las puntuaciones reales q
 cámara ni volver a inferir.
 
 1. **Fidelidad.** Sin `--config` se usa la configuración guardada de la corrida y las alertas deben coincidir con
-   las grabadas en `alert_id`, evento disparador, valor y estado. Resultado: ref 0/0, C1 1/1 y C2 4/4. El desfase
-   máximo de `opened_at` es de 91 ms: el motor evalúa con el instante del ciclo y el evento se sella después de
-   inferir. `stream-stale-v1` se excluye porque depende del reloj y no de los eventos.
+   las grabadas en `alert_id`, evento disparador, valor y estado. Resultado: **42/42 alertas en las 9 corridas**.
+   El desfase máximo de `opened_at` es de 138 ms: el motor evalúa con el instante del ciclo y el evento se sella
+   después de inferir. `stream-stale-v1` se excluye porque depende del reloj y no de los eventos. Esta prueba
+   encontró el problema de redondeo de [PM-6](POSTMORTEM.md).
 2. **Comparación.** Con `--config` se reevalúa otra versión de reglas sobre la misma evidencia.
 
 | Corrida | `monitor-v1` (grabado) | `monitor-v2` (backtest) |
