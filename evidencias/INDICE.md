@@ -30,6 +30,35 @@ python3 -I scripts/recompute_metrics.py evidencias/runs/20261110-c2-baja-confian
 uv run streamwatch backtest evidencias/runs/20261110-c2-baja-confianza   # reproduce las alertas con la config grabada
 ```
 
+## Recorrido de una muestra (fuente → modelo → evento → captura → regla → alerta → portal)
+
+Alerta `alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-001` de C2. Cada eslabón se comprueba con los
+archivos de [`runs/20261110-c2-baja-confianza`](runs/20261110-c2-baja-confianza):
+
+| Eslabón | Dato | Dónde |
+|---|---|---|
+| Fuente | `sheep-barn`, frame decodificado n.º 6323 (`frame_id: sheep-barn-0006323`), decodificado a las 15:32:33.339 | `events.jsonl` (`frame_id`, `captured_at`); `source_stats.jsonl` cuenta los frames leídos y descartados |
+| Entrada al modelo | Poca luz aplicada (`degrade: brightness 0.2, gamma 3.0, noise_sigma 14`) desde la marca `degrade_start` | `events.jsonl` (`degrade`), `markers.jsonl` |
+| Salida del modelo | `yolo11s@sha256:85a76fe86dd8`: 1 detección, `dog` 0.1934 en `[230.3, 67.9, 494.1, 245.8]`. Con poca luz la clase incluso es incorrecta (es una oveja) | `events.jsonl` (`detections`) |
+| Evento | `evt-20261110-c2-baja-confianza-sheep-barn-000209`, `frame_state: low`, `config_ref: monitor-v1@0dd196e29756` | `events.jsonl` |
+| Captura | `captures/sheep-barn/000209.jpg`, SHA-256 `94b989b3…ef32870` (coincide con el archivo) | `events.jsonl` (`image_ref`, `image_sha256`) |
+| Regla | Evaluación a las 15:32:33.345: `breach`, valor 0.9412 ≥ 0.35, `breach_streak: 3` = persistencia | `rule_evaluations.jsonl` |
+| Alerta | `warning`, 20 `event_ids` de la ventana, evento disparador 000209, motivo y acción sugerida | `alerts.jsonl` |
+| Portal | Alerta, evento con las cajas sobre la captura y dashboard | [`portal/04`](portal/04-alerta-c2-baja-confianza-sheep.png), [`portal/06`](portal/06-evento-c2-disparador.png) y la [demo pública](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com/alerts/alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-001) |
+
+Comprobarlo sin instalar nada:
+
+```bash
+R=evidencias/runs/20261110-c2-baja-confianza
+grep '"evt-20261110-c2-baja-confianza-sheep-barn-000209"' $R/events.jsonl | head -1
+shasum -a 256 $R/captures/sheep-barn/000209.jpg
+grep 'low-confidence-sheep-barn-001' $R/alerts.jsonl | head -1
+```
+
+**Recorrido completo del portal** (22 vistas con los IDs de este índice, cada una verificada con su código
+HTTP y un texto esperado): `uv run --with playwright python scripts/capturar_portal.py --base <https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com>`. Funciona
+contra el portal local o contra la demo pública; regenera `evidencias/portal/`.
+
 ## Criterios
 
 | Criterio | Dónde está | IDs o valores para comprobar |
@@ -40,7 +69,7 @@ uv run streamwatch backtest evidencias/runs/20261110-c2-baja-confianza   # repro
 | **R2** G1–G7 | [`docs/METRICAS.md`](../docs/METRICAS.md) (M1–M4 y métrica base), `src/streamwatch/metrics.py`, `runs/*/metrics.json` | M5: [`metricas/*.txt`](metricas) y `tests/test_metrics.py` |
 | **R3.1** Dos umbrales justificados | [`docs/CONFIANZA.md`](../docs/CONFIANZA.md), [`config/reference/reference-v1.json`](../config/reference/reference-v1.json) | `lower 0.40` = media de P20 por fuente; `upper 0.65` = media de P50 |
 | **R3.2** Tres zonas, baja confianza conservada y frames sin detecciones aparte | [`docs/CONFIANZA.md`](../docs/CONFIANZA.md), [`docs/CONTRATO.md`](../docs/CONTRATO.md) | `zone_counts`, `frame_state ∈ {accepted, doubt, low, no_detections, error}`; piso 0.10 |
-| **R3.3** Referencia, ventanas, mínimos y regla sostenida | [`docs/ALERTAS.md`](../docs/ALERTAS.md), [`docs/CONFIANZA.md`](../docs/CONFIANZA.md) | `confidence-shift-v1` (60 frames, ≥ 40 detecciones, tolerancia 0.15); estado `insufficient` en `rule_evaluations.jsonl` |
+| **R3.3** Referencia, ventanas, mínimos y regla sostenida | [`docs/ALERTAS.md`](../docs/ALERTAS.md), [`docs/CONFIANZA.md`](../docs/CONFIANZA.md) | `confidence-shift-v1` (60 frames, ≥ 40 detecciones, tolerancia 0.15); estado `insufficient` en `rule_evaluations.jsonl`; series separadas por modelo (`require_same_model`, `monitor-v3`) |
 | **R4.1** Evento completo | [`docs/CONTRATO.md`](../docs/CONTRATO.md), `src/streamwatch/events.py` (Pydantic `extra=forbid`) | Cualquier línea de `runs/*/events.jsonl` |
 | **R4.2** Persistencia y consulta en el portal | `src/streamwatch/storage.py` (JSONL → SQLite), `src/streamwatch/portal/` | [`portal/02`](portal/02-eventos-c2-sheep-degradados.png), [`portal/06`](portal/06-evento-c2-disparador.png), [`portal/10`](portal/10-evento-c1-disparador.png) |
 | **R4.3** Capturas vinculadas sin expiración | [`docs/CONTRATO.md#política-de-captura`](../docs/CONTRATO.md#política-de-captura-captures-en-la-configuración) y `captures:` en la config. Ningún proceso borra capturas | `image_ref` + `image_sha256`; G5 = 1.0 y M8 = 100 % verificadas en todas las corridas |
@@ -60,7 +89,7 @@ uv run streamwatch backtest evidencias/runs/20261110-c2-baja-confianza   # repro
 |---|---|
 | [`portal/`](portal) | Capturas de pantalla del portal sobre los datos reales (numeradas por escenario) |
 | [`observabilidad/`](observabilidad) | Grafana durante S3, alerta de Prometheus disparada y portal en Docker |
-| [`backtests/`](backtests) | Fidelidad (`__monitor-v1`), comparación con `monitor-v2` y barrido de histéresis |
+| [`backtests/`](backtests) | Fidelidad (`__monitor-v1`), comparación con `monitor-v2` y `monitor-v3`, y barrido de histéresis |
 | [`aws/`](aws) | Portal desplegado en AWS ([demo](https://streamwatch-cv.ap47byhbgz430.us-east-1.cs.amazonlightsail.com), imagen `streamwatch-cv:9f6f03c61170` = commit `9f6f03c`) |
 | [`revisiones/`](revisiones) | Veredictos de revisión manual exportados del portal (la tabla `reviews` vive en SQLite) |
 | [`metricas/`](metricas) | Salida del recálculo independiente por corrida (base `G*` y extras `X.*`) |

@@ -5,7 +5,8 @@ Cada regla se evalúa por fuente y deja una *evaluación* con su estado:
 - ``ok``            — hay evidencia suficiente y la condición no se cumple
 - ``breach``        — hay evidencia suficiente y la condición se cumple
 - ``insufficient``  — la ventana no tiene el mínimo de observaciones: **no es normalidad**
-- ``no_reference``  — no hay referencia para comparar (regla de cambio sostenido)
+- ``no_reference``  — no hay referencia comparable (regla de cambio sostenido): falta, o con
+  ``require_same_model`` el evento viene de un modelo distinto al de la referencia (series separadas)
 - ``hold``          — con la alerta abierta, el valor ya no cumple la condición pero sigue dentro del
   margen de histéresis (``clear_margin``): ni confirma ni resuelve
 
@@ -292,8 +293,10 @@ class RuleEngine:
         items = self._window(win, rule.window_frames)
         scores = [s for o in items for s in o.scores]
         ref = self.reference.get("sources", {}).get(obs.source_id, {}).get("mean_score")
+        ref_model = (self.reference.get("model_ref") or "").split("@")[0] or None
+        other_model = rule.require_same_model and ref_model is not None and obs.model_name != ref_model
         drop = None
-        if ref is None:
+        if ref is None or other_model:
             state = "no_reference"
         elif len(items) < rule.window_frames or len(scores) < rule.min_detections:
             state = "insufficient"
@@ -308,8 +311,15 @@ class RuleEngine:
             f"{rule.tolerance}) sostenida {rule.persistence} evaluaciones. Posible cambio de escena, cámara o "
             "modelo; la confianza no confirma por sí sola pérdida de calidad."
         )
+        if other_model:
+            reason = (
+                f"Sin referencia comparable: el evento viene de '{obs.model_name}' y la referencia es de "
+                f"'{ref_model}'. Las series de modelos distintos no se comparan; el cambio de versión lo reporta "
+                "model-version-v1."
+            )
         info = self._window_info(items, len(scores))
         info["reference_mean"] = ref
+        info["reference_model"] = ref_model
         return self._transition(
             "confidence-shift-v1",
             obs.source_id,

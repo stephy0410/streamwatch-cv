@@ -1,6 +1,6 @@
 # Configuración base del monitor (versionada). Los escenarios la sobrescriben con config/scenarios/*.yaml.
 # Cada evento guarda config_ref = <config_id>@<sha256[:12]> de la configuración efectiva.
-config_id: monitor-v2   # v2: regla detector-silence e histéresis (docs/ALERTAS.md). C1/C2 corrieron con v1
+config_id: monitor-v3   # v3: series separadas por modelo + histéresis 0.10 (docs/ALERTAS.md). C1/C2: v1 · S1–S4: v2
 
 sources:
   - id: sheep-barn
@@ -44,7 +44,7 @@ alerts:
     per_source_threshold: {sheep-barn: 0.35, puppy-playroom: 0.65}
     persistence: 3
     clear_after: 5
-    clear_margin: 0.05     # histéresis: con la alerta abierta, cierra solo bajo umbral − 0.05
+    clear_margin: 0.10     # histéresis: cierra solo bajo umbral − 0.10 (barrido con backtest, docs/ESCENARIOS.md S3)
   confidence_shift:
     window_frames: 60      # ~1 min por fuente
     min_detections: 40
@@ -52,6 +52,7 @@ alerts:
     persistence: 15
     clear_after: 10
     clear_margin: 0.05
+    require_same_model: true   # la referencia es de yolo11s: otro modelo = otra serie (no se compara)
   detector_silence:        # frames sin detecciones: el modelo se calla en vez de dudar (hallazgo de C2)
     enabled: true
     window_frames: 20

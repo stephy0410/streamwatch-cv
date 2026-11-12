@@ -1,0 +1,107 @@
+{
+  "run_id": "20261110-c2-baja-confianza",
+  "scenario": "C2",
+  "recorded_config_ref": "monitor-v1@0dd196e29756",
+  "config_id": "monitor-v3",
+  "config_ref": "monitor-v3@55d62d70c26c",
+  "reference": "config/reference/reference-v2.json",
+  "events": 814,
+  "evaluations": 3256,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": false,
+    "note": "configuración distinta a la de la corrida: se comparan resultados"
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261110-c2-baja-confianza-detector-silence-sheep-barn-001",
+      "opened_at": "2026-11-10T15:31:06.622Z",
+      "resolved_at": "2026-11-10T15:33:19.863Z",
+      "value": 0.35,
+      "rule_id": "detector-silence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-c2-baja-confianza-sheep-barn-000123",
+      "threshold": 0.25,
+      "reason": "7 de 20 frames de sheep-barn sin ninguna detección (35%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    },
+    {
+      "alert_id": "alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-001",
+      "opened_at": "2026-11-10T15:32:33.435Z",
+      "resolved_at": null,
+      "value": 0.9412,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-c2-baja-confianza-sheep-barn-000209",
+      "threshold": 0.35,
+      "reason": "16 de 17 detecciones (94%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261110-c2-baja-confianza-confidence-shift-sheep-barn-001",
+      "opened_at": "2026-11-10T15:33:16.855Z",
+      "resolved_at": null,
+      "value": 0.4201,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-c2-baja-confianza-sheep-barn-000252",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.269 en 86 detecciones de los últimos 60 frames vs referencia 0.689 (caída 0.420 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261110-c2-baja-confianza-low-confidence-puppy-playroom-001",
+      "opened_at": "2026-11-10T15:33:18.909Z",
+      "resolved_at": "2026-11-10T15:33:40.089Z",
+      "value": 0.6558,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261110-c2-baja-confianza-puppy-playroom-000254",
+      "threshold": 0.65,
+      "reason": "101 de 154 detecciones (66%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    }
+  ],
+  "time_to_detect": [
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:30:54.419Z",
+      "rule_id": "low-confidence-v1",
+      "alert_id": "alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-001",
+      "seconds": 99.02
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:30:54.419Z",
+      "rule_id": "confidence-shift-v1",
+      "alert_id": "alt-20261110-c2-baja-confianza-confidence-shift-sheep-barn-001",
+      "seconds": 142.44
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:30:54.419Z",
+      "rule_id": "detector-silence-v1",
+      "alert_id": "alt-20261110-c2-baja-confianza-detector-silence-sheep-barn-001",
+      "seconds": 12.2
+    }
+  ],
+  "recorded_time_to_detect": [
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:30:54.419Z",
+      "rule_id": "low-confidence-v1",
+      "alert_id": "alt-20261110-c2-baja-confianza-low-confidence-sheep-barn-001",
+      "seconds": 98.93
+    },
+    {
+      "marker": "degrade_start",
+      "source_id": "sheep-barn",
+      "marker_ts": "2026-11-10T15:30:54.419Z",
+      "rule_id": "confidence-shift-v1",
+      "alert_id": "alt-20261110-c2-baja-confianza-confidence-shift-sheep-barn-001",
+      "seconds": 142.35
+    }
+  ]
+}

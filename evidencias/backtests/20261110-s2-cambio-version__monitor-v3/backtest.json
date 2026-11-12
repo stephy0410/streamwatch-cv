@@ -1,0 +1,76 @@
+{
+  "run_id": "20261110-s2-cambio-version",
+  "scenario": "S2",
+  "recorded_config_ref": "monitor-v2@9cb8895e3b40",
+  "config_id": "monitor-v3",
+  "config_ref": "monitor-v3@55d62d70c26c",
+  "reference": "config/reference/reference-v2.json",
+  "events": 580,
+  "evaluations": 2320,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": false,
+    "note": "configuración distinta a la de la corrida: se comparan resultados"
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261110-s2-cambio-version-model-version-sheep-barn-001",
+      "opened_at": "2026-11-10T15:53:19.950Z",
+      "resolved_at": null,
+      "value": 1.0,
+      "rule_id": "model-version-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261110-s2-cambio-version-sheep-barn-000001",
+      "threshold": 0.0,
+      "reason": "El evento reporta el modelo 'yolo11n' y la versión aprobada es 'yolo11s'."
+    },
+    {
+      "alert_id": "alt-20261110-s2-cambio-version-model-version-puppy-playroom-001",
+      "opened_at": "2026-11-10T15:53:19.994Z",
+      "resolved_at": null,
+      "value": 1.0,
+      "rule_id": "model-version-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261110-s2-cambio-version-puppy-playroom-000001",
+      "threshold": 0.0,
+      "reason": "El evento reporta el modelo 'yolo11n' y la versión aprobada es 'yolo11s'."
+    },
+    {
+      "alert_id": "alt-20261110-s2-cambio-version-detector-silence-puppy-playroom-001",
+      "opened_at": "2026-11-10T15:53:41.096Z",
+      "resolved_at": "2026-11-10T15:55:40.247Z",
+      "value": 0.7,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261110-s2-cambio-version-puppy-playroom-000022",
+      "threshold": 0.25,
+      "reason": "14 de 20 frames de puppy-playroom sin ninguna detección (70%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    },
+    {
+      "alert_id": "alt-20261110-s2-cambio-version-low-confidence-puppy-playroom-001",
+      "opened_at": "2026-11-10T15:55:11.999Z",
+      "resolved_at": null,
+      "value": 0.8889,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261110-s2-cambio-version-puppy-playroom-000112",
+      "threshold": 0.65,
+      "reason": "16 de 18 detecciones (89%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261110-s2-cambio-version-detector-silence-puppy-playroom-002",
+      "opened_at": "2026-11-10T15:56:29.763Z",
+      "resolved_at": "2026-11-10T15:57:12.159Z",
+      "value": 0.25,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261110-s2-cambio-version-puppy-playroom-000189",
+      "threshold": 0.25,
+      "reason": "5 de 20 frames de puppy-playroom sin ninguna detección (25%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    }
+  ],
+  "time_to_detect": [],
+  "recorded_time_to_detect": []
+}

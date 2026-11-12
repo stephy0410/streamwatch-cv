@@ -104,13 +104,15 @@ uv run streamwatch portal       # http://127.0.0.1:8000
 | `python3 -I scripts/recompute_metrics.py <corrida>` | Verificación independiente (solo biblioteca estándar) |
 | `streamwatch reference <corrida> --out config/reference/<id>.json` | Calibra umbrales y reglas desde una corrida normal |
 | `streamwatch backtest <corrida> [--config ...]` | Reevalúa las reglas sobre eventos grabados (sin `--config`: prueba de fidelidad) |
-| `streamwatch import <corridas…>` | Carga corridas exportadas en el SQLite del portal |
+| `streamwatch import <corridas…> [--reviews evidencias/revisiones]` | Carga corridas y revisiones exportadas en el SQLite del portal |
+| `uv run --with playwright python scripts/capturar_portal.py --base <URL>` | Recorre y verifica 22 vistas del portal (local o demo) y regenera las capturas |
 | `docker compose -f ops/docker-compose.yml up -d --build` | Prometheus `:9090`, Grafana `:3000`, portal de evidencias `:8080` |
 | `ops/aws/deploy.sh` · `terraform -chdir=ops/aws destroy` | Publica el portal de evidencias en AWS (Terraform) · lo elimina |
 
 Todos los escenarios y su duración están en [`config/scenarios/README.md`](config/scenarios/README.md). La
-configuración base es [`config/monitor.yaml`](config/monitor.yaml) (`monitor-v2`); C1 y C2 se ejecutaron con
-`monitor-v1`, y su configuración efectiva quedó guardada en cada `config.json`.
+configuración base es [`config/monitor.yaml`](config/monitor.yaml) (`monitor-v3`). C1 y C2 se ejecutaron con
+`monitor-v1` y S1–S4 con `monitor-v2`; la configuración efectiva de cada corrida quedó guardada en su
+`config.json`, y los cambios entre versiones están validados con backtest ([ALERTAS.md](docs/ALERTAS.md)).
 
 ## Estructura
 

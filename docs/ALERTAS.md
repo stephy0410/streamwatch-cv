@@ -9,7 +9,7 @@ Cada regla se evalúa **por fuente**. Cada evaluación queda en `rule_evaluation
 | `ok` | Hay evidencia suficiente y la condición no se cumple |
 | `breach` | Hay evidencia suficiente y la condición se cumple |
 | `insufficient` | La ventana no alcanza el mínimo de frames o detecciones. **No es normalidad** |
-| `no_reference` | No hay referencia contra la cual comparar |
+| `no_reference` | No hay referencia comparable: falta o, con `require_same_model`, el evento viene de otro modelo (series separadas) |
 | `hold` | Con la alerta abierta, el valor ya no cumple la condición pero sigue dentro del margen de histéresis (`clear_margin`) |
 
 Una alerta **se abre** tras `persistence` evaluaciones `breach` seguidas y **se resuelve** tras `clear_after`
@@ -80,3 +80,13 @@ Resultados: `evidencias/backtests/<corrida>__monitor-v{1,2}/backtest.json` y `.t
 ejemplo, C2 pasa de `@0dd196e29756` a `@623c315bf48f`): el esquema ganó campos con valores por defecto
 (`clear_margin = 0` y `detector_silence.enabled = false`) que no cambian el comportamiento, como confirma la
 fidelidad. El hash grabado se conserva en `recorded_config_ref`.
+
+## `monitor-v3`: series separadas por modelo e histéresis ajustada
+
+| Cambio | Por qué | Validación con backtest (`evidencias/backtests/*__monitor-v3.txt`) |
+|---|---|---|
+| `confidence_shift.require_same_model: true` | La referencia es de YOLO11s. Comparar la confianza de otro modelo contra ella mezcla dos series: la caída mide el cambio de modelo, no de escena. Con la opción, esa evaluación queda en `no_reference` y el cambio lo reporta `model-version-v1` | S2 (YOLO11n): desaparece el `confidence-shift` de cachorros y `model-version-v1` sigue abriendo en el primer frame. En las demás corridas (YOLO11s) no cambia nada |
+| `low_confidence.clear_margin: 0.10` | Recomendación del barrido de histéresis ([`ESCENARIOS.md`](ESCENARIOS.md#s3--cambio-sostenido-gradual)) | S3: 1 alerta en lugar de 3. Ref, C1 y C2: sin alertas nuevas; C2 conserva el silencio a los 12.2 s |
+
+`monitor-v3` es la configuración actual (`config/monitor.yaml`). Las corridas conservan la versión con la que se
+ejecutaron: C1 y C2 con v1; S1–S4 con v2.

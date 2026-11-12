@@ -166,6 +166,9 @@ Se desplegó `yolo11n` (verificado por SHA-256) con `expected_name: yolo11s`.
   desplegado.
 - **Sala de cachorros:** 39 % de frames vacíos, confianza media 0.283 (yolo11s en C1: 0.474) y 2.1 detecciones
   por frame (C1: 9.4). Se abrieron `detector-silence` (a los 22 s), `low-confidence` y `confidence-shift`.
+  Ese `confidence-shift` comparaba YOLO11n contra la referencia de YOLO11s, es decir, mezclaba dos series. Desde
+  `monitor-v3` la regla deja esos eventos en `no_reference` (backtest:
+  [`…s2-cambio-version__monitor-v3.txt`](../evidencias/backtests/20261110-s2-cambio-version__monitor-v3.txt)).
   Coincide con la sonda de selección de modelo ([`MODELO.md`](MODELO.md)): yolo11n no ve cachorros dormidos.
 - **Granero:** con yolo11n la confianza media fue 0.768, contra 0.775 de yolo11s en S1, con un conteo parecido.
   **Ninguna regla de confianza se disparó.** Si la versión no estuviera registrada en cada evento, el cambio de
@@ -203,8 +206,8 @@ A diferencia de C2 no hay apagón: la deriva es lenta.
   | **0.10** | **1** | La alerta de cachorros de C1 dura 22 s (antes 14 s); la de control en C2 dura 21 s (antes 17 s). Sin alertas nuevas |
   | 0.15 | 1 | Las de control duran 53 s y 36 s |
 
-  Recomendación para la siguiente versión de configuración: `clear_margin: 0.10`. No se cambió durante la campaña
-  de escenarios para que S1–S3 compartan las mismas reglas.
+  `clear_margin: 0.10` se adoptó en `monitor-v3`, después de la campaña de escenarios, para que S1–S3 compartan
+  las mismas reglas.
 
 Capturas: [`40`](../evidencias/portal/40-alerta-s3-cambio-sostenido.png) y
 [`41-dashboard-s3.png`](../evidencias/portal/41-dashboard-s3.png).

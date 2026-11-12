@@ -107,6 +107,8 @@ class ConfidenceShiftRule(_Strict):
     clear_after: int = Field(10, ge=1)
     severity: Literal["info", "warning", "critical"] = "warning"
     clear_margin: float = Field(0.0, ge=0, lt=1)
+    # Series separadas: solo se compara contra la referencia si el evento viene del mismo modelo que la generó.
+    require_same_model: bool = False
 
 
 class DetectorSilenceRule(_Strict):
