@@ -1,0 +1,37 @@
+{
+  "run_id": "20261111-ref-ciudad",
+  "scenario": "REF-CIUDAD",
+  "recorded_config_ref": "monitor-v3@896335455485",
+  "config_id": "monitor-v3",
+  "config_ref": "monitor-v3@896335455485",
+  "reference": "config/reference/reference-v2.json",
+  "events": 589,
+  "evaluations": 2356,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": true,
+    "match": true,
+    "recorded": 1,
+    "replayed": 1,
+    "max_time_offset_ms": 54.0,
+    "tolerance_ms": 1000.0,
+    "mismatches": []
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261111-ref-ciudad-low-confidence-city-crossing-001",
+      "opened_at": "2026-11-12T01:50:04.058Z",
+      "resolved_at": null,
+      "value": 0.786,
+      "rule_id": "low-confidence-v1",
+      "source_id": "city-crossing",
+      "trigger_event_id": "evt-20261111-ref-ciudad-city-crossing-000022",
+      "threshold": 0.6,
+      "reason": "393 de 500 detecciones (79%) bajo el umbral inferior 0.4 en los últimos 20 frames de city-crossing; umbral de la regla 60%, persistencia 3 evaluaciones."
+    }
+  ],
+  "time_to_detect": [],
+  "recorded_time_to_detect": []
+}

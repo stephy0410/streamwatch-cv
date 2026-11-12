@@ -56,7 +56,10 @@ def build_reference(
     silence_window: int = 20,
     silence_floor: float = 0.25,
     reference_id: str = "reference-v1",
+    thresholds: tuple[float, float] | None = None,
 ) -> dict[str, Any]:
+    """``thresholds``: umbrales de zona ya fijados (p. ej. al agregar una fuente nueva). Si se dan, no se
+    recalculan y solo se derivan las estadísticas y los umbrales de regla de cada fuente."""
     run = load_run(run_dir)
     by_source: dict[str, list[dict[str, Any]]] = {}
     for e in run["events"]:
@@ -64,8 +67,11 @@ def build_reference(
     per_source_scores = {
         sid: [d["score"] for e in evs if e["status"] == "ok" for d in e["detections"]] for sid, evs in by_source.items()
     }
-    lower = _round(sum(percentile(s, q_lower) for s in per_source_scores.values()) / len(per_source_scores))
-    upper = _round(sum(percentile(s, q_upper) for s in per_source_scores.values()) / len(per_source_scores))
+    if thresholds:
+        lower, upper = thresholds
+    else:
+        lower = _round(sum(percentile(s, q_lower) for s in per_source_scores.values()) / len(per_source_scores))
+        upper = _round(sum(percentile(s, q_upper) for s in per_source_scores.values()) / len(per_source_scores))
     if not lower < upper:
         raise ValueError(f"Umbrales degenerados: lower={lower}, upper={upper}")
 
@@ -145,11 +151,35 @@ def build_reference(
             "q_lower": q_lower,
             "q_upper": q_upper,
             "weighting": "mismo peso por fuente",
+            "thresholds_fixed": bool(thresholds),
             "low_rate_margin": margin,
             "rounding": "umbrales a 0.05; umbral de regla hacia arriba a 0.05",
             "silence_floor": silence_floor,
         },
         "thresholds": {"lower": lower, "upper": upper},
         "recommended_shift_tolerance": max(0.10, _ceil(max(drops) + 0.03)) if drops else 0.10,
+        "sources": sources,
+    }
+
+
+def merge_reference(base: dict[str, Any], new: dict[str, Any], reference_id: str) -> dict[str, Any]:
+    """Agrega a ``base`` las fuentes de ``new`` sin tocar los umbrales de zona ni las fuentes existentes.
+
+    Exige el mismo modelo y los mismos umbrales: una referencia mezclada de modelos o políticas distintas no
+    sería comparable. Cada fuente conserva la corrida de la que salió (``built_from_run``)."""
+    if base["model_ref"] != new["model_ref"]:
+        raise ValueError(f"Modelos distintos: {base['model_ref']} vs {new['model_ref']}")
+    if base["thresholds"] != new["thresholds"]:
+        raise ValueError(f"Umbrales distintos: {base['thresholds']} vs {new['thresholds']}")
+    sources = {sid: {"built_from_run": base["built_from_run"], **s} for sid, s in base["sources"].items()}
+    for sid, s in new["sources"].items():
+        if sid in sources:
+            raise ValueError(f"La fuente {sid} ya está en la referencia base")
+        sources[sid] = {"built_from_run": new["built_from_run"], **s}
+    return {
+        **base,
+        "reference_id": reference_id,
+        "built_from_run": [base["built_from_run"], new["built_from_run"]],
+        "merged_from": [base["reference_id"], new["reference_id"]],
         "sources": sources,
     }

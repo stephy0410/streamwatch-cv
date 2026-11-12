@@ -1,0 +1,4 @@
+# Operación normal con las tres fuentes: granero (AgTech), sala de cachorros y cruce de Shibuya (ciudad).
+# No es un escenario de falla: muestra el monitor con fuentes de dominios, densidades y husos horarios distintos,
+# cada una con su referencia y sus umbrales de regla, usando la configuración actual (monitor-v3).
+scenario: TRES-FUENTES

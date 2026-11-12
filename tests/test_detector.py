@@ -9,12 +9,12 @@ from streamwatch.detector import Detection, sha256_file
 HAS_VISION = importlib.util.find_spec("ultralytics") is not None
 
 
-def test_detection_serialization_rounds_values():
+def test_detection_serialization_keeps_exact_score_and_rounds_box():
     d = Detection(18, "sheep", 0.876543, (1.234, 2.0, 30.06, 40.0))
     assert d.to_dict() == {
         "class_id": 18,
         "class_name": "sheep",
-        "score": 0.8765,
+        "score": 0.876543,
         "box": [1.2, 2.0, 30.1, 40.0],
     }
 

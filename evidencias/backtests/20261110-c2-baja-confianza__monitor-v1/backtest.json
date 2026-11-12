@@ -3,7 +3,7 @@
   "scenario": "C2",
   "recorded_config_ref": "monitor-v1@0dd196e29756",
   "config_id": "monitor-v1",
-  "config_ref": "monitor-v1@623c315bf48f",
+  "config_ref": "monitor-v1@c3ae2c611980",
   "reference": "config/reference/reference-v1.json",
   "events": 814,
   "evaluations": 2442,

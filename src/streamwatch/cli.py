@@ -92,12 +92,21 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 
 
 def cmd_reference(args: argparse.Namespace) -> int:
-    from streamwatch.reference import build_reference
+    from streamwatch.reference import build_reference, merge_reference
 
     out = Path(args.out)
+    base = json.loads(Path(args.merge_into).read_text(encoding="utf-8")) if args.merge_into else None
+    thresholds = (base["thresholds"]["lower"], base["thresholds"]["upper"]) if base else None
     ref = build_reference(
-        args.run_dir, q_lower=args.q_lower, q_upper=args.q_upper, margin=args.margin, reference_id=out.stem
+        args.run_dir,
+        q_lower=args.q_lower,
+        q_upper=args.q_upper,
+        margin=args.margin,
+        reference_id=out.stem,
+        thresholds=thresholds,
     )
+    if base:
+        ref = merge_reference(base, ref, out.stem)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(ref, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{out}: umbrales {ref['thresholds']} · tolerancia de cambio {ref['recommended_shift_tolerance']}")
@@ -168,6 +177,10 @@ def build_parser() -> argparse.ArgumentParser:
     rf.add_argument("--q-lower", type=float, default=0.2)
     rf.add_argument("--q-upper", type=float, default=0.5)
     rf.add_argument("--margin", type=float, default=0.15)
+    rf.add_argument(
+        "--merge-into",
+        help="Referencia existente: conserva sus umbrales de zona y le agrega las fuentes de esta corrida",
+    )
     rf.set_defaults(func=cmd_reference)
 
     bt = sub.add_parser(

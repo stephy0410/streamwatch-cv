@@ -1,0 +1,14 @@
+Backtest de 20261111-s4-anochecer-real con monitor-v3@55d62d70c26c → evidencias/backtests/20261111-s4-anochecer-real__monitor-v3
+  fidelidad: {'checked': False, 'note': 'configuración distinta a la de la corrida: se comparan resultados'}
+  2026-11-12T00:19:22.335Z → 2026-11-12T01:39:49.443Z  low-confidence-v1      sheep-barn      0.4912
+  2026-11-12T00:19:23.378Z → 2026-11-12T01:01:36.106Z  detector-silence-v1    puppy-playroom  1.0
+  2026-11-12T00:20:14.586Z → abierta  confidence-shift-v1    sheep-barn      0.2052
+  2026-11-12T00:24:05.713Z → 2026-11-12T01:01:34.068Z  low-confidence-v1      puppy-playroom  0.8667
+  2026-11-12T01:01:36.106Z → 2026-11-12T01:01:57.172Z  confidence-shift-v1    puppy-playroom  0.1524
+  2026-11-12T01:02:22.304Z → 2026-11-12T01:02:42.378Z  low-confidence-v1      puppy-playroom  0.6804
+  2026-11-12T01:12:57.527Z → 2026-11-12T01:13:21.629Z  low-confidence-v1      puppy-playroom  0.7258
+  2026-11-12T01:20:39.806Z → 2026-11-12T01:21:25.021Z  low-confidence-v1      puppy-playroom  0.6831
+  2026-11-12T01:36:19.254Z → 2026-11-12T01:36:34.389Z  low-confidence-v1      puppy-playroom  0.6806
+  2026-11-12T01:40:40.725Z → abierta  low-confidence-v1      sheep-barn      0.3769
+  2026-11-12T01:45:45.235Z → abierta  low-confidence-v1      puppy-playroom  0.717
+  2026-11-12T01:46:49.589Z → abierta  confidence-shift-v1    puppy-playroom  0.157

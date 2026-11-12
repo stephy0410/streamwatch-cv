@@ -1,0 +1,180 @@
+{
+  "run_id": "20261111-s4-anochecer-real",
+  "scenario": "S4",
+  "recorded_config_ref": "monitor-v2@e21aacb21974",
+  "config_id": "monitor-v2",
+  "config_ref": "monitor-v2@9de61eae6696",
+  "reference": "config/reference/reference-v2.json",
+  "events": 10635,
+  "evaluations": 42540,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": true,
+    "match": true,
+    "recorded": 14,
+    "replayed": 14,
+    "max_time_offset_ms": 63.0,
+    "tolerance_ms": 1000.0,
+    "mismatches": []
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-sheep-barn-001",
+      "opened_at": "2026-11-12T00:19:22.335Z",
+      "resolved_at": "2026-11-12T00:21:48.006Z",
+      "value": 0.4912,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-sheep-barn-000022",
+      "threshold": 0.35,
+      "reason": "222 de 452 detecciones (49%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-detector-silence-puppy-playroom-001",
+      "opened_at": "2026-11-12T00:19:23.378Z",
+      "resolved_at": "2026-11-12T01:01:36.106Z",
+      "value": 1.0,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-000022",
+      "threshold": 0.25,
+      "reason": "20 de 20 frames de puppy-playroom sin ninguna detección (100%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-confidence-shift-sheep-barn-001",
+      "opened_at": "2026-11-12T00:20:14.586Z",
+      "resolved_at": null,
+      "value": 0.2052,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-sheep-barn-000074",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.484 en 1173 detecciones de los últimos 60 frames vs referencia 0.689 (caída 0.205 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-sheep-barn-002",
+      "opened_at": "2026-11-12T00:22:44.293Z",
+      "resolved_at": "2026-11-12T01:39:44.412Z",
+      "value": 0.3632,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-sheep-barn-000223",
+      "threshold": 0.35,
+      "reason": "138 de 380 detecciones (36%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-001",
+      "opened_at": "2026-11-12T00:24:05.713Z",
+      "resolved_at": "2026-11-12T01:01:33.080Z",
+      "value": 0.8667,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-000303",
+      "threshold": 0.65,
+      "reason": "13 de 15 detecciones (87%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-confidence-shift-puppy-playroom-001",
+      "opened_at": "2026-11-12T01:01:36.106Z",
+      "resolved_at": "2026-11-12T01:01:57.172Z",
+      "value": 0.1524,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-002543",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.355 en 72 detecciones de los últimos 60 frames vs referencia 0.507 (caída 0.152 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-002",
+      "opened_at": "2026-11-12T01:02:22.304Z",
+      "resolved_at": "2026-11-12T01:02:41.393Z",
+      "value": 0.6804,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-002589",
+      "threshold": 0.65,
+      "reason": "66 de 97 detecciones (68%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-003",
+      "opened_at": "2026-11-12T01:12:57.527Z",
+      "resolved_at": "2026-11-12T01:13:15.564Z",
+      "value": 0.7258,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-003213",
+      "threshold": 0.65,
+      "reason": "90 de 124 detecciones (73%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-004",
+      "opened_at": "2026-11-12T01:20:39.806Z",
+      "resolved_at": "2026-11-12T01:20:59.890Z",
+      "value": 0.6831,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-003663",
+      "threshold": 0.65,
+      "reason": "97 de 142 detecciones (68%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-005",
+      "opened_at": "2026-11-12T01:36:19.254Z",
+      "resolved_at": "2026-11-12T01:36:31.358Z",
+      "value": 0.6806,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-004591",
+      "threshold": 0.65,
+      "reason": "98 de 144 detecciones (68%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-sheep-barn-003",
+      "opened_at": "2026-11-12T01:40:40.725Z",
+      "resolved_at": "2026-11-12T01:42:11.144Z",
+      "value": 0.3769,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-sheep-barn-004808",
+      "threshold": 0.35,
+      "reason": "124 de 329 detecciones (38%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-sheep-barn-004",
+      "opened_at": "2026-11-12T01:43:59.695Z",
+      "resolved_at": null,
+      "value": 0.3763,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-sheep-barn-005006",
+      "threshold": 0.35,
+      "reason": "146 de 388 detecciones (38%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-low-confidence-puppy-playroom-006",
+      "opened_at": "2026-11-12T01:45:45.235Z",
+      "resolved_at": null,
+      "value": 0.717,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-005154",
+      "threshold": 0.65,
+      "reason": "114 de 159 detecciones (72%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-s4-anochecer-real-confidence-shift-puppy-playroom-002",
+      "opened_at": "2026-11-12T01:46:49.589Z",
+      "resolved_at": null,
+      "value": 0.157,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-s4-anochecer-real-puppy-playroom-005218",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.351 en 458 detecciones de los últimos 60 frames vs referencia 0.507 (caída 0.157 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    }
+  ],
+  "time_to_detect": [],
+  "recorded_time_to_detect": []
+}

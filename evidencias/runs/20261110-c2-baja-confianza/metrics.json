@@ -3,7 +3,7 @@
   "scenario": "C2",
   "config_ref": "monitor-v1@0dd196e29756",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-10T15:35:59.229Z",
+  "computed_at": "2026-11-12T01:02:39.431Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -221,6 +221,27 @@
           "p50": 4.0,
           "p95": 8.0,
           "max": 15
+        }
+      }
+    },
+    "M-predictions-by-class": {
+      "name": "Predicciones por clase y fuente (G4)",
+      "unit": "detecciones candidatas (≥ piso, clases monitoreadas) de eventos ok",
+      "by_source": {
+        "puppy-playroom": {
+          "cat": 32,
+          "cow": 1,
+          "dog": 2600,
+          "person": 100,
+          "sheep": 5
+        },
+        "sheep-barn": {
+          "bird": 39,
+          "cat": 19,
+          "cow": 218,
+          "dog": 15,
+          "person": 68,
+          "sheep": 1085
         }
       }
     },

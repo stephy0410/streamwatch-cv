@@ -3,7 +3,7 @@
   "scenario": "S3",
   "config_ref": "monitor-v2@5c513e9e9bbb",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-10T16:05:53.774Z",
+  "computed_at": "2026-11-12T01:02:40.237Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -154,17 +154,17 @@
     "M-capture-fps": {
       "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
       "by_source": {
-        "puppy-playroom": {
-          "fps": 29.7691,
-          "reconnects": 0,
-          "read_failures": 0,
-          "dropped_by_sampling": 11946
-        },
         "sheep-barn": {
           "fps": 29.8318,
           "reconnects": 0,
           "read_failures": 0,
           "dropped_by_sampling": 11971
+        },
+        "puppy-playroom": {
+          "fps": 29.7691,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 11946
         }
       }
     },
@@ -221,6 +221,26 @@
           "p50": 6.0,
           "p95": 10.0,
           "max": 12
+        }
+      }
+    },
+    "M-predictions-by-class": {
+      "name": "Predicciones por clase y fuente (G4)",
+      "unit": "detecciones candidatas (≥ piso, clases monitoreadas) de eventos ok",
+      "by_source": {
+        "sheep-barn": {
+          "bird": 1,
+          "cow": 534,
+          "dog": 4,
+          "person": 10,
+          "sheep": 3752
+        },
+        "puppy-playroom": {
+          "bird": 9,
+          "cat": 107,
+          "dog": 2103,
+          "person": 162,
+          "sheep": 98
         }
       }
     },

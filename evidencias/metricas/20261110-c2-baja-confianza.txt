@@ -18,6 +18,17 @@ G7.open_at_end                                                   1.0000        1
 G7.opened                                                        4.0000        4.0000  ✓
 X.capture_fps.puppy-playroom                                    29.6538       29.6538  ✓
 X.capture_fps.sheep-barn                                        29.7646       29.7646  ✓
+X.class.puppy-playroom.cat                                      32.0000       32.0000  ✓
+X.class.puppy-playroom.cow                                       1.0000        1.0000  ✓
+X.class.puppy-playroom.dog                                    2600.0000     2600.0000  ✓
+X.class.puppy-playroom.person                                  100.0000      100.0000  ✓
+X.class.puppy-playroom.sheep                                     5.0000        5.0000  ✓
+X.class.sheep-barn.bird                                         39.0000       39.0000  ✓
+X.class.sheep-barn.cat                                          19.0000       19.0000  ✓
+X.class.sheep-barn.cow                                         218.0000      218.0000  ✓
+X.class.sheep-barn.dog                                          15.0000       15.0000  ✓
+X.class.sheep-barn.person                                       68.0000       68.0000  ✓
+X.class.sheep-barn.sheep                                      1085.0000     1085.0000  ✓
 X.conf_hist.0.0                                                  0.0000        0.0000  ✓
 X.conf_hist.0.1                                                895.0000      895.0000  ✓
 X.conf_hist.0.2                                                499.0000      499.0000  ✓
@@ -45,4 +56,4 @@ X.ttd.degrade_start.confidence-shift-v1.sheep-barn             142.3450      142
 X.ttd.degrade_start.low-confidence-v1.sheep-barn                98.9260       98.9300  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 17/17 coinciden · total: 45/45 coinciden
+base: 17/17 coinciden · total: 56/56 coinciden

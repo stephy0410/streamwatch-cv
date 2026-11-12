@@ -1,0 +1,125 @@
+{
+  "run_id": "20261111-tres-fuentes",
+  "scenario": "TRES-FUENTES",
+  "recorded_config_ref": "monitor-v3@4b17b97467d4",
+  "config_id": "monitor-v3",
+  "config_ref": "monitor-v3@4b17b97467d4",
+  "reference": "config/reference/reference-v3.json",
+  "events": 1774,
+  "evaluations": 7096,
+  "excluded_rules": [
+    "stream-stale-v1"
+  ],
+  "fidelity": {
+    "checked": true,
+    "match": true,
+    "recorded": 9,
+    "replayed": 9,
+    "max_time_offset_ms": 56.0,
+    "tolerance_ms": 1000.0,
+    "mismatches": []
+  },
+  "alerts": [
+    {
+      "alert_id": "alt-20261111-tres-fuentes-low-confidence-puppy-playroom-001",
+      "opened_at": "2026-11-12T02:53:25.245Z",
+      "resolved_at": "2026-11-12T02:59:22.921Z",
+      "value": 1.0,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000022",
+      "threshold": 0.65,
+      "reason": "39 de 39 detecciones (100%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-confidence-shift-puppy-playroom-001",
+      "opened_at": "2026-11-12T02:54:17.474Z",
+      "resolved_at": "2026-11-12T02:59:48.029Z",
+      "value": 0.3197,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000074",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.188 en 167 detecciones de los últimos 60 frames vs referencia 0.507 (caída 0.320 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-low-confidence-sheep-barn-001",
+      "opened_at": "2026-11-12T02:55:15.712Z",
+      "resolved_at": null,
+      "value": 0.3509,
+      "rule_id": "low-confidence-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-tres-fuentes-sheep-barn-000130",
+      "threshold": 0.35,
+      "reason": "120 de 342 detecciones (35%) bajo el umbral inferior 0.4 en los últimos 20 frames de sheep-barn; umbral de la regla 35%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-confidence-shift-sheep-barn-001",
+      "opened_at": "2026-11-12T02:55:32.775Z",
+      "resolved_at": null,
+      "value": 0.1818,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "sheep-barn",
+      "trigger_event_id": "evt-20261111-tres-fuentes-sheep-barn-000147",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.507 en 1017 detecciones de los últimos 60 frames vs referencia 0.689 (caída 0.182 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-detector-silence-puppy-playroom-001",
+      "opened_at": "2026-11-12T02:56:16.027Z",
+      "resolved_at": "2026-11-12T02:56:39.141Z",
+      "value": 0.35,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000192",
+      "threshold": 0.25,
+      "reason": "7 de 20 frames de puppy-playroom sin ninguna detección (35%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-low-confidence-puppy-playroom-002",
+      "opened_at": "2026-11-12T03:00:00.100Z",
+      "resolved_at": null,
+      "value": 0.6667,
+      "rule_id": "low-confidence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000415",
+      "threshold": 0.65,
+      "reason": "108 de 162 detecciones (67%) bajo el umbral inferior 0.4 en los últimos 20 frames de puppy-playroom; umbral de la regla 65%, persistencia 3 evaluaciones."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-detector-silence-puppy-playroom-002",
+      "opened_at": "2026-11-12T03:00:12.153Z",
+      "resolved_at": "2026-11-12T03:01:01.379Z",
+      "value": 0.35,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000427",
+      "threshold": 0.25,
+      "reason": "7 de 20 frames de puppy-playroom sin ninguna detección (35%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-confidence-shift-puppy-playroom-002",
+      "opened_at": "2026-11-12T03:00:51.338Z",
+      "resolved_at": null,
+      "value": 0.1842,
+      "rule_id": "confidence-shift-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000466",
+      "threshold": 0.15,
+      "reason": "Confianza media 0.323 en 149 detecciones de los últimos 60 frames vs referencia 0.507 (caída 0.184 ≥ tolerancia 0.15) sostenida 15 evaluaciones. Posible cambio de escena, cámara o modelo; la confianza no confirma por sí sola pérdida de calidad."
+    },
+    {
+      "alert_id": "alt-20261111-tres-fuentes-detector-silence-puppy-playroom-003",
+      "opened_at": "2026-11-12T03:01:15.455Z",
+      "resolved_at": "2026-11-12T03:01:56.633Z",
+      "value": 0.25,
+      "rule_id": "detector-silence-v1",
+      "source_id": "puppy-playroom",
+      "trigger_event_id": "evt-20261111-tres-fuentes-puppy-playroom-000490",
+      "threshold": 0.25,
+      "reason": "5 de 20 frames de puppy-playroom sin ninguna detección (25%, umbral 25%, persistencia 3). El modelo dejó de detectar: puede ser poca luz, cámara obstruida o una escena realmente vacía."
+    }
+  ],
+  "time_to_detect": [],
+  "recorded_time_to_detect": []
+}

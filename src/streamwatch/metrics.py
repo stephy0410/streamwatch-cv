@@ -14,7 +14,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime
 from itertools import pairwise
 from pathlib import Path
@@ -280,6 +280,14 @@ def extra_metrics(run: dict[str, Any]) -> dict[str, Any]:
         "M-detections-per-frame": {
             "name": "Detecciones por frame (G4)",
             "by_source": {s: _summary([e["n_detections"] for e in evs]) for s, evs in _by_source(ok).items()},
+        },
+        "M-predictions-by-class": {
+            "name": "Predicciones por clase y fuente (G4)",
+            "unit": "detecciones candidatas (≥ piso, clases monitoreadas) de eventos ok",
+            "by_source": {
+                s: dict(sorted(Counter(d["class_name"] for e in evs for d in e["detections"]).items()))
+                for s, evs in _by_source(ok).items()
+            },
         },
         "M-confidence-distribution": {
             "name": "Distribución de confianza por deciles (G4)",

@@ -53,6 +53,10 @@ def backtest(run_dir: str | Path, cfg: MonitorConfig | None = None) -> dict[str,
     reference = _load_reference(cfg.confidence.reference)
     engine = RuleEngine(cfg, run["meta"]["run_id"], reference=reference)
     lower = cfg.confidence.lower
+    # Con los mismos umbrales se usa la zona registrada en vivo: la política la decidió con la puntuación exacta, y
+    # las corridas anteriores guardaron la puntuación redondeada a 4 decimales (0.39996 → 0.4000 seguía siendo baja).
+    recorded = run["meta"].get("thresholds", {})
+    same_policy = recorded.get("lower") == lower and recorded.get("upper") == cfg.confidence.upper
 
     log: list[dict[str, Any]] = []
     n_evaluations = 0
@@ -64,7 +68,7 @@ def backtest(run_dir: str | Path, cfg: MonitorConfig | None = None) -> dict[str,
             ts=ts(e["timestamp"]),
             status=e["status"],
             scores=scores,
-            n_low=sum(s < lower for s in scores),
+            n_low=sum(d["zone"] == "low" for d in e["detections"]) if same_policy else sum(s < lower for s in scores),
             model_name=e["model_name"],
         )
         out = engine.observe(obs)

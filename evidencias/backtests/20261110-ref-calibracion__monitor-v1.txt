@@ -1,2 +1,2 @@
-Backtest de 20261110-ref-calibracion con monitor-v1@50e9907609c5 → evidencias/backtests/20261110-ref-calibracion__monitor-v1
+Backtest de 20261110-ref-calibracion con monitor-v1@5552722720f2 → evidencias/backtests/20261110-ref-calibracion__monitor-v1
   fidelidad: {'checked': True, 'match': True, 'recorded': 0, 'replayed': 0, 'max_time_offset_ms': 0.0, 'tolerance_ms': 1000.0, 'mismatches': []}

@@ -1,12 +1,12 @@
 # StreamWatch CV
 
-**Centro de monitoreo de computer vision en tiempo real.** YOLO11 detecta animales en dos cámaras públicas en
-vivo (un granero de ovejas y una sala de cachorros), y el sistema vigila **cómo se comporta el modelo en
-producción**. Registra cada inferencia como un evento trazable, guarda capturas verificables, calcula métricas de
+**Centro de monitoreo de computer vision en tiempo real.** YOLO11 procesa tres cámaras públicas en vivo de dominios
+muy distintos (un granero de ovejas en Nueva York, una sala de cachorros en Maryland y el cruce de Shibuya en
+Tokio), y el sistema vigila **cómo se comporta el modelo en producción**. Registra cada inferencia como un evento trazable, guarda capturas verificables, calcula métricas de
 operación G1–G7, alerta con reglas calibradas y muestra todo en un portal web, Prometheus y Grafana.
 
-> **TL;DR (English).** A real-time ML monitoring system for object detection on live public cameras (AgTech
-> livestock + a puppy room). YOLO11s runs on every sampled frame. Each inference becomes a schema-validated event
+> **TL;DR (English).** A real-time ML monitoring system for object detection on three live public cameras (AgTech
+> livestock barn, a puppy room, and Tokyo's Shibuya crossing). YOLO11s runs on every sampled frame. Each inference becomes a schema-validated event
 > with a verifiable image capture (SHA-256). Calibrated alert rules (low confidence, sustained confidence shift,
 > detector silence, stale stream, model-version mismatch) are explained in a FastAPI portal and mirrored in
 > Prometheus/Grafana. A rule **backtesting** engine replays recorded events to validate rule changes without
@@ -23,7 +23,7 @@ individual · [índice de evidencias](evidencias/INDICE.md) · [inventario de ex
 
 | | |
 |---|---|
-| **Fuentes** | Dos transmisiones en vivo de explore.org en YouTube: [Farm Sanctuary · Sheep Barn](https://www.youtube.com/watch?v=SnHke968zAA) (AgTech, ovejas) y [Warrior Canine Connection · Puppy Cam](https://www.youtube.com/watch?v=h-Z0wCdD3dI) (cachorros de perro de servicio). También acepta webcam, archivo de video o secuencia de imágenes |
+| **Fuentes** | Tres transmisiones en vivo en YouTube: [Farm Sanctuary · Sheep Barn](https://www.youtube.com/watch?v=SnHke968zAA) (AgTech, ovejas; infrarrojo de noche), [Warrior Canine Connection · Puppy Cam](https://www.youtube.com/watch?v=h-Z0wCdD3dI) (cachorros de perro de servicio) y [FNN · Shibuya Scramble Crossing](https://www.youtube.com/watch?v=dfVK7ld38Ys) (ciudad: personas, autos, autobuses; ~21 detecciones por frame). Cada una con su referencia y sus umbrales de regla. También acepta webcam, archivo de video o secuencia de imágenes |
 | **Modelo** | YOLO11s preentrenado en COCO (detección), con identidad verificada por SHA-256: `yolo11s@sha256:85a76fe86dd8`. MPS en Apple M3. [Ficha](docs/MODELO.md) |
 | **Muestreo** | 1 frame/s por cámara. Un hilo lector por fuente reproduce el HLS a su ritmo real ([PM-1](docs/POSTMORTEM.md)); el resto de frames se cuenta como descartado |
 | **Confianza** | Tres zonas calibradas con una corrida de referencia: baja `< 0.40` ≤ duda `< 0.65` ≤ aceptada. Piso de salida 0.10 para que la zona baja sea observable. [Calibración](docs/CONFIANZA.md) |
@@ -41,8 +41,9 @@ flowchart LR
   subgraph Fuentes
     A[YouTube HLS<br/>sheep-barn] --> R1[Lector + PTS pacing]
     B[YouTube HLS<br/>puppy-playroom] --> R2[Lector + PTS pacing]
+    C[YouTube HLS<br/>city-crossing] --> R3[Lector + PTS pacing]
   end
-  R1 & R2 -->|último frame, 1/s| M[Monitor]
+  R1 & R2 & R3 -->|último frame, 1/s| M[Monitor]
   M --> D[YOLO11s<br/>MPS]
   D --> P[Política de confianza<br/>3 zonas]
   P --> E[RuleEngine<br/>ventanas · persistencia · histéresis]
@@ -71,14 +72,18 @@ como probabilidad de acierto (no hay etiquetas, no se mide calidad predictiva).
 | **S1** interrupción | Corte de 60 s y reconexión | `stream-stale` critical a los 14.1 s, resuelta 2 s después de reconectar. Además, un **fallo real del modelo** detectado sin etiquetas ([PM-4](docs/POSTMORTEM.md)) |
 | **S2** cambio de versión | YOLO11n desplegado sin aprobación | `model-version` critical en el primer frame. En el granero, la confianza casi no cambió: solo la regla de identidad lo detecta |
 | **S3** deriva gradual | Atardecer comprimido | `confidence-shift` a los 98 s, estable durante toda la deriva |
+| **S4** noche real (90 min) | Cámara infrarroja de noche frente a la referencia de mañana | `confidence-shift` abierta los 90 min; con infrarrojo el modelo confunde ovejas con vacas (3.8 % frente a 0.3 %); corral vacío detectado y resuelto al volver los cachorros |
+| **Tres fuentes** | Shibuya junto al granero y los cachorros | Ver [ESCENARIOS.md](docs/ESCENARIOS.md#tres-fuentes-cruce-de-shibuya) |
 | **Backtest** `monitor-v2` | Mejora de reglas sobre C2 grabado | Tiempo de detección **98.9 s → 12.2 s**, sin alertas nuevas en C1 ni en la referencia |
 
 Detalle: [ESCENARIOS.md](docs/ESCENARIOS.md) · Post-mortems: [POSTMORTEM.md](docs/POSTMORTEM.md) · Todas las
 cifras se verifican con `python3 -I scripts/recompute_metrics.py evidencias/runs/<corrida>`.
 
-| Dashboard de C2 | Grafana durante S3 |
+![Vista en vivo con las tres cámaras](evidencias/portal/15-en-vivo-tres-fuentes.png)
+
+| Dashboard de S4 (noche real) | Grafana durante S3 |
 |---|---|
-| ![Dashboard](evidencias/portal/07-dashboard-c2.png) | ![Grafana](evidencias/observabilidad/grafana-s3.png) |
+| ![Dashboard](evidencias/portal/52-dashboard-s4.png) | ![Grafana](evidencias/observabilidad/grafana-s3.png) |
 
 ## Reproducir
 
@@ -88,7 +93,7 @@ cifras se verifican con `python3 -I scripts/recompute_metrics.py evidencias/runs
 ```bash
 git clone https://github.com/stephy0410/streamwatch-cv.git && cd streamwatch-cv
 uv sync --extra vision          # dependencias + Ultralytics/PyTorch (el extra se omite en CI)
-uv run pytest                   # 72 pruebas sin el modelo + 2 con el modelo real
+uv run pytest                   # 74 pruebas sin el modelo + 2 con el modelo real
 
 # Escenarios (los pesos se descargan del release oficial y se verifican por SHA-256 al primer arranque)
 uv run streamwatch monitor --scenario config/scenarios/c1-normal.yaml         --duration 600 --export evidencias/runs
@@ -105,7 +110,7 @@ uv run streamwatch portal       # http://127.0.0.1:8000
 | `streamwatch reference <corrida> --out config/reference/<id>.json` | Calibra umbrales y reglas desde una corrida normal |
 | `streamwatch backtest <corrida> [--config ...]` | Reevalúa las reglas sobre eventos grabados (sin `--config`: prueba de fidelidad) |
 | `streamwatch import <corridas…> [--reviews evidencias/revisiones]` | Carga corridas y revisiones exportadas en el SQLite del portal |
-| `uv run --with playwright python scripts/capturar_portal.py --base <URL>` | Recorre y verifica 22 vistas del portal (local o demo) y regenera las capturas |
+| `uv run --with playwright python scripts/capturar_portal.py --base <URL>` | Recorre y verifica 27 vistas del portal (local o demo) y regenera las capturas |
 | `docker compose -f ops/docker-compose.yml up -d --build` | Prometheus `:9090`, Grafana `:3000`, portal de evidencias `:8080` |
 | `ops/aws/deploy.sh` · `terraform -chdir=ops/aws destroy` | Publica el portal de evidencias en AWS (Terraform) · lo elimina |
 
@@ -137,7 +142,8 @@ evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests
 - Las cámaras son transmisiones públicas de terceros: la escena cambia sola (los animales se van, el operador
   hace zoom). El monitor lo registra; no lo controla.
 - COCO no distingue cabras ni razas, y YOLO11s tiene un punto ciego con cachorros amontonados boca arriba
-  ([PM-4](docs/POSTMORTEM.md)).
+  ([PM-4](docs/POSTMORTEM.md)). En multitudes (Shibuya), a `imgsz 640` detecta solo una fracción de las personas
+  lejanas ([PM-8](docs/POSTMORTEM.md)).
 - El monitor corre en un solo proceso, con SQLite local. Para más cámaras, el siguiente paso sería separar la
   captura de la inferencia con una cola.
 
@@ -153,5 +159,5 @@ evidencias/        runs/ · metricas/ · portal/ · observabilidad/ · backtests
   AGPL-3.0), OpenCV, yt-dlp, FastAPI, Jinja2, Pydantic, prometheus-client, psutil, Prometheus, Grafana y
   Terraform (proveedor AWS).
 - **Fuentes de video:** transmisiones públicas de [explore.org](https://explore.org) (Farm Sanctuary y Warrior
-  Canine Connection). Las capturas de `evidencias/` son fotogramas de esas transmisiones y se conservan como
+  Canine Connection) y de FNNプライムオンライン (Fuji News Network, cruce de Shibuya). Las capturas de `evidencias/` son fotogramas de esas transmisiones y se conservan como
   evidencia académica del monitoreo.

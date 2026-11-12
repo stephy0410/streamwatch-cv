@@ -1,0 +1,11 @@
+Backtest de 20261111-tres-fuentes con monitor-v3@4b17b97467d4 → evidencias/backtests/20261111-tres-fuentes__monitor-v3
+  fidelidad: {'checked': True, 'match': True, 'recorded': 9, 'replayed': 9, 'max_time_offset_ms': 56.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-12T02:53:25.245Z → 2026-11-12T02:59:22.921Z  low-confidence-v1      puppy-playroom  1.0
+  2026-11-12T02:54:17.474Z → 2026-11-12T02:59:48.029Z  confidence-shift-v1    puppy-playroom  0.3197
+  2026-11-12T02:55:15.712Z → abierta  low-confidence-v1      sheep-barn      0.3509
+  2026-11-12T02:55:32.775Z → abierta  confidence-shift-v1    sheep-barn      0.1818
+  2026-11-12T02:56:16.027Z → 2026-11-12T02:56:39.141Z  detector-silence-v1    puppy-playroom  0.35
+  2026-11-12T03:00:00.100Z → abierta  low-confidence-v1      puppy-playroom  0.6667
+  2026-11-12T03:00:12.153Z → 2026-11-12T03:01:01.379Z  detector-silence-v1    puppy-playroom  0.35
+  2026-11-12T03:00:51.338Z → abierta  confidence-shift-v1    puppy-playroom  0.1842
+  2026-11-12T03:01:15.455Z → 2026-11-12T03:01:56.633Z  detector-silence-v1    puppy-playroom  0.25
