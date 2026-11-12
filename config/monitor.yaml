@@ -41,14 +41,14 @@ model:
 confidence:                # calibrados con la corrida de referencia (docs/CONFIANZA.md)
   lower: 0.40              # media de P20 por fuente
   upper: 0.65              # media de P50 por fuente
-  reference: config/reference/reference-v2.json  # v1 + estadística de frames vacíos; umbrales idénticos
+  reference: config/reference/reference-v3.json  # v2 + fuente city-crossing (umbrales de zona idénticos)
 
 alerts:
   low_confidence:
     window_frames: 20      # ~20 s por fuente
     min_detections: 15
     rate_threshold: 0.6    # por defecto; abajo, por fuente = P95 de la referencia + 0.15
-    per_source_threshold: {sheep-barn: 0.35, puppy-playroom: 0.65}
+    per_source_threshold: {sheep-barn: 0.35, puppy-playroom: 0.65, city-crossing: 0.95}  # Shibuya: P95 0.90 de su referencia
     persistence: 3
     clear_after: 5
     clear_margin: 0.10     # histéresis: cierra solo bajo umbral − 0.10 (barrido con backtest, docs/ESCENARIOS.md S3)

@@ -1,0 +1,16 @@
+Backtest de 20261111-s4-anochecer-real con monitor-v2@9de61eae6696 → evidencias/backtests/20261111-s4-anochecer-real__monitor-v2
+  fidelidad: {'checked': True, 'match': True, 'recorded': 14, 'replayed': 14, 'max_time_offset_ms': 63.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-12T00:19:22.335Z → 2026-11-12T00:21:48.006Z  low-confidence-v1      sheep-barn      0.4912
+  2026-11-12T00:19:23.378Z → 2026-11-12T01:01:36.106Z  detector-silence-v1    puppy-playroom  1.0
+  2026-11-12T00:20:14.586Z → abierta  confidence-shift-v1    sheep-barn      0.2052
+  2026-11-12T00:22:44.293Z → 2026-11-12T01:39:44.412Z  low-confidence-v1      sheep-barn      0.3632
+  2026-11-12T00:24:05.713Z → 2026-11-12T01:01:33.080Z  low-confidence-v1      puppy-playroom  0.8667
+  2026-11-12T01:01:36.106Z → 2026-11-12T01:01:57.172Z  confidence-shift-v1    puppy-playroom  0.1524
+  2026-11-12T01:02:22.304Z → 2026-11-12T01:02:41.393Z  low-confidence-v1      puppy-playroom  0.6804
+  2026-11-12T01:12:57.527Z → 2026-11-12T01:13:15.564Z  low-confidence-v1      puppy-playroom  0.7258
+  2026-11-12T01:20:39.806Z → 2026-11-12T01:20:59.890Z  low-confidence-v1      puppy-playroom  0.6831
+  2026-11-12T01:36:19.254Z → 2026-11-12T01:36:31.358Z  low-confidence-v1      puppy-playroom  0.6806
+  2026-11-12T01:40:40.725Z → 2026-11-12T01:42:11.144Z  low-confidence-v1      sheep-barn      0.3769
+  2026-11-12T01:43:59.695Z → abierta  low-confidence-v1      sheep-barn      0.3763
+  2026-11-12T01:45:45.235Z → abierta  low-confidence-v1      puppy-playroom  0.717
+  2026-11-12T01:46:49.589Z → abierta  confidence-shift-v1    puppy-playroom  0.157

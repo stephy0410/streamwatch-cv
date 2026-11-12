@@ -1,0 +1,5 @@
+Backtest de 20261110-s1-interrupcion con monitor-v2@6d3f1b41797b → evidencias/backtests/20261110-s1-interrupcion__monitor-v2
+  fidelidad: {'checked': True, 'match': True, 'recorded': 3, 'replayed': 3, 'max_time_offset_ms': 38.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-10T15:50:45.178Z → abierta  low-confidence-v1      puppy-playroom  0.6889
+  2026-11-10T15:52:33.186Z → abierta  detector-silence-v1    puppy-playroom  0.3
+  2026-11-10T15:52:34.197Z → abierta  confidence-shift-v1    puppy-playroom  0.183

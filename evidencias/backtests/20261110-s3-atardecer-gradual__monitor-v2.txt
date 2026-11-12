@@ -1,0 +1,9 @@
+Backtest de 20261110-s3-atardecer-gradual con monitor-v2@04bf8919f4bb → evidencias/backtests/20261110-s3-atardecer-gradual__monitor-v2
+  fidelidad: {'checked': True, 'match': True, 'recorded': 4, 'replayed': 4, 'max_time_offset_ms': 103.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-10T16:00:06.078Z → 2026-11-10T16:03:39.169Z  low-confidence-v1      sheep-barn      0.3548
+  2026-11-10T16:00:53.324Z → abierta  confidence-shift-v1    sheep-barn      0.1971
+  2026-11-10T16:03:54.245Z → 2026-11-10T16:05:05.614Z  low-confidence-v1      sheep-barn      0.3762
+  2026-11-10T16:05:11.657Z → abierta  low-confidence-v1      sheep-barn      0.4105
+  tiempo de detección low-confidence-v1 (sheep-barn): 51.27 s (grabado: 51.19)
+  tiempo de detección confidence-shift-v1 (sheep-barn): 98.51 s (grabado: 98.43)
+  tiempo de detección detector-silence-v1 (sheep-barn): None s (grabado: None)

@@ -33,7 +33,7 @@ class Detection:
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["box"] = [round(v, 1) for v in self.box]
-        d["score"] = round(self.score, 4)
+        d["score"] = float(self.score)  # sin redondear: la zona se decide con este valor exacto
         return d
 
 

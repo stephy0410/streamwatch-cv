@@ -3,7 +3,8 @@
 Solo usa la biblioteca estándar y lee directamente los JSONL; no importa ``streamwatch``.
 Compara con ``metrics.json`` y termina con código 1 si algún valor no coincide.
 
-- ``G*``: las 17 métricas base de G1–G7.
+- ``G*``: las 17 métricas base de G1–G7. G4 cuenta la ``zone`` de cada detección (la decisión de la política,
+  tomada con la puntuación completa), no ``zone_counts`` del evento como ``metrics.py``.
 - ``X.*``: las métricas adicionales que se reclaman como extra (``docs/EXTRAS.md``). Donde es posible se
   recalculan por otro camino: la latencia e2e se obtiene de ``timestamp − captured_at`` (resolución de ms,
   tolerancia 2 ms) en lugar del campo ``e2e_ms``, y los frames vacíos se cuentan por la lista de detecciones
@@ -51,7 +52,6 @@ def recompute(run: Path) -> dict[str, float | None]:
         last_alert[a["alert_id"]] = a
     alerts = list(last_alert.values())
     res = rows(run / "resources.jsonl")
-    lower = meta["thresholds"]["lower"]
     out: dict[str, float | None] = {}
 
     inf = [e["inference_ms"] for e in events if e["status"] == "ok" and e["inference_ms"] is not None]
@@ -67,7 +67,7 @@ def recompute(run: Path) -> dict[str, float | None]:
         out[f"G6.age_at_end_s.{sid}"] = t(meta["ended_at"]) - stamps[-1]
         ok = [e for e in evs if e["status"] == "ok"]
         scored = sum(len(e["detections"]) for e in ok)
-        low = sum(1 for e in ok for d in e["detections"] if d["score"] < lower)
+        low = sum(1 for e in ok for d in e["detections"] if d["zone"] == "low")
         out[f"G4.rate.{sid}"] = low / scored if scored else None
 
     cpu = [r["process_cpu_percent"] for r in res[1:]]
@@ -76,7 +76,7 @@ def recompute(run: Path) -> dict[str, float | None]:
 
     ok = [e for e in events if e["status"] == "ok"]
     scored = sum(len(e["detections"]) for e in ok)
-    low = sum(1 for e in ok for d in e["detections"] if d["score"] < lower)
+    low = sum(1 for e in ok for d in e["detections"] if d["zone"] == "low")
     out["G4.rate"] = low / scored if scored else None
 
     good = 0

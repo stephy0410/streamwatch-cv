@@ -1,0 +1,8 @@
+Backtest de 20261110-s2-cambio-version con monitor-v2@c74d184ebc96 → evidencias/backtests/20261110-s2-cambio-version__monitor-v2
+  fidelidad: {'checked': True, 'match': True, 'recorded': 6, 'replayed': 6, 'max_time_offset_ms': 138.0, 'tolerance_ms': 1000.0, 'mismatches': []}
+  2026-11-10T15:53:19.950Z → abierta  model-version-v1       sheep-barn      1.0
+  2026-11-10T15:53:19.994Z → abierta  model-version-v1       puppy-playroom  1.0
+  2026-11-10T15:53:41.096Z → 2026-11-10T15:55:40.247Z  detector-silence-v1    puppy-playroom  0.7
+  2026-11-10T15:55:11.999Z → abierta  low-confidence-v1      puppy-playroom  0.8889
+  2026-11-10T15:55:36.220Z → abierta  confidence-shift-v1    puppy-playroom  0.2177
+  2026-11-10T15:56:29.763Z → 2026-11-10T15:57:12.159Z  detector-silence-v1    puppy-playroom  0.25
