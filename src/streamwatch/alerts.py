@@ -255,12 +255,15 @@ class RuleEngine:
         out.extend(self._model_version(obs))
         return out
 
-    def _stale(self, items: list[Observation], window_frames: int) -> bool:
-        """Evidencia vieja (poco tráfico): la ventana abarca más tiempo del que corresponde a su tamaño."""
+    def _stale(self, items: list[Observation], window_frames: int, now: float) -> bool:
+        """Evidencia vieja: el frame más antiguo de la ventana tiene, respecto a esta evaluación, más antigüedad de la
+        que corresponde al tamaño de la ventana. Cubre poco tráfico (frames espaciados) y ventanas congeladas (no
+        llegan frames ``ok`` porque la inferencia falla). Medir solo la distancia entre el primer y el último frame
+        no detecta el segundo caso (hallazgo de S5, PM-9)."""
         factor = self.cfg.alerts.max_span_factor
-        if not factor or len(items) < 2:
+        if not factor or not items:
             return False
-        return items[-1].ts - items[0].ts > factor * window_frames * self.cfg.sampling.interval_s
+        return now - items[0].ts > factor * window_frames * self.cfg.sampling.interval_s
 
     @staticmethod
     def _window(win: deque[Observation], n: int) -> list[Observation]:
@@ -284,7 +287,11 @@ class RuleEngine:
         scored = sum(len(o.scores) for o in items)
         low = sum(o.n_low for o in items)
         threshold = rule.per_source_threshold.get(obs.source_id, rule.rate_threshold)
-        if len(items) < rule.window_frames or scored < rule.min_detections or self._stale(items, rule.window_frames):
+        if (
+            len(items) < rule.window_frames
+            or scored < rule.min_detections
+            or self._stale(items, rule.window_frames, obs.ts)
+        ):
             state, value = "insufficient", (low / scored if scored else None)
         else:
             value = low / scored
@@ -321,7 +328,7 @@ class RuleEngine:
         elif (
             len(items) < rule.window_frames
             or len(scores) < rule.min_detections
-            or self._stale(items, rule.window_frames)
+            or self._stale(items, rule.window_frames, obs.ts)
         ):
             state = "insufficient"
         else:
@@ -365,7 +372,7 @@ class RuleEngine:
         items = self._window(win, rule.window_frames)
         empty = sum(not o.scores for o in items)
         threshold = rule.per_source_threshold.get(obs.source_id, rule.empty_share_threshold)
-        if len(items) < rule.window_frames or self._stale(items, rule.window_frames):
+        if len(items) < rule.window_frames or self._stale(items, rule.window_frames, obs.ts):
             state, value = "insufficient", (empty / len(items) if items else None)
         else:
             value = empty / len(items)

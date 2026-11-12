@@ -226,3 +226,14 @@ def test_stale_window_is_insufficient_not_normal(cfg):
     assert st == ["insufficient", "insufficient"]
     _, _, st = run(eng, [obs(t, good) for t in (41, 42, 43)])  # el tráfico vuelve
     assert st[-1] == "ok"
+
+
+def test_frozen_window_during_inference_errors_is_insufficient(cfg):
+    cfg.alerts.max_span_factor = 2.0  # 3 frames × 1 s × 2 = 6 s
+    eng = RuleEngine(cfg, "r")
+    good = [0.9, 0.8, 0.7]
+    _, _, st = run(eng, [obs(i, good) for i in range(1, 5)])
+    assert st[-1] == "ok"
+    # La inferencia falla: no entran frames ok y la ventana queda congelada con evidencia cada vez más vieja.
+    _, _, st = run(eng, [obs(i, [], status="error") for i in range(5, 15)])
+    assert st[0] == "ok" and st[-1] == "insufficient"
