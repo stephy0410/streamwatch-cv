@@ -1,6 +1,6 @@
 # Configuración base del monitor (versionada). Los escenarios la sobrescriben con config/scenarios/*.yaml.
 # Cada evento guarda config_ref = <config_id>@<sha256[:12]> de la configuración efectiva.
-config_id: monitor-v3   # v3: series separadas por modelo + histéresis 0.10 (docs/ALERTAS.md). C1/C2: v1 · S1–S4: v2
+config_id: monitor-v4   # v4: errores de inferencia + evidencia vieja (docs/ALERTAS.md). C1/C2: v1 · S1–S4: v2 · Shibuya: v3
 
 sources:
   - id: sheep-barn
@@ -67,6 +67,13 @@ alerts:
     persistence: 3
     clear_after: 5
     clear_margin: 0.10     # 2 frames de 20
+  inference_errors:        # inferencias fallidas: en todas las corridas sin fallas inyectadas la tasa fue 0 %
+    enabled: true
+    window_frames: 20
+    error_rate_threshold: 0.25   # 5 de 20 frames
+    persistence: 2
+    clear_after: 5
+  max_span_factor: 2.0     # evidencia vieja: una ventana de 20 frames que abarca más de 40 s es insufficient
   stream_stale: {max_age_s: 15}
   model_version: {enabled: true}
 

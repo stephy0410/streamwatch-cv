@@ -50,6 +50,13 @@ RULES = {
             "un fallo del modelo."
         ),
     },
+    "inference-errors-v1": {
+        "metric": "inference_error_rate",
+        "action": (
+            "Revisar el log del monitor y el campo `error` de los eventos de la ventana: dispositivo (MPS/CUDA), "
+            "memoria, pesos o entrada corrupta. Si persiste, reiniciar el monitor o volver a la versión estable."
+        ),
+    },
     "stream-stale-v1": {
         "metric": "seconds_since_last_frame",
         "action": (
@@ -116,6 +123,9 @@ class RuleEngine:
         a = cfg.alerts
         maxlen = max(a.low_confidence.window_frames, a.confidence_shift.window_frames, a.detector_silence.window_frames)
         self.windows: dict[str, deque[Observation]] = {}
+        # Ventana con todos los estados (ok y error) para la regla de errores de inferencia.
+        self.all_windows: dict[str, deque[Observation]] = {}
+        self._all_maxlen = a.inference_errors.window_frames
         self._maxlen = maxlen
         self.states: dict[tuple[str, str], _State] = {}
         self.last_event: dict[str, str] = {}
@@ -236,11 +246,21 @@ class RuleEngine:
         out = Outcome()
         if obs.status == "ok":
             win.append(obs)
+        all_win = self.all_windows.setdefault(obs.source_id, deque(maxlen=self._all_maxlen))
+        all_win.append(obs)
         out.extend(self._low_confidence(obs, win))
         out.extend(self._confidence_shift(obs, win))
         out.extend(self._detector_silence(obs, win))
+        out.extend(self._inference_errors(obs, all_win))
         out.extend(self._model_version(obs))
         return out
+
+    def _stale(self, items: list[Observation], window_frames: int) -> bool:
+        """Evidencia vieja (poco tráfico): la ventana abarca más tiempo del que corresponde a su tamaño."""
+        factor = self.cfg.alerts.max_span_factor
+        if not factor or len(items) < 2:
+            return False
+        return items[-1].ts - items[0].ts > factor * window_frames * self.cfg.sampling.interval_s
 
     @staticmethod
     def _window(win: deque[Observation], n: int) -> list[Observation]:
@@ -264,7 +284,7 @@ class RuleEngine:
         scored = sum(len(o.scores) for o in items)
         low = sum(o.n_low for o in items)
         threshold = rule.per_source_threshold.get(obs.source_id, rule.rate_threshold)
-        if len(items) < rule.window_frames or scored < rule.min_detections:
+        if len(items) < rule.window_frames or scored < rule.min_detections or self._stale(items, rule.window_frames):
             state, value = "insufficient", (low / scored if scored else None)
         else:
             value = low / scored
@@ -298,7 +318,11 @@ class RuleEngine:
         drop = None
         if ref is None or other_model:
             state = "no_reference"
-        elif len(items) < rule.window_frames or len(scores) < rule.min_detections:
+        elif (
+            len(items) < rule.window_frames
+            or len(scores) < rule.min_detections
+            or self._stale(items, rule.window_frames)
+        ):
             state = "insufficient"
         else:
             mean = statistics.fmean(scores)
@@ -341,7 +365,7 @@ class RuleEngine:
         items = self._window(win, rule.window_frames)
         empty = sum(not o.scores for o in items)
         threshold = rule.per_source_threshold.get(obs.source_id, rule.empty_share_threshold)
-        if len(items) < rule.window_frames:
+        if len(items) < rule.window_frames or self._stale(items, rule.window_frames):
             state, value = "insufficient", (empty / len(items) if items else None)
         else:
             value = empty / len(items)
@@ -360,6 +384,38 @@ class RuleEngine:
             state,
             value,
             threshold,
+            rule.persistence,
+            rule.clear_after,
+            rule.severity,
+            reason,
+            info,
+        )
+
+    def _inference_errors(self, obs: Observation, win: deque[Observation]) -> Outcome:
+        rule = self.cfg.alerts.inference_errors
+        if not rule.enabled:
+            return Outcome()
+        items = list(win)
+        errors = sum(o.status == "error" for o in items)
+        if len(items) < rule.window_frames:
+            state, value = "insufficient", (errors / len(items) if items else None)
+        else:
+            value = errors / len(items)
+            state = "breach" if value >= rule.error_rate_threshold else "ok"
+        reason = (
+            f"{errors} de {len(items)} inferencias de {obs.source_id} fallaron ({(value or 0):.0%}, umbral "
+            f"{rule.error_rate_threshold:.0%}, persistencia {rule.persistence}). Los frames fallidos no entran a las "
+            "reglas de confianza: mientras falle, esas reglas se quedan sin evidencia."
+        )
+        info = self._window_info(items, 0)
+        info["errors"] = errors
+        return self._transition(
+            "inference-errors-v1",
+            obs.source_id,
+            obs.ts,
+            state,
+            value,
+            rule.error_rate_threshold,
             rule.persistence,
             rule.clear_after,
             rule.severity,

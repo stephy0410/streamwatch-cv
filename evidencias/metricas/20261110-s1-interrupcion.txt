@@ -41,12 +41,16 @@ X.e2e_p50_ms                                                    53.9999       53
 X.e2e_p95_ms                                                    79.2000       79.4700  ✓
 X.empty_rate.puppy-playroom                                      0.1941        0.1941  ✓
 X.empty_rate.sheep-barn                                          0.0000        0.0000  ✓
+X.error_rate.puppy-playroom                                      0.0000        0.0000  ✓
+X.error_rate.sheep-barn                                          0.0000        0.0000  ✓
 X.images_verified                                               20.0000       20.0000  ✓
 X.images_with_ref                                               20.0000       20.0000  ✓
 X.reconnects.puppy-playroom                                      1.0000        1.0000  ✓
 X.reconnects.sheep-barn                                          0.0000        0.0000  ✓
+X.repeated_alerts                                                0.0000        0.0000  ✓
 X.rss_p50_mb                                                   620.7000      620.7000  ✓
 X.ttd.outage_start.stream-stale-v1.puppy-playroom               14.0740       14.0700  ✓
+X.ttr.outage_end.puppy-playroom                                  2.0380        2.0400  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 17/17 coinciden · total: 49/49 coinciden
+base: 17/17 coinciden · total: 53/53 coinciden

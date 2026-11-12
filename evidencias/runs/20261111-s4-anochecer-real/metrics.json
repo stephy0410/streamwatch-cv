@@ -3,7 +3,7 @@
   "scenario": "S4",
   "config_ref": "monitor-v2@e21aacb21974",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T01:50:06.515Z",
+  "computed_at": "2026-11-12T03:21:02.700Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -155,17 +155,17 @@
     "M-capture-fps": {
       "name": "FPS de captura, reconexiones y descartes por muestreo (G2)",
       "by_source": {
-        "sheep-barn": {
-          "fps": 29.574,
-          "reconnects": 0,
-          "read_failures": 0,
-          "dropped_by_sampling": 154257
-        },
         "puppy-playroom": {
           "fps": 29.8413,
           "reconnects": 0,
           "read_failures": 0,
           "dropped_by_sampling": 155656
+        },
+        "sheep-barn": {
+          "fps": 29.574,
+          "reconnects": 0,
+          "read_failures": 0,
+          "dropped_by_sampling": 154257
         }
       }
     },
@@ -243,6 +243,37 @@
           "person": 773,
           "sheep": 266
         }
+      }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "sheep-barn": {
+          "events": 5296,
+          "errors": 0,
+          "rate": 0.0
+        },
+        "puppy-playroom": {
+          "events": 5339,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": []
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 14,
+      "repeated": 3,
+      "by_rule_source": {
+        "low-confidence-v1/puppy-playroom": 1,
+        "low-confidence-v1/sheep-barn": 2
       }
     },
     "M-confidence-distribution": {

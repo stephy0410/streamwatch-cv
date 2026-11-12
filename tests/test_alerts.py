@@ -192,3 +192,37 @@ def test_confidence_shift_keeps_series_separate_by_model(cfg):
     eng = RuleEngine(cfg, "r", reference=ref)
     out = [eng.observe(obs(i, low, model="yolo11s")) for i in range(1, 6)]
     assert [a for o in out for a in o.opened if a["rule_id"] == "confidence-shift-v1"]
+
+
+def test_inference_errors_rule_opens_and_resolves(cfg):
+    cfg.alerts.inference_errors.enabled = True
+    cfg.alerts.inference_errors.window_frames = 4
+    cfg.alerts.inference_errors.error_rate_threshold = 0.5
+    cfg.alerts.inference_errors.persistence = 2
+    cfg.alerts.inference_errors.clear_after = 2
+    eng = RuleEngine(cfg, "r")
+    items = [obs(i, [0.9]) for i in range(1, 5)] + [obs(i, [], status="error") for i in range(5, 9)]
+    items += [obs(i, [0.9]) for i in range(9, 16)]
+    opened, resolved, st = [], [], []
+    for o in items:
+        out = eng.observe(o)
+        opened += [a for a in out.opened if a["rule_id"] == "inference-errors-v1"]
+        resolved += [a for a in out.resolved if a["rule_id"] == "inference-errors-v1"]
+        st += states(out, "inference-errors-v1")
+    assert st[:3] == ["insufficient"] * 3
+    assert len(opened) == 1 and opened[0]["severity"] == "critical" and opened[0]["window"]["errors"] >= 2
+    assert len(resolved) == 1
+    # los frames con error no alimentan las reglas de confianza
+    assert all(o.status == "ok" for o in eng.windows["s"])
+
+
+def test_stale_window_is_insufficient_not_normal(cfg):
+    cfg.alerts.max_span_factor = 2.0  # ventana de 3 frames a 1 s: más de 6 s de extensión es evidencia vieja
+    eng = RuleEngine(cfg, "r")
+    good = [0.9, 0.8, 0.7]
+    _, _, st = run(eng, [obs(i, good) for i in range(1, 5)])
+    assert st[-1] == "ok"
+    _, _, st = run(eng, [obs(t, good) for t in (20, 40)])  # poco tráfico: un frame cada 20 s
+    assert st == ["insufficient", "insufficient"]
+    _, _, st = run(eng, [obs(t, good) for t in (41, 42, 43)])  # el tráfico vuelve
+    assert st[-1] == "ok"

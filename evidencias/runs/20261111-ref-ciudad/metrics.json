@@ -3,7 +3,7 @@
   "scenario": "REF-CIUDAD",
   "config_ref": "monitor-v3@896335455485",
   "model_ref": "yolo11s@sha256:85a76fe86dd8",
-  "computed_at": "2026-11-12T02:10:26.988Z",
+  "computed_at": "2026-11-12T03:21:02.322Z",
   "source": "events.jsonl, alerts.jsonl, resources.jsonl, source_stats.jsonl, markers.jsonl",
   "base": {
     "G1": {
@@ -192,6 +192,29 @@
           "truck": 347
         }
       }
+    },
+    "M-inference-errors": {
+      "name": "Tasa de errores de inferencia (G1)",
+      "unit": "eventos status=error / eventos",
+      "by_source": {
+        "city-crossing": {
+          "events": 589,
+          "errors": 0,
+          "rate": 0.0
+        }
+      }
+    },
+    "M-time-to-recover": {
+      "name": "Tiempo de recuperación: fin de la falla → recuperación verificada (G7)",
+      "unit": "s",
+      "items": []
+    },
+    "M-repeated-alerts": {
+      "name": "Alertas repetidas: reaperturas de la misma regla y fuente ≤ 60 s (G7)",
+      "window_s": 60.0,
+      "alerts": 2,
+      "repeated": 0,
+      "by_rule_source": {}
     },
     "M-confidence-distribution": {
       "name": "Distribución de confianza por deciles (G4)",

@@ -47,13 +47,16 @@ X.e2e_p50_ms                                                    57.0000       57
 X.e2e_p95_ms                                                   115.3501      115.3700  ✓
 X.empty_rate.puppy-playroom                                      0.0000        0.0000  ✓
 X.empty_rate.sheep-barn                                          0.1966        0.1966  ✓
+X.error_rate.puppy-playroom                                      0.0000        0.0000  ✓
+X.error_rate.sheep-barn                                          0.0000        0.0000  ✓
 X.images_verified                                               61.0000       61.0000  ✓
 X.images_with_ref                                               61.0000       61.0000  ✓
 X.reconnects.puppy-playroom                                      0.0000        0.0000  ✓
 X.reconnects.sheep-barn                                          0.0000        0.0000  ✓
+X.repeated_alerts                                                1.0000        1.0000  ✓
 X.rss_p50_mb                                                   643.3500      643.3000  ✓
 X.ttd.degrade_start.confidence-shift-v1.sheep-barn             142.3450      142.3500  ✓
 X.ttd.degrade_start.low-confidence-v1.sheep-barn                98.9260       98.9300  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 17/17 coinciden · total: 56/56 coinciden
+base: 17/17 coinciden · total: 59/59 coinciden

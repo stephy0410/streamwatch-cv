@@ -128,6 +128,7 @@ def cmd_backtest(args: argparse.Namespace) -> int:
     out = write(result, Path(args.out) if args.out else None)
     print(f"Backtest de {result['run_id']} con {result['config_ref']} → {out}")
     print(f"  fidelidad: {result['fidelity']}")
+    print(f"  alertas repetidas (≤ 60 s): {result['repeated_alerts']} (grabado: {result['recorded_repeated_alerts']})")
     for a in result["alerts"]:
         print(
             f"  {a['opened_at']} → {a['resolved_at'] or 'abierta'}  "

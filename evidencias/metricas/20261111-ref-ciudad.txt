@@ -34,10 +34,12 @@ X.dropped.city-crossing                                      17165.0000    17165
 X.e2e_p50_ms                                                    63.0000       63.2800  ✓
 X.e2e_p95_ms                                                    97.5999       97.0200  ✓
 X.empty_rate.city-crossing                                       0.0000        0.0000  ✓
+X.error_rate.city-crossing                                       0.0000        0.0000  ✓
 X.images_verified                                               51.0000       51.0000  ✓
 X.images_with_ref                                               51.0000       51.0000  ✓
 X.reconnects.city-crossing                                       0.0000        0.0000  ✓
+X.repeated_alerts                                                0.0000        0.0000  ✓
 X.rss_p50_mb                                                   386.0000      386.0000  ✓
 X.version_mismatched                                             0.0000        0.0000  ✓
 
-base: 13/13 coinciden · total: 40/40 coinciden
+base: 13/13 coinciden · total: 42/42 coinciden

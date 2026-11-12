@@ -119,3 +119,33 @@ def test_git_revision_lists_dirty_paths(tmp_path):
     (tmp_path / "a.txt").write_text("x")
     info = git_revision(tmp_path)
     assert info["dirty"] is True and info["dirty_paths"] == ["?? a.txt"]
+
+
+def test_injected_inference_errors_and_low_traffic_are_recorded(root, tmp_path, frames):
+    cfg = make_cfg(
+        root,
+        tmp_path,
+        frames,
+        faults=[
+            {"kind": "inference_error", "start_after_s": 0.3, "duration_s": 0.4},
+            {"kind": "low_traffic", "start_after_s": 0.8, "duration_s": 0.5, "period_s": 0.25},
+        ],
+    )
+    cfg.alerts.inference_errors.enabled = True
+    cfg.alerts.inference_errors.window_frames = 4
+    cfg.alerts.inference_errors.persistence = 1
+    Monitor(cfg, BrightnessDetector(), run_id="f1", telemetry=False).run(duration_s=20)
+    run = tmp_path / "runs/f1"
+    events = list(read_jsonl(run / "events.jsonl"))
+    errors = [e for e in events if e["status"] == "error"]
+    assert errors and all("inyectada" in e["error"] and e["detections"] == [] for e in errors)
+    kinds = [m["kind"] for m in read_jsonl(run / "markers.jsonl")]
+    for k in ("inference_error_start", "inference_error_end", "low_traffic_start", "low_traffic_end"):
+        assert k in kinds
+    alerts = [a for a in read_jsonl(run / "alerts.jsonl") if a["rule_id"] == "inference-errors-v1"]
+    assert alerts and alerts[0]["severity"] == "critical"
+    from streamwatch.metrics import compute
+
+    extra = compute(run)["extra"]
+    assert extra["M-inference-errors"]["by_source"]["sheep-barn"]["errors"] == len(errors)
+    assert {i["marker"] for i in extra["M-time-to-recover"]["items"]} >= {"inference_error_end", "low_traffic_end"}
